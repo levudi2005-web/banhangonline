@@ -1,0 +1,4 @@
+target
+archive/
+.git
+.env

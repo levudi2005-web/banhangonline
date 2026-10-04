@@ -1,0 +1,41 @@
+CREATE TABLE stores (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  owner_user_id BIGINT NOT NULL,
+  name VARCHAR(160) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  email VARCHAR(190) NULL,
+  province VARCHAR(100) NOT NULL,
+  district VARCHAR(100) NOT NULL,
+  ward VARCHAR(100) NOT NULL,
+  address_detail VARCHAR(255) NOT NULL,
+  postal_code VARCHAR(20) NULL,
+  status VARCHAR(24) NOT NULL,
+  created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (id),
+  KEY idx_stores_owner_status (owner_user_id, status),
+  CONSTRAINT fk_stores_owner FOREIGN KEY (owner_user_id) REFERENCES users (id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE store_registration_requests (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  owner_user_id BIGINT NOT NULL,
+  store_name VARCHAR(160) NOT NULL,
+  store_phone VARCHAR(20) NOT NULL,
+  store_email VARCHAR(190) NULL,
+  province VARCHAR(100) NOT NULL,
+  district VARCHAR(100) NOT NULL,
+  ward VARCHAR(100) NOT NULL,
+  address_detail VARCHAR(255) NOT NULL,
+  postal_code VARCHAR(20) NULL,
+  description VARCHAR(1000) NULL,
+  status VARCHAR(20) NOT NULL,
+  review_note VARCHAR(500) NULL,
+  reviewed_at DATETIME(6) NULL,
+  created_at DATETIME(6) NOT NULL,
+  updated_at DATETIME(6) NOT NULL,
+  PRIMARY KEY (id),
+  KEY idx_store_req_owner (owner_user_id),
+  KEY idx_store_req_status (status),
+  CONSTRAINT fk_store_req_owner FOREIGN KEY (owner_user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

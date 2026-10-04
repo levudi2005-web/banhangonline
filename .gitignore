@@ -1,1 +1,7 @@
-Main.class
+target/
+.env
+*.log
+.idea/
+.vscode/
+
+/archive/standalone-java-sample/

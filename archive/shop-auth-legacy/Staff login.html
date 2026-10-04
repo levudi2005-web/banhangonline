@@ -1,0 +1,19 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Đăng nhập quản trị — Cửa hàng</title></head>
+<body class="staff"><main class="auth">
+<aside class="visual"><a class="brand" href="staff-login.html"><span class="logo"><i data-i="store"></i></span><span>Cửa hàng<small style="color:#9aaccb">Hệ thống quản lý cửa hàng</small></span></a>
+<h2>Xử lý đơn nhận tại cửa hàng</h2><ul>
+<li><i data-i="list"></i><span><b>Chuẩn bị đơn hàng</b><small>Theo dõi đơn khách đã đặt</small></span></li>
+<li><i data-i="shield"></i><span><b>Xác nhận mã nhận hàng</b><small>Đối chiếu mã 8 chữ số của khách</small></span></li>
+<li><i data-i="lock"></i><span><b>Phân quyền theo vai trò</b><small>Chủ cửa hàng và nhân viên</small></span></li></ul></aside>
+<section class="panel"><div class="card">
+<a class="back" href="login.html"><i data-i="left"></i> Quay lại trang khách hàng</a>
+<h1>Đăng nhập quản trị</h1><p class="sub">Dành cho chủ cửa hàng và nhân viên</p>
+<form data-endpoint="/api/auth/staff/login" data-next="/staff/" novalidate>
+<div class="field"><label for="account">Tài khoản</label><input id="account" name="account" autocomplete="username" placeholder="Email / Số điện thoại / Tên đăng nhập" data-v="required"><p class="err"></p></div>
+<div class="field"><label for="password">Mật khẩu</label><div class="pw"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu" data-v="required"><button type="button" class="eye" aria-label="Hiện mật khẩu"><i data-i="eye"></i></button></div><p class="err"></p></div>
+<div class="between"><label class="chk"><input type="checkbox" name="remember"> Ghi nhớ đăng nhập</label><a href="forgot-password.html">Quên mật khẩu?</a></div>
+<p class="form-msg" role="alert"></p>
+<button class="btn" type="submit">Đăng nhập</button></form>
+<p class="center" style="margin-top:18px">Chưa có cửa hàng? <a href="staff-register.html"><b>Tạo tài khoản cửa hàng</b></a></p>
+<p class="lockline"><i data-i="lock"></i> Chỉ dành cho tài khoản được cấp quyền</p>
+</div></section></main><script src="app.js"></script></body></html>
