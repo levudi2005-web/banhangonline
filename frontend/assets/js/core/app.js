@@ -1,26 +1,28 @@
 (()=>{"use strict";
-// Đặt window.API_BASE = "https://<service>.onrender.com" trước khi nạp app.js khi nối backend Render.
+// Configure window.API_BASE at deployment only when the frontend and API use different origins.
 const API=(window.API_BASE||"").replace(/\/$/,"");
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const P={eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',off:'<path d="M3 3l18 18M10.6 6.1A10 10 0 0 1 12 6c6.5 0 10 6 10 6a17 17 0 0 1-3.2 3.9M6.5 7A16.6 16.6 0 0 0 2 12s3.5 6 10 6c1.5 0 2.8-.3 4-.8"/>',lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',left:'<path d="M19 12H5M11 6l-6 6 6 6"/>',right:'<path d="M5 12h14M13 6l6 6-6 6"/>',bag:'<path d="M6 8h12l1 12H5z"/><path d="M9 8a3 3 0 0 1 6 0"/>',store:'<path d="M4 9v11h16V9M3 9l1.5-5h15L21 9c0 1.7-1.3 3-3 3s-3-1.3-3-3c0 1.7-1.3 3-3 3S9 10.7 9 9c0 1.7-1.3 3-3 3S3 10.7 3 9zM10 20v-5h4v5"/>',pin:'<path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',up:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>'};
 const svg=n=>`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
 $$("[data-i]").forEach(e=>e.innerHTML=svg(e.dataset.i));
 
-const V={required:v=>v.trim()?"":"Trường này là bắt buộc",
+const V={required:v=>v.trim()?"":"Thông tin bắt buộc",
 email:v=>!v||/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())?"":"Email không hợp lệ",
 phone:v=>!v||/^(0|\+84)\d{9}$/.test(v.replace(/[\s.-]/g,""))?"":"Số điện thoại không hợp lệ",
 username:v=>!v||/^[A-Za-z0-9_.]{4,30}$/.test(v)?"":"Tên đăng nhập gồm 4–30 ký tự: chữ, số, _ hoặc .",
 min8:v=>!v||v.length>=8?"":"Mật khẩu phải có ít nhất 8 ký tự"};
 const check=el=>{let m="";
  for(const r of (el.dataset.v||"").split(" ").filter(Boolean)){const[k,p]=r.split(":");
-  if(k==="required")m=el.type==="checkbox"?(el.checked?"":"Vui lòng xác nhận để tiếp tục"):V.required(el.value);
+  if(k==="required")m=el.type==="checkbox"?(el.checked?"":el.dataset.requiredMessage||"Vui lòng xác nhận để tiếp tục"):V.required(el.value);
   else if(k==="match")m=el.value===el.form.elements[p].value?"":"Mật khẩu xác nhận không khớp";
   else m=V[k](el.value);
   if(m)break}
  const box=el.closest(".field"),e=$(".err",box);if(!e.id)e.id="e"+Math.random().toString(36).slice(2,8);
  box.classList.toggle("invalid",!!m);e.textContent=m;
  el.setAttribute("aria-invalid",String(!!m));el.setAttribute("aria-describedby",e.id);return !m};
-const validate=root=>{const ok=$$("[data-v]",root).map(check).every(Boolean);
+const validate=root=>{let ok=$$("[data-v]",root).map(check).every(Boolean);
+ for(const group of $$("[data-address-group]",root)){const inputs=$$("input",group),started=inputs.some(el=>el.value.trim());
+  if(started)for(const el of inputs){if(!el.value.trim()){const box=el.closest(".field"),err=$(".err",box);err.textContent=el.dataset.requiredMessage||"Thông tin bắt buộc";box.classList.add("invalid");el.setAttribute("aria-invalid","true");ok=false}else check(el)}}
  if(!ok){const b=$(".invalid input,.invalid textarea",root);b&&b.focus()}return ok};
 document.addEventListener("focusout",e=>e.target.dataset&&e.target.dataset.v&&check(e.target));
 document.addEventListener("input",e=>e.target.closest&&e.target.closest(".invalid")&&check(e.target));
@@ -29,7 +31,7 @@ document.addEventListener("click",e=>{
  const b=e.target.closest(".eye");
  if(b){const i=$("input",b.parentNode),show=i.type==="password";i.type=show?"text":"password";
   b.setAttribute("aria-label",show?"Ẩn mật khẩu":"Hiện mật khẩu");b.innerHTML=svg(show?"off":"eye")}
- if(e.target.closest("[data-oauth]"))$(".note").textContent="Đăng nhập Google chưa được kết nối. Sẽ bổ sung khi có OAuth từ backend."});
+});
 
 const collect=f=>{const o={};$$("[name]",f).forEach(el=>{
  if(el.type==="file"||el.dataset.skip!==undefined)return;
@@ -55,11 +57,16 @@ if(wiz){const S=$$("[data-step]",wiz),T=$$("#steps li"),n=S.length;let i=0;
 document.addEventListener("submit",async e=>{const f=e.target;if(!f.dataset.endpoint)return;e.preventDefault();
  const msg=$(".form-msg",f),btn=$("[type=submit]",f);msg.className="form-msg";msg.textContent="";
  if(!validate(f))return;btn.setAttribute("aria-busy","true");
+ if(f.dataset.endpoint==="/api/auth/reset-password"&&!$("[name=token]",f).value){msg.textContent="Liên kết đặt lại mật khẩu bị thiếu mã hoặc không hợp lệ.";msg.classList.add("show");btn.removeAttribute("aria-busy");return}
  try{const r=await fetch(API+f.dataset.endpoint,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json","X-Requested-With":"fetch"},body:JSON.stringify(collect(f))});
   const d=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(d.message||"Thông tin chưa chính xác. Vui lòng kiểm tra và thử lại.");
-  location.href=d.redirect||f.dataset.next||"/"}
+  if(!r.ok){const fallback={400:"Dữ liệu không hợp lệ.",401:"Sai tài khoản/mật khẩu hoặc chưa xác thực.",403:"Bạn không có quyền thực hiện thao tác này.",404:"Không tìm thấy yêu cầu.",409:"Dữ liệu đã tồn tại.",429:"Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",500:"Lỗi máy chủ. Vui lòng thử lại sau.",503:"Dịch vụ hiện chưa khả dụng. Vui lòng thử lại sau."};throw new Error(d.message||fallback[r.status]||"Không thể hoàn tất yêu cầu. Vui lòng thử lại sau.")}
+  if(f.dataset.success){msg.textContent=f.dataset.success;msg.classList.add("show","success");if(f.dataset.next)setTimeout(()=>{location.href=f.dataset.next},1600);return}
+  const next=d.redirect||f.dataset.next;if(next)location.href=next;else{msg.textContent=d.message||"Yêu cầu đã được xử lý.";msg.classList.add("show","success")}}
  catch(x){msg.textContent=x instanceof TypeError?"Không thể kết nối máy chủ. Vui lòng thử lại sau.":x.message;msg.classList.add("show")}
  finally{btn.removeAttribute("aria-busy")}});
-if(/registered=1/.test(location.search)){const s=$(".sub");if(s)s.textContent="Đã gửi đăng ký. Tài khoản dùng được sau khi được xác minh."}
+const resetToken=new URLSearchParams(location.search).get("token");if(resetToken){const token=$("[name=token]");if(token)token.value=resetToken}
+const registered=new URLSearchParams(location.search).get("registered");
+if(registered){const s=$(".sub");if(s)s.textContent=registered==="customer"?"Tài khoản đã được tạo. Bạn có thể đăng nhập.":"Đã gửi đăng ký cửa hàng. Tài khoản đang chờ quản trị viên xác minh."}
+if(new URLSearchParams(location.search).get("reset")==="success"){const s=$(".sub");if(s)s.textContent="Mật khẩu đã được cập nhật. Hãy đăng nhập bằng mật khẩu mới."}
 })();

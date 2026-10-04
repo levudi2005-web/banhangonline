@@ -14,9 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class PasswordResetService {
+    private static final Logger log = LoggerFactory.getLogger(PasswordResetService.class);
     private final AuthService auth;
     private final PasswordResetTokenRepository tokens;
     private final SessionRepository sessions;
@@ -37,6 +40,7 @@ public class PasswordResetService {
     /** Luôn trả về như nhau dù tài khoản có tồn tại hay không. */
     @Transactional
     public void request(String account) {
+        notifier.ensureConfigured();
         Optional<User> found = auth.findByAccount(account);
         if (found.isEmpty() || found.get().getStatus() != UserStatus.ACTIVE) return;
         User u = found.get();
@@ -47,8 +51,14 @@ public class PasswordResetService {
         t.setTokenHash(TokenUtil.sha256(raw));
         t.setCreatedAt(Instant.now());
         t.setExpiresAt(Instant.now().plusSeconds(props.resetToken().ttlMinutes() * 60L));
-        tokens.save(t);
-        notifier.send(u, raw);
+        tokens.saveAndFlush(t);
+        try {
+            notifier.send(u, raw);
+        } catch (ApiException e) {
+            if (!"EMAIL_DELIVERY_FAILED".equals(e.getCode())) throw e;
+            tokens.delete(t);
+            log.warn("Password reset notification failed; keeping the account-enumeration-safe response");
+        }
     }
 
     @Transactional

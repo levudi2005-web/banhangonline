@@ -2,7 +2,9 @@ package com.banhangonline.auth.service;
 
 import com.banhangonline.user.entity.User;
 
-/** Điểm nối để gửi link đặt lại mật khẩu (email/SMS). Chưa có nhà cung cấp thì dùng bản mặc định bên dưới. */
+/** Sends password reset links through the configured delivery provider. */
 public interface ResetNotifier {
+    void ensureConfigured();
+
     void send(User user, String rawToken);
 }

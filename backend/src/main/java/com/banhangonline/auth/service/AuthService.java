@@ -5,6 +5,7 @@ import com.banhangonline.address.entity.UserAddress;
 import com.banhangonline.address.repository.UserAddressRepository;
 import com.banhangonline.auth.dto.RegisterRequest;
 import com.banhangonline.auth.dto.StaffRegisterRequest;
+import com.banhangonline.auth.security.TokenUtil;
 import com.banhangonline.common.exception.ApiException;
 import com.banhangonline.role.entity.Role;
 import com.banhangonline.role.repository.RoleRepository;
@@ -37,7 +38,7 @@ public class AuthService {
         this.addresses = addresses;
         this.storeRequests = storeRequests;
         this.encoder = encoder;
-        this.dummyHash = encoder.encode("timing-equalizer-not-a-real-password");
+        this.dummyHash = encoder.encode(TokenUtil.newToken());
     }
 
     /** Backend tự nhận dạng: có '@' là email, dạng số điện thoại là phone, còn lại là username. */

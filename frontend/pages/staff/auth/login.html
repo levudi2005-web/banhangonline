@@ -8,9 +8,9 @@
 <section class="panel"><div class="card">
 <a class="back" href="/pages/customer/auth/login.html"><i data-i="left"></i> Quay lại trang khách hàng</a>
 <h1>Đăng nhập quản trị</h1><p class="sub">Dành cho chủ cửa hàng và nhân viên</p>
-<form data-endpoint="/api/auth/staff/login" data-next="/staff/" novalidate>
-<div class="field"><label for="account">Tài khoản</label><input id="account" name="account" autocomplete="username" placeholder="Email / Số điện thoại / Tên đăng nhập" data-v="required"><p class="err"></p></div>
-<div class="field"><label for="password">Mật khẩu</label><div class="pw"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu" data-v="required"><button type="button" class="eye" aria-label="Hiện mật khẩu"><i data-i="eye"></i></button></div><p class="err"></p></div>
+<form data-endpoint="/api/auth/staff/login" data-next="/pages/auth/session.html?area=staff" novalidate>
+<div class="field"><label for="account">Tài khoản</label><input id="account" name="account" autocomplete="username" placeholder="Email / Số điện thoại / Tên đăng nhập" data-v="required" data-required-message="Vui lòng nhập tài khoản."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
+<div class="field"><label for="password">Mật khẩu</label><div class="pw"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu" data-v="required" data-required-message="Vui lòng nhập mật khẩu."><button type="button" class="eye" aria-label="Hiện mật khẩu"><i data-i="eye"></i></button></div><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
 <div class="between"><label class="chk"><input type="checkbox" name="remember"> Ghi nhớ đăng nhập</label><a href="forgot-password.html">Quên mật khẩu?</a></div>
 <p class="form-msg" role="alert"></p>
 <button class="btn" type="submit">Đăng nhập</button></form>

@@ -1,0 +1,14 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../assets/css/style.css"><title>Tài khoản — Cửa hàng</title></head>
+<body class="customer" data-auth-mode="session"><main class="auth">
+<section class="panel"><div class="card">
+<a class="brand" href="/pages/customer/auth/login.html"><span class="logo"><i data-i="bag"></i></span>Cửa hàng</a>
+<h1>Tài khoản của bạn</h1><p class="sub">Phiên đăng nhập được xác thực từ máy chủ</p>
+<p id="session-state" class="form-msg show" role="status">Đang tải thông tin tài khoản…</p>
+<div id="account-info" hidden><p><b id="account-name"></b></p><p>Vai trò: <span id="account-roles"></span></p>
+<a id="logout-link" class="btn" href="/pages/customer/auth/logout.html">Đăng xuất</a></div>
+<p id="session-error" class="form-msg" role="alert" hidden></p>
+</div></section>
+<aside class="visual"><h2>Đăng nhập an toàn</h2><ul>
+<li><i data-i="lock"></i><span><b>Phiên được bảo vệ</b><small>Cookie HttpOnly, token chỉ lưu dạng hash</small></span></li>
+<li><i data-i="shield"></i><span><b>Thông tin tài khoản</b><small>Được tải từ phiên hiện tại</small></span></li></ul></aside>
+</main><script src="../../assets/js/core/app.js"></script><script src="../../assets/js/core/session.js"></script></body></html>
