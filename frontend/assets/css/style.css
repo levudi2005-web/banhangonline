@@ -6,19 +6,22 @@
 :root {
   --bg: #f5f6f8;
   --bg-2: #edf1f4;
-  --card: rgba(255, 255, 255, 0.72);
-  --card-strong: rgba(255, 255, 255, 0.9);
-  --card-soft: rgba(255, 255, 255, 0.44);
+  --card: rgba(255, 255, 255, 0.76);
+  --card-strong: rgba(255, 255, 255, 0.92);
+  --card-soft: rgba(255, 255, 255, 0.52);
   --ink: #111827;
-  --mut: #6a7280;
-  --line: rgba(17, 24, 39, 0.06);
-  --pri: #171a1f;
-  --pri2: #0d0f12;
-  --soft: rgba(17, 24, 39, 0.025);
-  --acc: #a7acb5;
+  --mut: #5f6875;
+  --line: rgba(17, 24, 39, 0.09);
+  --pri: #2a2f36;
+  --pri2: #171b20;
+  --soft: rgba(17, 24, 39, 0.04);
+  --acc: #9aa3af;
   --err: #b91c1c;
-  --shadow: rgba(15, 23, 42, 0.08);
-  --radius: 28px;
+  --shadow: rgba(15, 23, 42, 0.1);
+  --radius: 30px;
+  --input-bg: rgba(255,255,255,0.76);
+  --input-border: rgba(17, 24, 39, 0.12);
+  --input-shadow: rgba(15, 23, 42, 0.08);
 }
 
 body.customer {
@@ -93,6 +96,13 @@ body.customer .field textarea,
 body.staff .field textarea {
   backdrop-filter: blur(18px) saturate(1.5);
   -webkit-backdrop-filter: blur(18px) saturate(1.5);
+}
+
+body.customer, body.staff {
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.92), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(148,163,184,0.12), transparent 30%),
+    linear-gradient(135deg, var(--bg) 0%, var(--bg-2) 100%);
 }
 
 a { color: var(--pri); text-decoration: none; }
@@ -293,29 +303,30 @@ form .form-msg {
 .field input:not([type=checkbox]),
 .field textarea {
   width: 100%;
-  height: 50px;
-  padding: 0 14px;
-  border: 1px solid rgba(255,255,255,0.8);
-  border-radius: 16px;
-  background: rgba(255,255,255,0.38);
+  height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--input-border);
+  border-radius: 18px;
+  background: var(--input-bg);
   color: inherit;
   font: inherit;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), 0 12px 20px -18px rgba(15,23,42,0.12);
-  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease, transform .2s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.92), 0 10px 18px -15px var(--input-shadow);
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease, transform .2s ease, filter .2s ease;
 }
 .field input::placeholder,
 .field textarea::placeholder { color: var(--mut); opacity: .8; }
 .field input:not([type=checkbox]):hover,
-.field textarea:hover { border-color: rgba(17,24,39,0.1); background: rgba(255,255,255,0.45); }
+.field textarea:hover { border-color: rgba(17,24,39,0.16); background: rgba(255,255,255,0.88); }
 
-.field textarea { height: 92px; padding: 12px 14px; resize: vertical; }
+.field textarea { height: 92px; padding: 12px 16px; resize: vertical; }
 
 .field input:focus,
 .field textarea:focus {
   outline: 0;
-  border-color: rgba(17,24,39,0.12);
-  background: rgba(255,255,255,0.58);
-  box-shadow: 0 0 0 4px rgba(17,24,39,0.03), inset 0 1px 0 rgba(255,255,255,0.9);
+  border-color: rgba(17,24,39,0.18);
+  background: rgba(255,255,255,0.94);
+  box-shadow: 0 0 0 4px rgba(15,23,42,0.04), inset 0 1px 0 rgba(255,255,255,0.98);
+  transform: translateY(-1px);
 }
 
 .err { min-height: 20px; margin: 4px 0 0; font-size: 13px; color: var(--err); }
@@ -384,21 +395,21 @@ fieldset.address-fields legend { padding: 0 6px; font-weight: 600; font-size: 14
   justify-content: center;
   gap: 10px;
   width: 100%;
-  height: 52px;
-  border: 1px solid rgba(255,255,255,0.7);
-  border-radius: 15px;
-  background: linear-gradient(180deg, rgba(17,17,17,0.96), rgba(28,29,32,0.98));
+  height: 54px;
+  border: 1px solid rgba(17,24,39,0.06);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(17,17,17,0.98), rgba(25,27,31,0.98));
   color: #fff;
   font: 600 16px inherit;
   font-family: inherit;
   cursor: pointer;
-  box-shadow: 0 18px 28px -20px rgba(17,17,17,0.65), inset 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow: 0 24px 28px -22px rgba(17,17,17,0.5), inset 0 1px 0 rgba(255,255,255,0.16);
   transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease, filter .2s ease;
 }
 .btn:hover {
-  background: linear-gradient(180deg, rgba(24,24,26,0.99), rgba(36,37,40,0.99));
+  background: linear-gradient(180deg, rgba(24,24,26,0.99), rgba(35,36,40,0.99));
   transform: translateY(-2px);
-  box-shadow: 0 24px 34px -22px rgba(17,17,17,0.7), inset 0 1px 0 rgba(255,255,255,0.25);
+  box-shadow: 0 26px 32px -24px rgba(17,17,17,0.62), inset 0 1px 0 rgba(255,255,255,0.2);
   filter: brightness(1.04);
   text-decoration: none;
 }
@@ -583,22 +594,33 @@ body.staff .switch {
     padding: 28px 22px;
   }
   .panel { padding: 24px 16px; align-items: start; }
+  .card { max-width: 680px; }
 }
 
 @media (max-width: 600px) {
   .auth {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
-  .row {
+  .row,
+  .between,
+  .row > * {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .row {
     gap: 0 12px;
   }
-  .card { padding: 22px 18px; }
+  .card { padding: 20px 16px; }
   h1 { font-size: 24px; }
   .between {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
   }
+  .field input:not([type=checkbox]),
+  .field textarea {
+    height: 48px;
+    border-radius: 16px;
+  }
+  .btn { height: 50px; }
   dl { grid-template-columns: 1fr; gap: 2px; }
   dd { margin-bottom: 8px; }
   .actions .btn { flex: 1; min-width: 0; }

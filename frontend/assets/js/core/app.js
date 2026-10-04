@@ -34,6 +34,25 @@ document.addEventListener("click",e=>{
   b.setAttribute("aria-label",show?"Ẩn mật khẩu":"Hiện mật khẩu");b.innerHTML=svg(show?"off":"eye")}
 });
 
+const applyGlassMotion = () => {
+  const items = [...document.querySelectorAll(".card, .switch")];
+  items.forEach((el, index) => {
+    el.style.transform = "translateY(0)";
+    el.style.transition = "transform .28s ease, box-shadow .28s ease, border-color .28s ease";
+    el.addEventListener("pointermove", event => {
+      const rect = el.getBoundingClientRect();
+      const rotateX = ((event.clientY - rect.top) / rect.height - 0.5) * 4;
+      const rotateY = ((event.clientX - rect.left) / rect.width - 0.5) * 6;
+      el.style.transform = `perspective(1200px) rotateX(${(-rotateX).toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
+    });
+    el.addEventListener("pointerleave", () => {
+      el.style.transform = `translateY(${index % 2 === 0 ? 0 : 0}px)`;
+    });
+  });
+};
+
+applyGlassMotion();
+
 const collect=f=>{const o={};$$("[name]",f).forEach(el=>{
  if(el.type==="file"||el.dataset.skip!==undefined)return;
  const v=el.type==="checkbox"?el.checked:el.type==="password"?el.value:el.value.trim();
