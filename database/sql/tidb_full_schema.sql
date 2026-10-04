@@ -97,7 +97,7 @@ CREATE TABLE verification_codes (
   purpose VARCHAR(20) NOT NULL,
   destination_hash VARCHAR(64) NOT NULL,
   code_hash VARCHAR(64) NOT NULL,
-  ip_address VARCHAR(45) NOT NULL,
+  ip_address VARCHAR(45) NULL,
   expires_at DATETIME(6) NOT NULL,
   attempts INT NOT NULL DEFAULT 0,
   max_attempts INT NOT NULL,

@@ -52,7 +52,7 @@ public class VerificationCode {
     @Column(name = "code_hash", nullable = false, length = 64)
     private String codeHash;
 
-    @Column(name = "ip_address", nullable = false, length = 45)
+    @Column(name = "ip_address", length = 45)
     private String ipAddress;
 
     @Column(name = "expires_at", nullable = false)
