@@ -11,7 +11,7 @@ The app requires `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, 
 
 ## Architecture
 
-- This is a Java 21 / Spring Boot application built with Maven. `BanHangOnlineApplication` starts the app, enables configuration-property scanning, and schedules maintenance tasks.
+- This is a Java 25 / Spring Boot application built with Maven. `BanHangOnlineApplication` starts the app, enables configuration-property scanning, and schedules maintenance tasks.
 - The backend is under `backend/` and groups the implemented auth, user, address, role, permission, and store-registration code by feature. Controllers bind and validate DTOs, services implement transactional business rules, repositories access JPA entities, and `GlobalExceptionHandler` maps API and persistence errors to the shared `ApiResponse` envelope.
 - Authentication is stateless at the Spring Security layer. Auth-owned session code under `auth/security` issues and resolves an HttpOnly `SID` cookie; only a SHA-256 hash of its token is stored in the `sessions` table. `SecurityConfig` installs those session components and the shared request-header and rate-limit filters under `common/security`.
 - Customer and staff authentication endpoints live under `/api/auth`. Staff-store registration creates a pending account with no role; owner activation and role assignment are a manual database operation documented in `docs/approve-owner.sql`.
