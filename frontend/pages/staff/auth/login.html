@@ -1,12 +1,7 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../../assets/css/style.css"><title>Đăng nhập quản trị — Cửa hàng</title></head>
 <body class="staff"><main class="auth">
-<aside class="visual"><a class="brand" href="/pages/staff/auth/login.html"><span class="logo"><i data-i="store"></i></span><span>Cửa hàng<small style="color:#9aaccb">Hệ thống quản lý cửa hàng</small></span></a>
-<h2>Xử lý đơn nhận tại cửa hàng</h2><ul>
-<li><i data-i="list"></i><span><b>Chuẩn bị đơn hàng</b><small>Theo dõi đơn khách đã đặt</small></span></li>
-<li><i data-i="shield"></i><span><b>Xác nhận mã nhận hàng</b><small>Đối chiếu mã 8 chữ số của khách</small></span></li>
-<li><i data-i="lock"></i><span><b>Phân quyền theo vai trò</b><small>Chủ cửa hàng và nhân viên</small></span></li></ul></aside>
-<section class="panel"><div class="card">
-<a class="back" href="/pages/customer/auth/login.html"><i data-i="left"></i> Quay lại trang khách hàng</a>
+<section class="panel"><div class="card auth-card">
+<div class="auth-header"><a class="back" href="/pages/customer/auth/login.html"><i data-i="left"></i> Quay lại trang khách hàng</a></div>
 <h1>Đăng nhập quản trị</h1><p class="sub">Dành cho chủ cửa hàng và nhân viên</p>
 <form data-endpoint="/api/auth/staff/login" data-next="/pages/auth/session.html?area=staff" novalidate>
 <div class="row">
