@@ -58,9 +58,10 @@ included. AI chat is not mixed with customer-to-store chat.
   No floating-point money columns are used. VND is expected for the initial
   deployment, but currency selection/scale must be confirmed in the MPD.
 - Passwords are represented only by `password_hash`; session, reset, pickup,
-  and OTP verification secrets are represented by hashes. OTP destination
-  identifiers use a keyed HMAC; the HMAC secret is supplied as `OTP_HASH_SECRET`.
-  No credentials, OTP codes, or sample accounts are in SQL.
+  and OTP verification secrets are represented by hashes. Email destination
+  identifiers use keyed HMAC; `OTP_HASH_SECRET` can override its key, otherwise
+  the application derives one from the configured SMTP password. No credentials,
+  OTP codes, or sample accounts are in SQL.
 - New lifecycle/status values are `VARCHAR`, not database enums. Java services
   own allowed transitions; the order service must record every state change in
   `order_status_history`.

@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface VerificationCodeRepository extends JpaRepository<VerificationCode, Long> {
     Optional<VerificationCode> findTopByUserIdAndChannelAndPurposeAndDestinationHashAndUsedAtIsNullAndInvalidatedAtIsNullOrderByCreatedAtDesc(
@@ -41,6 +43,7 @@ public interface VerificationCodeRepository extends JpaRepository<VerificationCo
             @Param("now") Instant now);
 
     @Modifying
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Query("""
             update VerificationCode c
                set c.attempts = c.attempts + 1

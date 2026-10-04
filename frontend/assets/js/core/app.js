@@ -9,6 +9,7 @@ $$("[data-i]").forEach(e=>e.innerHTML=svg(e.dataset.i));
 const V={required:v=>v.trim()?"":"Thông tin bắt buộc",
 email:v=>!v||/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())?"":"Email không hợp lệ",
 phone:v=>!v||/^(0|\+84)\d{9}$/.test(v.replace(/[\s.-]/g,""))?"":"Số điện thoại không hợp lệ",
+otp:v=>/^\d{6}$/.test(v)?"":"Nhập mã OTP gồm sáu chữ số.",
 username:v=>!v||/^[A-Za-z0-9_.]{4,30}$/.test(v)?"":"Tên đăng nhập gồm 4–30 ký tự: chữ, số, _ hoặc .",
 min8:v=>!v||v.length>=8?"":"Mật khẩu phải có ít nhất 8 ký tự"};
 const check=el=>{let m="";
@@ -38,6 +39,47 @@ const collect=f=>{const o={};$$("[name]",f).forEach(el=>{
  const v=el.type==="checkbox"?el.checked:el.type==="password"?el.value:el.value.trim();
  if(v===""&&!(el.dataset.v||"").includes("required"))return;
  el.name.split(".").reduce((a,k,i,r)=>i===r.length-1?(a[k]=v):(a[k]=a[k]||{}),o)});return o};
+const maskEmail=value=>{const [name,domain]=value.split("@");if(!domain)return value;const visible=name.slice(0,1);return `${visible}${"*".repeat(Math.min(6,Math.max(3,name.length-1)))}@${domain}`};
+let otpCountdownTimer;
+const startOtpCountdown=form=>{
+ const button=$("[data-otp-resend]",form),status=$("[data-otp-countdown]",form);
+ if(!button||!status)return;
+ clearInterval(otpCountdownTimer);
+ let seconds=Number(form.dataset.otpCooldown||60);
+ button.disabled=true;
+ const update=()=>{status.textContent=seconds>0?`Bạn có thể gửi lại mã sau ${seconds} giây.`:"Bạn có thể gửi lại mã.";if(seconds<=0){button.disabled=false;clearInterval(otpCountdownTimer)}seconds--};
+ update();otpCountdownTimer=setInterval(update,1000)
+};
+const apiError=(body,status)=>{
+ const messages={
+  OTP_INVALID:"Mã OTP không chính xác hoặc đã được sử dụng. Hãy kiểm tra và thử lại.",
+  OTP_EXPIRED:"Mã OTP đã hết hạn. Hãy gửi mã mới.",
+  OTP_MAX_ATTEMPTS:"Bạn đã nhập sai quá số lần cho phép. Hãy gửi mã mới.",
+  OTP_COOLDOWN:"Bạn vừa yêu cầu mã. Vui lòng chờ hết thời gian đếm ngược để gửi lại.",
+  OTP_RATE_LIMITED:"Bạn đã yêu cầu quá nhiều mã. Vui lòng thử lại sau.",
+  EMAIL_DELIVERY_UNAVAILABLE:"Email OTP chưa sẵn sàng. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
+  EMAIL_DELIVERY_FAILED:"Không gửi được email OTP qua Gmail SMTP. Vui lòng thử lại sau.",
+  OTP_CONFIGURATION_UNAVAILABLE:"Email OTP chưa được cấu hình đầy đủ trên máy chủ."
+ };
+ return new Error(messages[body.code]||body.message||({400:"Dữ liệu không hợp lệ.",429:"Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",503:"Dịch vụ hiện chưa khả dụng. Vui lòng thử lại sau."}[status]||"Không thể hoàn tất yêu cầu. Vui lòng thử lại sau."))
+};
+document.addEventListener("click",async e=>{
+ const button=e.target.closest("[data-otp-resend]");if(!button||button.disabled)return;
+ const form=button.closest("form"),msg=$(".form-msg",form);
+ msg.className="form-msg";msg.textContent="";button.setAttribute("aria-busy","true");
+ const originalText=button.textContent;button.textContent="Đang gửi mã…";
+ try{
+  const response=await fetch(API+"/api/auth/otp/resend",{method:"POST",credentials:"include",headers:{"Content-Type":"application/json","X-Requested-With":"fetch"},body:JSON.stringify(collect(form))});
+  const body=await response.json().catch(()=>({}));
+  if(!response.ok)throw apiError(body,response.status);
+  msg.textContent=body.message||"Nếu email tồn tại, mã OTP sẽ được gửi.";msg.classList.add("show","success");
+  startOtpCountdown(form)
+ }catch(error){
+  msg.textContent=error instanceof TypeError?"Không thể kết nối máy chủ. Vui lòng thử lại sau.":error.message;
+  msg.classList.add("show");
+  if(error.message.includes("chờ hết thời gian"))startOtpCountdown(form)
+ }finally{button.removeAttribute("aria-busy");button.textContent=originalText}
+});
 
 const wiz=$("form[data-wizard]");
 if(wiz){const S=$$("[data-step]",wiz),T=$$("#steps li"),n=S.length;let i=0;
@@ -57,21 +99,31 @@ if(wiz){const S=$$("[data-step]",wiz),T=$$("#steps li"),n=S.length;let i=0;
 document.addEventListener("submit",async e=>{const f=e.target;if(!f.dataset.endpoint)return;e.preventDefault();
  const msg=$(".form-msg",f),btn=$("[type=submit]",f);msg.className="form-msg";msg.textContent="";
  if(!validate(f))return;btn.setAttribute("aria-busy","true");
- if(f.dataset.endpoint==="/api/auth/reset-password"&&!$("[name=token]",f).value){msg.textContent="Liên kết đặt lại mật khẩu bị thiếu mã hoặc không hợp lệ.";msg.classList.add("show");btn.removeAttribute("aria-busy");return}
+ const originalText=btn.textContent;
+ btn.disabled=true;
+ btn.textContent=f.dataset.otpSend?"Đang gửi mã…":f.dataset.otpVerify?"Đang xác minh…":"Đang xử lý…";
+ if(f.dataset.endpoint==="/api/auth/reset-password"&&!$("[name=token]",f).value){msg.textContent="Mã xác minh bị thiếu hoặc không hợp lệ. Hãy yêu cầu OTP mới.";msg.classList.add("show");btn.removeAttribute("aria-busy");btn.disabled=false;btn.textContent=originalText;return}
  if(f.dataset.otpSend&&f.dataset.otpSent)f.dataset.endpoint="/api/auth/otp/resend";
  try{const r=await fetch(API+f.dataset.endpoint,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json","X-Requested-With":"fetch"},body:JSON.stringify(collect(f))});
   const d=await r.json().catch(()=>({}));
-  if(!r.ok){const fallback={400:"Dữ liệu không hợp lệ.",401:"Sai tài khoản/mật khẩu hoặc chưa xác thực.",403:"Bạn không có quyền thực hiện thao tác này.",404:"Không tìm thấy yêu cầu.",409:"Dữ liệu đã tồn tại.",429:"Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",500:"Lỗi máy chủ. Vui lòng thử lại sau.",503:"Dịch vụ hiện chưa khả dụng. Vui lòng thử lại sau."};throw new Error(d.message||fallback[r.status]||"Không thể hoàn tất yêu cầu. Vui lòng thử lại sau.")}
+  if(!r.ok){if(d.code==="OTP_COOLDOWN")startOtpCountdown(f);throw apiError(d,r.status)}
   if(f.dataset.otpSend){
    f.dataset.otpSent="true";
    const followup=f.dataset.otpFollowup?$(f.dataset.otpFollowup):null;
-   if(followup){for(const key of ["channel","purpose","destination"])if(followup.elements[key])followup.elements[key].value=f.elements[key].value;followup.hidden=false}
-   msg.textContent=d.message||"Nếu tài khoản tồn tại, mã xác minh sẽ được gửi.";msg.classList.add("show","success");return
+   if(followup){
+    for(const key of ["channel","purpose","destination"])if(followup.elements[key])followup.elements[key].value=f.elements[key].value;
+    const masked=$(f.dataset.otpMask);if(masked)masked.textContent=maskEmail(f.elements.destination.value);
+    followup.hidden=false;startOtpCountdown(followup)
+   }
+   msg.textContent=d.message||"Nếu email tồn tại, mã OTP sẽ được gửi.";msg.classList.add("show","success");
+   if(f.dataset.otpFollowup)f.hidden=true;
+   return
   }
   if(f.dataset.otpVerify){
    const result=d.data||{};
    if(result.resetToken){sessionStorage.setItem("passwordResetToken",result.resetToken);location.href=f.dataset.resetPage;return}
-   if(f.elements.purpose.value==="REGISTER_PHONE"){sessionStorage.removeItem("otpEmailDestination");sessionStorage.removeItem("otpPhoneDestination")}
+   sessionStorage.removeItem("otpEmailDestination");
+   f.dataset.otpVerified="true";
    msg.textContent=d.message||"Xác minh thành công.";msg.classList.add("show","success");
    btn.disabled=true;
    if(f.dataset.otpNext&&!f.parentNode.querySelector(`[href="${f.dataset.otpNext}"]`)){const link=document.createElement("a");link.href=f.dataset.otpNext;link.textContent="Tiếp tục";link.className="btn";link.style.display="block";msg.after(link)}
@@ -80,12 +132,12 @@ document.addEventListener("submit",async e=>{const f=e.target;if(!f.dataset.endp
   if(f.dataset.endpoint==="/api/auth/reset-password")sessionStorage.removeItem("passwordResetToken");
   if(f.dataset.endpoint==="/api/auth/register"||f.dataset.endpoint==="/api/auth/staff/register"){
    const registration=collect(f),owner=f.dataset.endpoint.includes("/staff/")?registration.owner:registration;
-   sessionStorage.setItem("otpEmailDestination",owner.email);sessionStorage.setItem("otpPhoneDestination",owner.phone||registration.phone)
+   sessionStorage.setItem("otpEmailDestination",owner.email)
   }
   if(f.dataset.success){msg.textContent=f.dataset.success;msg.classList.add("show","success");if(f.dataset.next)setTimeout(()=>{location.href=f.dataset.next},1600);return}
   const next=d.redirect||f.dataset.next;if(next)location.href=next;else{msg.textContent=d.message||"Yêu cầu đã được xử lý.";msg.classList.add("show","success")}}
  catch(x){msg.textContent=x instanceof TypeError?"Không thể kết nối máy chủ. Vui lòng thử lại sau.":x.message;msg.classList.add("show")}
- finally{btn.removeAttribute("aria-busy")}});
+ finally{btn.removeAttribute("aria-busy");if(!f.dataset.otpVerified)btn.disabled=false;btn.textContent=originalText}});
 const resetToken=new URLSearchParams(location.search).get("token")||sessionStorage.getItem("passwordResetToken");if(resetToken){const token=$("[name=token]");if(token)token.value=resetToken}
 $$("[data-otp-prefill]").forEach(el=>{const key=el.dataset.otpPrefill==="email"?"otpEmailDestination":"otpPhoneDestination",value=sessionStorage.getItem(key);if(value)el.value=value});
 const registered=new URLSearchParams(location.search).get("registered");

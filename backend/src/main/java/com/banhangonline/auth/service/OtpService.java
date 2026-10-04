@@ -14,6 +14,8 @@ import com.banhangonline.user.entity.User;
 import com.banhangonline.user.entity.UserStatus;
 import com.banhangonline.user.repository.UserRepository;
 import java.security.SecureRandom;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -69,9 +71,6 @@ public class OtpService {
         String destinationHash = destinationHash(destination);
         Instant now = Instant.now();
         Optional<User> found = users.findByEmail(destination);
-        if (request.channel() == OtpChannel.SMS) {
-            found = users.findByPhone(destination);
-        }
         if (found.isEmpty() || !eligible(found.get(), request.purpose())) {
             return ACCEPTED_MESSAGE;
         }
@@ -103,9 +102,7 @@ public class OtpService {
         validatePurposeChannel(request.purpose(), request.channel());
         String destination = normalizeDestination(request.channel(), request.destination());
         String destinationHash = destinationHash(destination);
-        Optional<User> found = request.channel() == OtpChannel.EMAIL
-                ? users.findByEmail(destination)
-                : users.findByPhone(destination);
+        Optional<User> found = users.findByEmail(destination);
         ApiException invalid = invalidCode();
         if (found.isEmpty() || !eligible(found.get(), request.purpose())) {
             throw invalid;
@@ -117,8 +114,14 @@ public class OtpService {
                 .orElseThrow(() -> invalid);
 
         Instant now = Instant.now();
-        if (code.getExpiresAt().isBefore(now)
-                || codes.incrementAttemptsIfActive(code.getId(), now) == 0) {
+        if (!code.getExpiresAt().isAfter(now)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "OTP_EXPIRED", "Mã xác minh đã hết hạn. Hãy gửi mã mới.");
+        }
+        if (codes.incrementAttemptsIfActive(code.getId(), now) == 0) {
+            if (code.getAttempts() >= code.getMaxAttempts()) {
+                throw new ApiException(HttpStatus.TOO_MANY_REQUESTS, "OTP_MAX_ATTEMPTS",
+                        "Bạn đã nhập sai quá số lần cho phép. Hãy gửi mã mới.");
+            }
             throw invalid;
         }
         if (!encoder.matches(request.code(), code.getCodeHash())) {
@@ -132,12 +135,8 @@ public class OtpService {
         if (request.purpose() == OtpPurpose.RESET_PASSWORD) {
             resetToken = passwordResets.issueAfterOtp(user);
         } else {
-            if (request.channel() == OtpChannel.EMAIL) {
-                user.setEmailVerified(true);
-            } else {
-                user.setPhoneVerified(true);
-            }
-            if (user.hasRole("CUSTOMER") && user.isEmailVerified() && user.isPhoneVerified()) {
+            user.setEmailVerified(true);
+            if (user.hasRole("CUSTOMER") && user.isEmailVerified()) {
                 user.setStatus(UserStatus.ACTIVE);
             }
         }
@@ -172,19 +171,12 @@ public class OtpService {
     private boolean eligible(User user, OtpPurpose purpose) {
         return switch (purpose) {
             case REGISTER_EMAIL -> user.getStatus() == UserStatus.PENDING_VERIFICATION && !user.isEmailVerified();
-            case REGISTER_PHONE -> user.getStatus() == UserStatus.PENDING_VERIFICATION && !user.isPhoneVerified();
             case RESET_PASSWORD -> user.getStatus() == UserStatus.ACTIVE;
-            case CHANGE_EMAIL, CHANGE_PHONE -> false;
         };
     }
 
     private void validatePurposeChannel(OtpPurpose purpose, OtpChannel channel) {
-        boolean valid = switch (purpose) {
-            case REGISTER_EMAIL, CHANGE_EMAIL -> channel == OtpChannel.EMAIL;
-            case REGISTER_PHONE, CHANGE_PHONE -> channel == OtpChannel.SMS;
-            case RESET_PASSWORD -> true;
-        };
-        if (!valid || purpose == OtpPurpose.CHANGE_EMAIL || purpose == OtpPurpose.CHANGE_PHONE) {
+        if (channel != OtpChannel.EMAIL) {
             throw ApiException.validation("Kênh xác minh không hợp lệ cho mục đích đã chọn");
         }
     }
@@ -193,18 +185,19 @@ public class OtpService {
         if (!StringUtils.hasText(raw)) {
             throw ApiException.validation("Địa chỉ nhận mã không hợp lệ");
         }
-        return channel == OtpChannel.EMAIL ? Rules.email(raw) : Rules.phone(raw);
+        return Rules.email(raw);
     }
 
     private String destinationHash(String destination) {
         String secret = props.otp().hashSecret();
-        if (!StringUtils.hasText(secret) || secret.length() < 32) {
+        if (!StringUtils.hasText(secret)) {
             throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "OTP_CONFIGURATION_UNAVAILABLE",
                     "Dịch vụ xác minh hiện chưa được cấu hình.");
         }
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            byte[] key = MessageDigest.getInstance("SHA-256").digest(secret.getBytes(StandardCharsets.UTF_8));
+            mac.init(new SecretKeySpec(key, "HmacSHA256"));
             byte[] digest = mac.doFinal(destination.getBytes(StandardCharsets.UTF_8));
             return java.util.HexFormat.of().formatHex(digest);
         } catch (java.security.GeneralSecurityException e) {
@@ -229,7 +222,7 @@ public class OtpService {
     }
 
     private ApiException invalidCode() {
-        return new ApiException(HttpStatus.BAD_REQUEST, "INVALID_OTP",
-                "Mã xác minh không hợp lệ, đã hết hạn hoặc đã được sử dụng.");
+        return new ApiException(HttpStatus.BAD_REQUEST, "OTP_INVALID",
+                "Mã OTP không chính xác hoặc đã được sử dụng. Hãy kiểm tra và thử lại.");
     }
 }

@@ -67,7 +67,7 @@ class AuthIntegrationTest {
         assertThat(status(post("/api/auth/register", c))).isEqualTo(201);
         User user = users.findByEmail((String) c.get("email")).orElseThrow();
         user.setEmailVerified(true);
-        user.setPhoneVerified(true);
+        user.setPhoneVerified(false);
         user.setStatus(UserStatus.ACTIVE);
         users.saveAndFlush(user);
         return c;

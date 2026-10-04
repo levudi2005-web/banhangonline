@@ -23,6 +23,7 @@ import com.banhangonline.auth.service.PasswordResetService;
 import com.banhangonline.auth.security.TokenUtil;
 import com.banhangonline.common.exception.ApiException;
 import com.banhangonline.config.AppProperties;
+import com.banhangonline.role.entity.Role;
 import com.banhangonline.user.entity.User;
 import com.banhangonline.user.entity.UserStatus;
 import com.banhangonline.user.repository.UserRepository;
@@ -33,6 +34,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 class OtpServiceTest {
     private static final String HASH_SECRET = TokenUtil.newToken() + TokenUtil.newToken();
@@ -50,9 +53,11 @@ class OtpServiceTest {
         User user = user();
         when(users.findByEmail(EMAIL)).thenReturn(Optional.of(user));
 
-        service.send(new OtpSendRequest(OtpChannel.EMAIL, OtpPurpose.REGISTER_EMAIL, EMAIL), "127.0.0.1");
+        String responseMessage = service.send(
+                new OtpSendRequest(OtpChannel.EMAIL, OtpPurpose.REGISTER_EMAIL, EMAIL), "127.0.0.1");
 
         assertThat(sender.code).matches("\\d{6}");
+        assertThat(responseMessage).doesNotContain(sender.code);
         var captor = org.mockito.ArgumentCaptor.forClass(VerificationCode.class);
         verify(codes).saveAndFlush(captor.capture());
         VerificationCode saved = captor.getValue();
@@ -66,6 +71,9 @@ class OtpServiceTest {
     @Test
     void verifyConsumesCodeAndMarksRegistrationEmailVerified() {
         User user = user();
+        Role customerRole = new Role();
+        customerRole.setName("CUSTOMER");
+        user.getRoles().add(customerRole);
         VerificationCode code = code(user, "123456");
         when(users.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(codes.findTopByUserIdAndChannelAndPurposeAndDestinationHashAndUsedAtIsNullAndInvalidatedAtIsNullOrderByCreatedAtDesc(
@@ -81,7 +89,7 @@ class OtpServiceTest {
         assertThat(result.resetToken()).isNull();
         assertThat(user.isEmailVerified()).isTrue();
         assertThat(user.isPhoneVerified()).isFalse();
-        assertThat(user.getStatus()).isEqualTo(UserStatus.PENDING_VERIFICATION);
+        assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
         verify(codes).markUsedIfActive(eq(7L), any(Instant.class));
     }
 
@@ -98,7 +106,7 @@ class OtpServiceTest {
         assertThatThrownBy(() -> service.verify(new OtpVerifyRequest(
                         OtpChannel.EMAIL, OtpPurpose.REGISTER_EMAIL, EMAIL, "999999")))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("Mã xác minh");
+                .hasMessageContaining("Mã OTP");
         assertThat(user.isEmailVerified()).isFalse();
         verify(codes, never()).markUsedIfActive(any(), any());
     }
@@ -117,6 +125,38 @@ class OtpServiceTest {
                         OtpChannel.EMAIL, OtpPurpose.REGISTER_EMAIL, EMAIL, "123456")))
                 .isInstanceOf(ApiException.class);
         verify(codes, never()).incrementAttemptsIfActive(any(), any());
+    }
+
+    @Test
+    void usedCodeCannotBeUsedAgain() {
+        User user = user();
+        when(users.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(codes.findTopByUserIdAndChannelAndPurposeAndDestinationHashAndUsedAtIsNullAndInvalidatedAtIsNullOrderByCreatedAtDesc(
+                eq(user.getId()), eq(OtpChannel.EMAIL), eq(OtpPurpose.REGISTER_EMAIL), anyString()))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.verify(new OtpVerifyRequest(
+                        OtpChannel.EMAIL, OtpPurpose.REGISTER_EMAIL, EMAIL, "123456")))
+                .isInstanceOf(ApiException.class)
+                .satisfies(error -> assertThat(((ApiException) error).getCode()).isEqualTo("OTP_INVALID"));
+    }
+
+    @Test
+    void maximumAttemptsRequiresAtomicIncrementToHaveReachedItsLimit() {
+        User user = user();
+        VerificationCode code = code(user, "123456");
+        code.setAttempts(5);
+        when(users.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(codes.findTopByUserIdAndChannelAndPurposeAndDestinationHashAndUsedAtIsNullAndInvalidatedAtIsNullOrderByCreatedAtDesc(
+                eq(user.getId()), eq(OtpChannel.EMAIL), eq(OtpPurpose.REGISTER_EMAIL), anyString()))
+                .thenReturn(Optional.of(code));
+        when(codes.incrementAttemptsIfActive(eq(7L), any(Instant.class))).thenReturn(0);
+
+        assertThatThrownBy(() -> service.verify(new OtpVerifyRequest(
+                        OtpChannel.EMAIL, OtpPurpose.REGISTER_EMAIL, EMAIL, "123456")))
+                .isInstanceOf(ApiException.class)
+                .satisfies(error -> assertThat(((ApiException) error).getCode()).isEqualTo("OTP_MAX_ATTEMPTS"));
+        verify(codes, never()).markUsedIfActive(any(), any());
     }
 
     @Test
@@ -160,6 +200,25 @@ class OtpServiceTest {
     }
 
     @Test
+    void sendingIsRateLimitedByDestination() {
+        User user = user();
+        user.setStatus(UserStatus.ACTIVE);
+        when(users.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(codes.findTopByUserIdAndChannelAndPurposeAndDestinationHashOrderByCreatedAtDesc(
+                eq(user.getId()), eq(OtpChannel.EMAIL), eq(OtpPurpose.RESET_PASSWORD), anyString()))
+                .thenReturn(Optional.empty());
+        when(codes.countByDestinationHashAndPurposeAndCreatedAtAfter(
+                anyString(), eq(OtpPurpose.RESET_PASSWORD), any(Instant.class)))
+                .thenReturn(5L);
+
+        assertThatThrownBy(() -> service.send(
+                        new OtpSendRequest(OtpChannel.EMAIL, OtpPurpose.RESET_PASSWORD, EMAIL), "127.0.0.1"))
+                .isInstanceOf(ApiException.class)
+                .satisfies(error -> assertThat(((ApiException) error).getCode()).isEqualTo("OTP_RATE_LIMITED"));
+        verify(codes, never()).saveAndFlush(any());
+    }
+
+    @Test
     void repositoryDerivedQueriesResolveAgainstEntityProperties() {
         assertThatCode(() -> new PartTree(
                         "findTopByUserIdAndChannelAndPurposeAndDestinationHashAndUsedAtIsNullAndInvalidatedAtIsNullOrderByCreatedAtDesc",
@@ -176,12 +235,17 @@ class OtpServiceTest {
     }
 
     @Test
-    void registrationPurposeRejectsWrongChannel() {
-        assertThatThrownBy(() -> service.send(
-                        new OtpSendRequest(OtpChannel.SMS, OtpPurpose.REGISTER_EMAIL, "0901234567"),
-                        "127.0.0.1"))
-                .isInstanceOf(ApiException.class)
-                .hasMessageContaining("Kênh xác minh");
+    void failedAttemptsAreCommittedOutsideTheVerificationTransaction() throws Exception {
+        var method = VerificationCodeRepository.class.getMethod(
+                "incrementAttemptsIfActive", Long.class, Instant.class);
+
+        assertThat(method.getAnnotation(Transactional.class).propagation())
+                .isEqualTo(Propagation.REQUIRES_NEW);
+    }
+
+    @Test
+    void emailIsTheOnlySupportedOtpChannel() {
+        assertThat(OtpChannel.values()).containsExactly(OtpChannel.EMAIL);
     }
 
     private User user() {

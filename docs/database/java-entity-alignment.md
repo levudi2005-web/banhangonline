@@ -34,11 +34,14 @@ contacted or SQL executed.
   entities map only hashed token fields.
 - Email and phone verification are explicit `users` booleans. Legacy active
   accounts receive a `TRUE` default when SQL 003 is applied; new registrations
-  are initialized to `FALSE` in Java and become active only after both channels
-  are verified. Staff registrations remain pending until manual approval.
-- OTPs are BCrypt-hashed; destination lookups use HMAC-SHA-256 keyed by
-  `OTP_HASH_SECRET`, not a reversible or plain SHA-256 contact hash. The secret
-  must remain stable while unexpired codes exist.
+  are initialized with email unverified and phone flag true because this
+  deployment uses email-only OTP. Customers activate after email verification;
+  staff registrations remain pending until manual approval.
+- OTPs are BCrypt-hashed; email destination lookups use HMAC-SHA-256 keyed by
+  `OTP_HASH_SECRET` when set, otherwise by the configured SMTP password. Email
+  OTP is the only verification channel; registration does not claim phone
+  verification. Keep
+  the key stable while unexpired codes exist.
 - Current associations use cascade-delete foreign keys for role links,
   addresses, sessions, reset tokens and store registration. The proposed
   definitions preserve these current V1 delete behaviors for those existing

@@ -5,6 +5,8 @@ import com.banhangonline.auth.dto.LoginRequest;
 import com.banhangonline.auth.dto.OtpSendRequest;
 import com.banhangonline.auth.dto.OtpVerificationResponse;
 import com.banhangonline.auth.dto.OtpVerifyRequest;
+import com.banhangonline.auth.entity.OtpChannel;
+import com.banhangonline.auth.entity.OtpPurpose;
 import com.banhangonline.auth.dto.RegisterRequest;
 import com.banhangonline.auth.dto.ResetPasswordRequest;
 import com.banhangonline.auth.dto.UserResponse;
@@ -15,7 +17,6 @@ import com.banhangonline.auth.security.SessionCookies;
 import com.banhangonline.auth.service.AuthService;
 import com.banhangonline.auth.service.PasswordResetService;
 import com.banhangonline.auth.service.OtpService;
-import com.banhangonline.auth.entity.OtpPurpose;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
@@ -65,9 +66,10 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ApiResponse<Void> forgot(@Valid @RequestBody ForgotPasswordRequest r) {
-        resets.request(r.account());
-        return ApiResponse.<Void>ok("Nếu tài khoản tồn tại, hướng dẫn đặt lại mật khẩu sẽ được gửi.", null);
+    public ApiResponse<Void> forgot(@Valid @RequestBody ForgotPasswordRequest r, HttpServletRequest request) {
+        otps.send(new OtpSendRequest(OtpChannel.EMAIL, OtpPurpose.RESET_PASSWORD, r.account()),
+                request.getRemoteAddr());
+        return ApiResponse.<Void>ok("Nếu email tồn tại, mã OTP sẽ được gửi.", null);
     }
 
     @PostMapping("/reset-password")
