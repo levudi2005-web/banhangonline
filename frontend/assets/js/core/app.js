@@ -58,14 +58,36 @@ document.addEventListener("submit",async e=>{const f=e.target;if(!f.dataset.endp
  const msg=$(".form-msg",f),btn=$("[type=submit]",f);msg.className="form-msg";msg.textContent="";
  if(!validate(f))return;btn.setAttribute("aria-busy","true");
  if(f.dataset.endpoint==="/api/auth/reset-password"&&!$("[name=token]",f).value){msg.textContent="Liên kết đặt lại mật khẩu bị thiếu mã hoặc không hợp lệ.";msg.classList.add("show");btn.removeAttribute("aria-busy");return}
+ if(f.dataset.otpSend&&f.dataset.otpSent)f.dataset.endpoint="/api/auth/otp/resend";
  try{const r=await fetch(API+f.dataset.endpoint,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json","X-Requested-With":"fetch"},body:JSON.stringify(collect(f))});
   const d=await r.json().catch(()=>({}));
   if(!r.ok){const fallback={400:"Dữ liệu không hợp lệ.",401:"Sai tài khoản/mật khẩu hoặc chưa xác thực.",403:"Bạn không có quyền thực hiện thao tác này.",404:"Không tìm thấy yêu cầu.",409:"Dữ liệu đã tồn tại.",429:"Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",500:"Lỗi máy chủ. Vui lòng thử lại sau.",503:"Dịch vụ hiện chưa khả dụng. Vui lòng thử lại sau."};throw new Error(d.message||fallback[r.status]||"Không thể hoàn tất yêu cầu. Vui lòng thử lại sau.")}
+  if(f.dataset.otpSend){
+   f.dataset.otpSent="true";
+   const followup=f.dataset.otpFollowup?$(f.dataset.otpFollowup):null;
+   if(followup){for(const key of ["channel","purpose","destination"])if(followup.elements[key])followup.elements[key].value=f.elements[key].value;followup.hidden=false}
+   msg.textContent=d.message||"Nếu tài khoản tồn tại, mã xác minh sẽ được gửi.";msg.classList.add("show","success");return
+  }
+  if(f.dataset.otpVerify){
+   const result=d.data||{};
+   if(result.resetToken){sessionStorage.setItem("passwordResetToken",result.resetToken);location.href=f.dataset.resetPage;return}
+   if(f.elements.purpose.value==="REGISTER_PHONE"){sessionStorage.removeItem("otpEmailDestination");sessionStorage.removeItem("otpPhoneDestination")}
+   msg.textContent=d.message||"Xác minh thành công.";msg.classList.add("show","success");
+   btn.disabled=true;
+   if(f.dataset.otpNext&&!f.parentNode.querySelector(`[href="${f.dataset.otpNext}"]`)){const link=document.createElement("a");link.href=f.dataset.otpNext;link.textContent="Tiếp tục";link.className="btn";link.style.display="block";msg.after(link)}
+   return
+  }
+  if(f.dataset.endpoint==="/api/auth/reset-password")sessionStorage.removeItem("passwordResetToken");
+  if(f.dataset.endpoint==="/api/auth/register"||f.dataset.endpoint==="/api/auth/staff/register"){
+   const registration=collect(f),owner=f.dataset.endpoint.includes("/staff/")?registration.owner:registration;
+   sessionStorage.setItem("otpEmailDestination",owner.email);sessionStorage.setItem("otpPhoneDestination",owner.phone||registration.phone)
+  }
   if(f.dataset.success){msg.textContent=f.dataset.success;msg.classList.add("show","success");if(f.dataset.next)setTimeout(()=>{location.href=f.dataset.next},1600);return}
   const next=d.redirect||f.dataset.next;if(next)location.href=next;else{msg.textContent=d.message||"Yêu cầu đã được xử lý.";msg.classList.add("show","success")}}
  catch(x){msg.textContent=x instanceof TypeError?"Không thể kết nối máy chủ. Vui lòng thử lại sau.":x.message;msg.classList.add("show")}
  finally{btn.removeAttribute("aria-busy")}});
-const resetToken=new URLSearchParams(location.search).get("token");if(resetToken){const token=$("[name=token]");if(token)token.value=resetToken}
+const resetToken=new URLSearchParams(location.search).get("token")||sessionStorage.getItem("passwordResetToken");if(resetToken){const token=$("[name=token]");if(token)token.value=resetToken}
+$$("[data-otp-prefill]").forEach(el=>{const key=el.dataset.otpPrefill==="email"?"otpEmailDestination":"otpPhoneDestination",value=sessionStorage.getItem(key);if(value)el.value=value});
 const registered=new URLSearchParams(location.search).get("registered");
 if(registered){const s=$(".sub");if(s)s.textContent=registered==="customer"?"Tài khoản đã được tạo. Bạn có thể đăng nhập.":"Đã gửi đăng ký cửa hàng. Tài khoản đang chờ quản trị viên xác minh."}
 if(new URLSearchParams(location.search).get("reset")==="success"){const s=$(".sub");if(s)s.textContent="Mật khẩu đã được cập nhật. Hãy đăng nhập bằng mật khẩu mới."}

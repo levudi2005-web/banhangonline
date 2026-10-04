@@ -7,7 +7,7 @@ catalog, not a global execution order.
 | Order | SQL module/file | Tables introduced | References already available |
 |---:|---|---|---|
 | 1 | `01-auth/001_auth_core.sql` | `users`, `roles`, `permissions` | None |
-| 2 | `01-auth/002_auth_links_and_tokens.sql` | `user_roles`, `role_permissions`, `sessions`, `password_reset_tokens` | `users`, `roles`, `permissions` |
+| 2 | `01-auth/002_auth_links_and_tokens.sql`, `01-auth/004_create_verification_codes.sql` | `user_roles`, `role_permissions`, `sessions`, `password_reset_tokens`, `verification_codes` | `users`, `roles`, `permissions` |
 | 3 | `02-user/001_user_addresses.sql` | `user_addresses` | `users` |
 | 4 | `04-category/001_categories.sql` | `categories` | Self-reference within `categories` |
 | 5 | `03-product/001_products.sql` | `products` | `categories` |

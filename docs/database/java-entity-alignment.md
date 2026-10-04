@@ -1,18 +1,19 @@
 # Java entity and proposed schema alignment
 
 Comparison is against the current Java entities and historical Flyway V1, not a
-live TiDB database. The new module SQL preserves the mapped columns of current
-entities where they overlap. No Java entity was changed for this schema
-proposal.
+live TiDB database. OTP introduces entity and SQL mappings that require
+explicit manual schema changes on an existing TiDB database; no database was
+contacted or SQL executed.
 
 | Java entity | Table | Current mapped fields/relations | Proposed SQL comparison |
 |---|---|---|---|
-| `User` | `users` | `id`, full name, username, email, phone, password hash, status, created/updated times; `user_roles` relation | Matches V1 names, types/lengths, nullability, unique identifiers and identity strategy |
+| `User` | `users` | `id`, full name, username, email, phone, password hash, status, email/phone verification flags, created/updated times; `user_roles` relation | Verification flags require manual SQL 003 on the existing schema; otherwise matches the proposed auth definition |
 | `Role` | `roles` | `id`, name, description; `role_permissions` relation | Matches V1 |
 | `Permission` | `permissions` | `id`, name, description | Matches V1 |
 | `UserAddress` | `user_addresses` | `id`, user, recipient/contact/address fields, default flag and timestamps | Matches V1 columns; FK and index are equivalent |
 | `Session` | `sessions` | `id`, token hash, user, expiry/creation, optional IP and user agent | Matches V1 columns and unique token hash |
 | `PasswordResetToken` | `password_reset_tokens` | `id`, user, token hash, expiry, used/creation times | Matches V1 columns and unique token hash |
+| `VerificationCode` | `verification_codes` | `id`, user, channel, purpose, HMAC destination hash, BCrypt code hash, expiry, attempts, use/invalidation and creation times | Added with manual SQL 004; maps to module and combined DDL |
 | `StoreRegistrationRequest` | `store_registration_requests` | `id`, owner, store/contact/address details, status/review and timestamps | Matches V1; request is distinct from the proposed `stores` entity/table |
 
 ## Findings and mismatches
@@ -31,6 +32,13 @@ proposal.
   `BIGINT AUTO_INCREMENT`.
 - Password columns hold hashes, not raw credentials. The session/reset token
   entities map only hashed token fields.
+- Email and phone verification are explicit `users` booleans. Legacy active
+  accounts receive a `TRUE` default when SQL 003 is applied; new registrations
+  are initialized to `FALSE` in Java and become active only after both channels
+  are verified. Staff registrations remain pending until manual approval.
+- OTPs are BCrypt-hashed; destination lookups use HMAC-SHA-256 keyed by
+  `OTP_HASH_SECRET`, not a reversible or plain SHA-256 contact hash. The secret
+  must remain stable while unexpired codes exist.
 - Current associations use cascade-delete foreign keys for role links,
   addresses, sessions, reset tokens and store registration. The proposed
   definitions preserve these current V1 delete behaviors for those existing

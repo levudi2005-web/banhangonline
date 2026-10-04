@@ -15,7 +15,7 @@ class SmtpResetNotifierTest {
     void rejectsPasswordResetWhenSmtpIsNotConfigured() {
         StaticListableBeanFactory beanFactory = new StaticListableBeanFactory();
         SmtpResetNotifier notifier = new SmtpResetNotifier(
-                beanFactory.getBeanProvider(JavaMailSender.class), "", "", "", "", "");
+                beanFactory.getBeanProvider(JavaMailSender.class), "", "", "", "", "", true);
 
         assertThatThrownBy(notifier::ensureConfigured)
                 .isInstanceOf(ApiException.class)

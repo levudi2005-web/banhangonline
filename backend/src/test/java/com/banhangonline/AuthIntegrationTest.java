@@ -65,6 +65,11 @@ class AuthIntegrationTest {
     private Map<String, Object> registered() throws Exception {
         Map<String, Object> c = customer();
         assertThat(status(post("/api/auth/register", c))).isEqualTo(201);
+        User user = users.findByEmail((String) c.get("email")).orElseThrow();
+        user.setEmailVerified(true);
+        user.setPhoneVerified(true);
+        user.setStatus(UserStatus.ACTIVE);
+        users.saveAndFlush(user);
         return c;
     }
     private MvcResult login(String url, String account, String password) throws Exception {
@@ -81,6 +86,9 @@ class AuthIntegrationTest {
         User u = users.findByEmail((String) c.get("email")).orElseThrow();
         assertThat(u.getPasswordHash()).startsWith("$2");
         assertThat(encoder.matches(PW, u.getPasswordHash())).isTrue();
+        assertThat(u.getStatus()).isEqualTo(UserStatus.PENDING_VERIFICATION);
+        assertThat(u.isEmailVerified()).isFalse();
+        assertThat(u.isPhoneVerified()).isFalse();
         assertThat(u.hasRole("CUSTOMER")).isTrue();
     }
 
@@ -155,6 +163,8 @@ class AuthIntegrationTest {
 
         User u = users.findByUsername("owner" + n).orElseThrow();
         assertThat(u.getStatus()).isEqualTo(UserStatus.PENDING_VERIFICATION);
+        assertThat(u.isEmailVerified()).isFalse();
+        assertThat(u.isPhoneVerified()).isFalse();
         assertThat(u.getRoles()).isEmpty();
         MvcResult l = login("/api/auth/staff/login", "owner" + n, PW);
         assertThat(status(l)).isEqualTo(403);

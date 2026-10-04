@@ -62,6 +62,24 @@ public class PasswordResetService {
     }
 
     @Transactional
+    public String issueAfterOtp(User user) {
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "INVALID_OTP",
+                    "Mã xác minh không hợp lệ, đã hết hạn hoặc đã được sử dụng.");
+        }
+        tokens.deleteByUser(user);
+        String raw = TokenUtil.newToken();
+        Instant now = Instant.now();
+        PasswordResetToken token = new PasswordResetToken();
+        token.setUser(user);
+        token.setTokenHash(TokenUtil.sha256(raw));
+        token.setCreatedAt(now);
+        token.setExpiresAt(now.plusSeconds(props.resetToken().ttlMinutes() * 60L));
+        tokens.saveAndFlush(token);
+        return raw;
+    }
+
+    @Transactional
     public void reset(String rawToken, String newPassword, String confirm) {
         Rules.password(newPassword, confirm);
         ApiException invalid = new ApiException(HttpStatus.BAD_REQUEST, "INVALID_TOKEN", "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn");

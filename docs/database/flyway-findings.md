@@ -43,6 +43,14 @@ proposed DDL changes both V1 junction tables from composite primary keys to
 `BIGINT AUTO_INCREMENT` primary keys plus unique FK pairs. This is a deliberate
 physical schema difference and requires PowerDesigner review.
 
+The OTP feature adds `users.email_verified`, `users.phone_verified`, and a new
+`verification_codes` table outside Flyway. The current Flyway history does not
+define them. Existing TiDB must receive the reviewed manual changes in
+`01-auth/003_add_user_verification_flags.sql` and
+`01-auth/004_create_verification_codes.sql` before the corresponding Java
+entities can pass Hibernate validation. Do not enable Flyway or run these
+scripts automatically.
+
 PowerDesigner-generated SQL is the intended authority. Before a deployment,
 compare its tables, indexes, FK actions and seeds with both the legacy V1/V2
 and the proposed SQL; choose a single reviewed source. This analysis is static

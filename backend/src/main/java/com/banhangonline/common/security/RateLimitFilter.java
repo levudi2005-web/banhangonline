@@ -15,7 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateLimitFilter extends OncePerRequestFilter {
     private static final Set<String> LIMITED = Set.of(
             "/api/auth/login", "/api/auth/staff/login", "/api/auth/register",
-            "/api/auth/staff/register", "/api/auth/forgot-password", "/api/auth/reset-password");
+            "/api/auth/staff/register", "/api/auth/forgot-password", "/api/auth/reset-password",
+            "/api/auth/otp/send", "/api/auth/otp/resend", "/api/auth/otp/verify");
 
     private final Map<String, long[]> hits = new ConcurrentHashMap<>();
     private final int max;
@@ -32,7 +33,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if ("POST".equals(req.getMethod()) && LIMITED.contains(req.getRequestURI())) {
             if (hits.size() > 50_000) hits.clear();
             long now = System.currentTimeMillis();
-            long[] w = hits.compute(req.getRemoteAddr() + "|" + req.getRequestURI(), (k, v) -> {
+            String path = req.getRequestURI().startsWith("/api/auth/otp/")
+                    ? "/api/auth/otp"
+                    : req.getRequestURI();
+            long[] w = hits.compute(req.getRemoteAddr() + "|" + path, (k, v) -> {
                 if (v == null || now - v[0] >= windowMs) return new long[]{now, 1};
                 v[1]++;
                 return v;

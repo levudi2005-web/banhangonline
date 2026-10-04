@@ -26,6 +26,7 @@ public class SmtpResetNotifier implements ResetNotifier {
     private final String password;
     private final String from;
     private final String frontendBaseUrl;
+    private final boolean tlsEnabled;
 
     public SmtpResetNotifier(
             ObjectProvider<JavaMailSender> mailSenders,
@@ -33,13 +34,15 @@ public class SmtpResetNotifier implements ResetNotifier {
             @Value("${SMTP_USERNAME:}") String username,
             @Value("${SMTP_PASSWORD:}") String password,
             @Value("${SMTP_FROM:}") String from,
-            @Value("${app.frontend.base-url}") String frontendBaseUrl) {
+            @Value("${app.frontend.base-url}") String frontendBaseUrl,
+            @Value("${SMTP_TLS_ENABLED:true}") boolean tlsEnabled) {
         this.mailSenders = mailSenders;
         this.smtpHost = smtpHost;
         this.username = username;
         this.password = password;
         this.from = from;
         this.frontendBaseUrl = frontendBaseUrl;
+        this.tlsEnabled = tlsEnabled;
     }
 
     @Override
@@ -49,6 +52,7 @@ public class SmtpResetNotifier implements ResetNotifier {
                 || !StringUtils.hasText(username)
                 || !StringUtils.hasText(password)
                 || !StringUtils.hasText(from)
+                || !tlsEnabled
                 || !isSecureFrontendBaseUrl(frontendBaseUrl)) {
             throw new ApiException(
                     HttpStatus.SERVICE_UNAVAILABLE,

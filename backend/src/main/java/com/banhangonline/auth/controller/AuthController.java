@@ -2,6 +2,9 @@ package com.banhangonline.auth.controller;
 
 import com.banhangonline.auth.dto.ForgotPasswordRequest;
 import com.banhangonline.auth.dto.LoginRequest;
+import com.banhangonline.auth.dto.OtpSendRequest;
+import com.banhangonline.auth.dto.OtpVerificationResponse;
+import com.banhangonline.auth.dto.OtpVerifyRequest;
 import com.banhangonline.auth.dto.RegisterRequest;
 import com.banhangonline.auth.dto.ResetPasswordRequest;
 import com.banhangonline.auth.dto.UserResponse;
@@ -11,6 +14,8 @@ import com.banhangonline.auth.security.AuthPrincipal;
 import com.banhangonline.auth.security.SessionCookies;
 import com.banhangonline.auth.service.AuthService;
 import com.banhangonline.auth.service.PasswordResetService;
+import com.banhangonline.auth.service.OtpService;
+import com.banhangonline.auth.entity.OtpPurpose;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
@@ -25,11 +30,14 @@ public class AuthController {
     private final AuthService auth;
     private final PasswordResetService resets;
     private final SessionCookies cookies;
+    private final OtpService otps;
 
-    public AuthController(AuthService auth, PasswordResetService resets, SessionCookies cookies) {
+    public AuthController(
+            AuthService auth, PasswordResetService resets, SessionCookies cookies, OtpService otps) {
         this.auth = auth;
         this.resets = resets;
         this.cookies = cookies;
+        this.otps = otps;
     }
 
     @PostMapping("/login")
@@ -66,5 +74,21 @@ public class AuthController {
     public ApiResponse<Void> reset(@Valid @RequestBody ResetPasswordRequest r) {
         resets.reset(r.token(), r.newPassword(), r.confirmPassword());
         return ApiResponse.<Void>ok("Đã đặt lại mật khẩu. Vui lòng đăng nhập lại.", null);
+    }
+
+    @PostMapping({"/otp/send", "/otp/resend"})
+    public ApiResponse<Void> sendOtp(@Valid @RequestBody OtpSendRequest request, HttpServletRequest httpRequest) {
+        String message = otps.send(request, httpRequest.getRemoteAddr());
+        return ApiResponse.ok(message, null);
+    }
+
+    @PostMapping("/otp/verify")
+    public ApiResponse<OtpVerificationResponse> verifyOtp(@Valid @RequestBody OtpVerifyRequest request) {
+        OtpVerificationResponse result = otps.verify(request);
+        return ApiResponse.ok(
+                request.purpose() == OtpPurpose.RESET_PASSWORD
+                        ? "Mã xác minh hợp lệ. Bạn có thể đặt lại mật khẩu."
+                        : "Xác minh thành công.",
+                result);
     }
 }

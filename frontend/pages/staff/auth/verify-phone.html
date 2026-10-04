@@ -1,5 +1,12 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../../assets/css/style.css"><title>Xác minh điện thoại — Cửa hàng</title></head>
 <body class="staff"><main class="auth"><aside class="visual"><h2>Xác minh tài khoản cửa hàng</h2></aside><section class="panel"><div class="card">
-<h1>Xác minh số điện thoại</h1><p class="sub">Backend chưa hỗ trợ SMS/OTP verification.</p>
-<div class="box" role="status">Chưa có API gửi SMS/xác nhận OTP hoặc bảng lưu OTP. Tài khoản cửa hàng được xử lý qua quy trình duyệt hiện có; trang này không gửi mã giả.</div>
-<a class="btn" href="/pages/staff/auth/login.html">Đến đăng nhập quản trị</a></div></section></main><script src="../../../assets/js/core/app.js"></script></body></html>
+<a class="back" href="/pages/staff/auth/verify-email.html">← Xác minh email</a><h1>Xác minh số điện thoại</h1>
+<form data-endpoint="/api/auth/otp/send" data-otp-send novalidate>
+<input type="hidden" name="channel" value="SMS"><input type="hidden" name="purpose" value="REGISTER_PHONE">
+<div class="field"><label for="phone">Số điện thoại chủ cửa hàng</label><input id="phone" name="destination" type="tel" autocomplete="tel" data-otp-prefill="phone" data-v="required phone" data-required-message="Vui lòng nhập số điện thoại."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
+<p class="form-msg" role="alert"></p><button class="btn" type="submit">Gửi mã SMS</button></form>
+<form data-endpoint="/api/auth/otp/verify" data-otp-verify hidden novalidate>
+<input type="hidden" name="channel" value="SMS"><input type="hidden" name="purpose" value="REGISTER_PHONE">
+<div class="field"><label for="code">Mã xác minh</label><input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" data-v="required" data-required-message="Vui lòng nhập mã."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
+<p class="form-msg" role="alert"></p><button class="btn" type="submit">Xác minh số điện thoại</button></form>
+<p class="note">Sau khi xác minh hai kênh, tài khoản cửa hàng vẫn cần được quản trị viên duyệt.</p></div></section></main><script src="../../../assets/js/core/app.js"></script></body></html>

@@ -1,5 +1,13 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../../assets/css/style.css"><title>Xác minh điện thoại — Khách hàng</title></head>
 <body class="customer"><main class="auth"><section class="panel"><div class="card">
-<h1>Xác minh số điện thoại</h1><p class="sub">Chức năng xác minh SMS/OTP chưa được backend hỗ trợ.</p>
-<div class="box" role="status">Backend chưa có API gửi SMS hoặc kiểm tra OTP, và chưa có bảng lưu OTP. Không có mã nào được gửi hoặc xác nhận trên trang này.</div>
-<a class="btn" href="/pages/customer/auth/login.html">Đến đăng nhập</a></div></section><aside class="visual"><h2>Không gửi SMS giả</h2></aside></main><script src="../../../assets/js/core/app.js"></script></body></html>
+<a class="back" href="/pages/customer/auth/verify-email.html">← Xác minh email</a><h1>Xác minh số điện thoại</h1>
+<p class="sub">Nhận mã sáu chữ số qua SMS để hoàn tất xác minh tài khoản.</p>
+<form data-endpoint="/api/auth/otp/send" data-otp-send novalidate>
+<input type="hidden" name="channel" value="SMS"><input type="hidden" name="purpose" value="REGISTER_PHONE">
+<div class="field"><label for="phone">Số điện thoại đăng ký</label><input id="phone" name="destination" type="tel" autocomplete="tel" data-otp-prefill="phone" data-v="required phone" data-required-message="Vui lòng nhập số điện thoại."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
+<p class="form-msg" role="alert"></p><button class="btn" type="submit">Gửi mã SMS</button></form>
+<form data-endpoint="/api/auth/otp/verify" data-otp-verify hidden novalidate>
+<input type="hidden" name="channel" value="SMS"><input type="hidden" name="purpose" value="REGISTER_PHONE">
+<div class="field"><label for="code">Mã xác minh</label><input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" data-v="required" data-required-message="Vui lòng nhập mã."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
+<p class="form-msg" role="alert"></p><button class="btn" type="submit">Xác minh số điện thoại</button></form>
+<p class="note">Cả email và số điện thoại cần được xác minh trước khi đăng nhập.</p></div></section><aside class="visual"><h2>Hoàn tất xác minh</h2></aside></main><script src="../../../assets/js/core/app.js"></script></body></html>

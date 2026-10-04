@@ -25,7 +25,7 @@ legacy migrations at startup.
 
 | Module | Tables | Responsibility |
 |---|---|---|
-| Auth | `users`, `roles`, `permissions`, `user_roles`, `role_permissions`, `sessions`, `password_reset_tokens` | Identity credentials, role/permission links, sessions and reset-token hashes |
+| Auth | `users`, `roles`, `permissions`, `user_roles`, `role_permissions`, `sessions`, `password_reset_tokens`, `verification_codes` | Identity credentials, role/permission links, sessions and hashed one-time credentials |
 | User | `user_addresses` | Customer pickup/contact addresses |
 | Product | `products` | Product catalog entries, SKU, price and lifecycle status |
 | Category | `categories` | Hierarchical product classification |
@@ -40,8 +40,8 @@ legacy migrations at startup.
 | Audit | `audit_logs` | Actor/action/entity audit records |
 | AI | No tables | Reserved module; omitted until the application has an AI persistence requirement |
 
-There are 25 proposed tables, including the existing store-registration
-workflow table. No delivery, shipping, courier, or tracking tables are
+There are 26 proposed tables, including the existing store-registration
+workflow table and the OTP verification table. No delivery, shipping, courier, or tracking tables are
 included. AI chat is not mixed with customer-to-store chat.
 
 ## Cross-cutting data rules
@@ -57,9 +57,10 @@ included. AI chat is not mixed with customer-to-store chat.
 - Money uses `DECIMAL(19,4)` and an explicit ISO-4217 `CHAR(3)` currency code.
   No floating-point money columns are used. VND is expected for the initial
   deployment, but currency selection/scale must be confirmed in the MPD.
-- Passwords are represented only by `password_hash`; session, reset, and
-  pickup verification secrets are represented by hashes. No credentials or
-  sample accounts are in SQL.
+- Passwords are represented only by `password_hash`; session, reset, pickup,
+  and OTP verification secrets are represented by hashes. OTP destination
+  identifiers use a keyed HMAC; the HMAC secret is supplied as `OTP_HASH_SECRET`.
+  No credentials, OTP codes, or sample accounts are in SQL.
 - New lifecycle/status values are `VARCHAR`, not database enums. Java services
   own allowed transitions; the order service must record every state change in
   `order_status_history`.
@@ -95,3 +96,9 @@ schema bootstrap proposal, not an idempotent migration.
 The SQL files are not loaded as Spring resources and are not applied at build
 or startup. Do not apply the legacy Flyway migrations as well as the proposed
 schema: both define the same auth tables.
+
+For an existing TiDB database, review and manually apply
+`01-auth/003_add_user_verification_flags.sql` and
+`01-auth/004_create_verification_codes.sql` as a deliberate database change
+before deploying the OTP-aware entities. The combined bootstrap schema is for
+an empty schema only and must not be run over an existing database.

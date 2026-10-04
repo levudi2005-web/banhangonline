@@ -9,6 +9,7 @@ Unless marked optional, child-to-parent relationships are mandatory.
 - `users` 1 — 0..N `user_addresses`
 - `users` 1 — 0..N `sessions`
 - `users` 1 — 0..N `password_reset_tokens`
+- `users` 1 — 0..N `verification_codes`
 - `users` N — M `roles` through `user_roles`
 - `roles` N — M `permissions` through `role_permissions`
 - `users` 1 — 0..N `store_registration_requests` as applicant/owner

@@ -3,7 +3,7 @@
 <a class="back" href="/pages/staff/auth/login.html"><i data-i="left"></i> Quay lại đăng nhập quản trị</a>
 <div class="card"><h1 style="margin-top:0">Tạo tài khoản cửa hàng</h1><p class="sub">Thiết lập thông tin chủ cửa hàng và cửa hàng của bạn</p>
 <ol class="steps" id="steps"><li>1 — Chủ cửa hàng</li><li>2 — Cửa hàng</li><li>3 — Xác nhận</li></ol>
-<form data-wizard data-endpoint="/api/auth/staff/register" data-next="/pages/staff/auth/login.html?registered=staff" novalidate>
+<form data-wizard data-endpoint="/api/auth/staff/register" data-next="/pages/staff/auth/verify-email.html" novalidate>
 <section data-step><h3>Thông tin chủ cửa hàng</h3>
 <div class="field"><label for="f_name">Họ và tên</label><input id="f_name" name="owner.fullName" type="text" autocomplete="name" placeholder="Nguyễn Văn A" data-v="required" data-required-message="Vui lòng nhập họ và tên."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
 <div class="row"><div class="field"><label for="f_mail">Email</label><input id="f_mail" name="owner.email" type="email" autocomplete="email" placeholder="ten@email.com" data-v="required email" data-required-message="Vui lòng nhập email."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div><div class="field"><label for="f_tel">Số điện thoại</label><input id="f_tel" name="owner.phone" type="tel" autocomplete="tel" placeholder="0912 345 678" data-v="required phone" data-required-message="Vui lòng nhập số điện thoại."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div></div>

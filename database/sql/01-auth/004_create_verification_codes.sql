@@ -1,0 +1,20 @@
+CREATE TABLE verification_codes (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  channel VARCHAR(10) NOT NULL,
+  purpose VARCHAR(20) NOT NULL,
+  destination_hash CHAR(64) NOT NULL,
+  code_hash VARCHAR(60) NOT NULL,
+  ip_address VARCHAR(45) NOT NULL,
+  expires_at DATETIME(6) NOT NULL,
+  attempts INT NOT NULL DEFAULT 0,
+  max_attempts INT NOT NULL,
+  used_at DATETIME(6) NULL,
+  invalidated_at DATETIME(6) NULL,
+  created_at DATETIME(6) NOT NULL,
+  PRIMARY KEY (id),
+  KEY idx_verification_destination_purpose_created (destination_hash, purpose, created_at),
+  KEY idx_verification_ip_created (ip_address, created_at),
+  KEY idx_verification_user_channel_purpose (user_id, channel, purpose, created_at),
+  CONSTRAINT fk_verification_codes_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -83,7 +83,9 @@ public class AuthService {
         String username = r.username().trim().toLowerCase(Locale.ROOT);
         assertAvailable(username, email, phone);
 
-        User u = newUser(r.fullName(), username, email, phone, r.password(), UserStatus.ACTIVE);
+        User u = newUser(r.fullName(), username, email, phone, r.password(), UserStatus.PENDING_VERIFICATION);
+        u.setEmailVerified(false);
+        u.setPhoneVerified(false);
         u.getRoles().add(role("CUSTOMER"));
         users.save(u);
 
@@ -119,6 +121,8 @@ public class AuthService {
         assertAvailable(username, email, phone);
 
         User u = newUser(o.fullName(), username, email, phone, o.password(), UserStatus.PENDING_VERIFICATION);
+        u.setEmailVerified(false);
+        u.setPhoneVerified(false);
         users.save(u);
 
         StoreRegistrationRequest req = new StoreRegistrationRequest();

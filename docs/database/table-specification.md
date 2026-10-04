@@ -14,6 +14,7 @@ The full schema is proposed only; it is not deployed.
 | `role_permissions` | `id` | both FKs; pair unique | Role-permission link |
 | `sessions` | `id` | FK user; unique `token_hash` | Session token hash, expiry and request metadata |
 | `password_reset_tokens` | `id` | FK user; unique `token_hash` | One-time hashed reset token and use time |
+| `verification_codes` | `id` | FK user; indexed HMAC destination hash | OTP BCrypt hash, channel/purpose, expiry, attempts and one-time use |
 | `user_addresses` | `id` | FK user | Existing customer address; `is_default` |
 | `categories` | `id` | optional self-FK; unique `slug` | Parent category and lifecycle status |
 | `products` | `id` | FK category; unique `sku` | Fixed-precision price and currency |
@@ -56,4 +57,5 @@ specified.
   or `DOUBLE` for money.
 - JSON is reserved for optional notification/audit metadata, not core
   relational fields.
-- Credentials and one-time codes are hashes only.
+- Credentials and one-time codes are hashes only. OTP destination hashes use
+  HMAC-SHA-256 with an environment-provided secret.

@@ -18,6 +18,8 @@ public class User {
     @Column(nullable = false, unique = true, length = 20) private String phone;
     @Column(name = "password_hash", nullable = false, length = 100) private String passwordHash;
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 30) private UserStatus status = UserStatus.ACTIVE;
+    @Column(name = "email_verified", nullable = false) private boolean emailVerified = true;
+    @Column(name = "phone_verified", nullable = false) private boolean phoneVerified = true;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"),

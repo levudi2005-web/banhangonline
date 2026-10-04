@@ -1,5 +1,12 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../../assets/css/style.css"><title>Xác minh email — Cửa hàng</title></head>
-<body class="staff"><main class="auth"><aside class="visual"><h2>Xác minh tài khoản cửa hàng</h2></aside><section class="panel"><div class="card">
-<h1>Xác minh email</h1><p class="sub">Backend chưa hỗ trợ email verification.</p>
-<div class="box" role="status">Đăng ký cửa hàng tạo tài khoản chờ duyệt và yêu cầu quản trị viên xác minh theo quy trình hiện tại. Chưa có endpoint gửi/xác nhận email; trang này không giả lập xác minh.</div>
-<a class="btn" href="/pages/staff/auth/login.html">Đến đăng nhập quản trị</a></div></section></main><script src="../../../assets/js/core/app.js"></script></body></html>
+<body class="staff"><main class="auth"><aside class="visual"><h2>Xác minh tài khoản cửa hàng</h2><p>Hoàn tất xác minh trước khi chờ duyệt đăng ký.</p></aside><section class="panel"><div class="card">
+<a class="back" href="/pages/staff/auth/register.html">← Quay lại đăng ký</a><h1>Xác minh email</h1>
+<form data-endpoint="/api/auth/otp/send" data-otp-send novalidate>
+<input type="hidden" name="channel" value="EMAIL"><input type="hidden" name="purpose" value="REGISTER_EMAIL">
+<div class="field"><label for="email">Email chủ cửa hàng</label><input id="email" name="destination" type="email" autocomplete="email" data-otp-prefill="email" data-v="required email" data-required-message="Vui lòng nhập email."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
+<p class="form-msg" role="alert"></p><button class="btn" type="submit">Gửi mã xác minh</button></form>
+<form data-endpoint="/api/auth/otp/verify" data-otp-verify data-otp-next="/pages/staff/auth/verify-phone.html" hidden novalidate>
+<input type="hidden" name="channel" value="EMAIL"><input type="hidden" name="purpose" value="REGISTER_EMAIL">
+<div class="field"><label for="code">Mã xác minh</label><input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" data-v="required" data-required-message="Vui lòng nhập mã."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
+<p class="form-msg" role="alert"></p><button class="btn" type="submit">Xác minh email</button></form>
+<p><a href="/pages/staff/auth/verify-phone.html">Tiếp tục xác minh số điện thoại</a></p></div></section></main><script src="../../../assets/js/core/app.js"></script></body></html>
