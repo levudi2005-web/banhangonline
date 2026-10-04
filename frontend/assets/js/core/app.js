@@ -139,7 +139,7 @@ document.addEventListener("submit",async e=>{const f=e.target;if(!f.dataset.endp
  catch(x){msg.textContent=x instanceof TypeError?"Không thể kết nối máy chủ. Vui lòng thử lại sau.":x.message;msg.classList.add("show")}
  finally{btn.removeAttribute("aria-busy");if(!f.dataset.otpVerified)btn.disabled=false;btn.textContent=originalText}});
 const resetToken=new URLSearchParams(location.search).get("token")||sessionStorage.getItem("passwordResetToken");if(resetToken){const token=$("[name=token]");if(token)token.value=resetToken}
-$$("[data-otp-prefill]").forEach(el=>{const key=el.dataset.otpPrefill==="email"?"otpEmailDestination":"otpPhoneDestination",value=sessionStorage.getItem(key);if(value)el.value=value});
+$$("[data-otp-prefill='email']").forEach(el=>{const value=sessionStorage.getItem("otpEmailDestination");if(value)el.value=value});
 const registered=new URLSearchParams(location.search).get("registered");
 if(registered){const s=$(".sub");if(s)s.textContent=registered==="customer"?"Tài khoản đã được tạo. Bạn có thể đăng nhập.":"Đã gửi đăng ký cửa hàng. Tài khoản đang chờ quản trị viên xác minh."}
 if(new URLSearchParams(location.search).get("reset")==="success"){const s=$(".sub");if(s)s.textContent="Mật khẩu đã được cập nhật. Hãy đăng nhập bằng mật khẩu mới."}

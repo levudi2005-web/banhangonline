@@ -67,7 +67,6 @@ class AuthIntegrationTest {
         assertThat(status(post("/api/auth/register", c))).isEqualTo(201);
         User user = users.findByEmail((String) c.get("email")).orElseThrow();
         user.setEmailVerified(true);
-        user.setPhoneVerified(false);
         user.setStatus(UserStatus.ACTIVE);
         users.saveAndFlush(user);
         return c;
@@ -88,7 +87,6 @@ class AuthIntegrationTest {
         assertThat(encoder.matches(PW, u.getPasswordHash())).isTrue();
         assertThat(u.getStatus()).isEqualTo(UserStatus.PENDING_VERIFICATION);
         assertThat(u.isEmailVerified()).isFalse();
-        assertThat(u.isPhoneVerified()).isFalse();
         assertThat(u.hasRole("CUSTOMER")).isTrue();
     }
 
@@ -164,7 +162,6 @@ class AuthIntegrationTest {
         User u = users.findByUsername("owner" + n).orElseThrow();
         assertThat(u.getStatus()).isEqualTo(UserStatus.PENDING_VERIFICATION);
         assertThat(u.isEmailVerified()).isFalse();
-        assertThat(u.isPhoneVerified()).isFalse();
         assertThat(u.getRoles()).isEmpty();
         MvcResult l = login("/api/auth/staff/login", "owner" + n, PW);
         assertThat(status(l)).isEqualTo(403);

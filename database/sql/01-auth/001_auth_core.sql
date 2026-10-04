@@ -7,7 +7,6 @@ CREATE TABLE users (
   password_hash VARCHAR(100) NOT NULL,
   status VARCHAR(30) NOT NULL,
   email_verified BOOLEAN NOT NULL DEFAULT TRUE,
-  phone_verified BOOLEAN NOT NULL DEFAULT TRUE,
   created_at DATETIME(6) NOT NULL,
   updated_at DATETIME(6) NOT NULL,
   PRIMARY KEY (id),

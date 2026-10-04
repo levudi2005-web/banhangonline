@@ -7,7 +7,7 @@ contacted or SQL executed.
 
 | Java entity | Table | Current mapped fields/relations | Proposed SQL comparison |
 |---|---|---|---|
-| `User` | `users` | `id`, full name, username, email, phone, password hash, status, email/phone verification flags, created/updated times; `user_roles` relation | Verification flags require manual SQL 003 on the existing schema; otherwise matches the proposed auth definition |
+| `User` | `users` | `id`, full name, username, email, phone, password hash, status, email verification flag, created/updated times; `user_roles` relation | Email verification requires manual SQL 003 on the existing schema; phone is contact information only |
 | `Role` | `roles` | `id`, name, description; `role_permissions` relation | Matches V1 |
 | `Permission` | `permissions` | `id`, name, description | Matches V1 |
 | `UserAddress` | `user_addresses` | `id`, user, recipient/contact/address fields, default flag and timestamps | Matches V1 columns; FK and index are equivalent |
@@ -32,16 +32,14 @@ contacted or SQL executed.
   `BIGINT AUTO_INCREMENT`.
 - Password columns hold hashes, not raw credentials. The session/reset token
   entities map only hashed token fields.
-- Email and phone verification are explicit `users` booleans. Legacy active
-  accounts receive a `TRUE` default when SQL 003 is applied; new registrations
-  are initialized with email unverified and phone flag true because this
-  deployment uses email-only OTP. Customers activate after email verification;
-  staff registrations remain pending until manual approval.
+- Email verification is represented by `users.email_verified`. New
+  registrations start with email unverified; customers activate after email
+  verification, while staff registrations remain pending until manual
+  approval. Phone is contact information only and has no verification state.
 - OTPs are BCrypt-hashed; email destination lookups use HMAC-SHA-256 keyed by
   `OTP_HASH_SECRET` when set, otherwise by the configured SMTP password. Email
-  OTP is the only verification channel; registration does not claim phone
-  verification. Keep
-  the key stable while unexpired codes exist.
+  OTP is the only verification channel. Keep the key stable while unexpired
+  codes exist.
 - Current associations use cascade-delete foreign keys for role links,
   addresses, sessions, reset tokens and store registration. The proposed
   definitions preserve these current V1 delete behaviors for those existing

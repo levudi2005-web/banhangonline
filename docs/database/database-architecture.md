@@ -99,7 +99,7 @@ or startup. Do not apply the legacy Flyway migrations as well as the proposed
 schema: both define the same auth tables.
 
 For an existing TiDB database, review and manually apply
-`01-auth/003_add_user_verification_flags.sql` and
+`01-auth/003_add_email_verification_flag.sql` and
 `01-auth/004_create_verification_codes.sql` as a deliberate database change
 before deploying the OTP-aware entities. The combined bootstrap schema is for
 an empty schema only and must not be run over an existing database.

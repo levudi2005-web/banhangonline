@@ -151,7 +151,6 @@ public class AuthService {
         u.setPhone(phone);
         u.setPasswordHash(encoder.encode(rawPassword));
         u.setStatus(status);
-        u.setPhoneVerified(false);
         return u;
     }
 

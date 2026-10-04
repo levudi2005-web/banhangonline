@@ -88,7 +88,6 @@ class OtpServiceTest {
         assertThat(result.verified()).isTrue();
         assertThat(result.resetToken()).isNull();
         assertThat(user.isEmailVerified()).isTrue();
-        assertThat(user.isPhoneVerified()).isFalse();
         assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
         verify(codes).markUsedIfActive(eq(7L), any(Instant.class));
     }
@@ -255,7 +254,6 @@ class OtpServiceTest {
         user.setPhone("0901234567");
         user.setStatus(UserStatus.PENDING_VERIFICATION);
         user.setEmailVerified(false);
-        user.setPhoneVerified(false);
         return user;
     }
 
