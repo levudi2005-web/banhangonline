@@ -46,10 +46,10 @@ public class VerificationCode {
     @Column(nullable = false, length = 20)
     private OtpPurpose purpose;
 
-    @Column(name = "destination_hash", nullable = false, length = 64, columnDefinition = "CHAR(64)")
+    @Column(name = "destination_hash", nullable = false, length = 64)
     private String destinationHash;
 
-    @Column(name = "code_hash", nullable = false, length = 60)
+    @Column(name = "code_hash", nullable = false, length = 64)
     private String codeHash;
 
     @Column(name = "ip_address", nullable = false, length = 45)
