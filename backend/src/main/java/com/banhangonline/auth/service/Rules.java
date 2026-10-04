@@ -4,6 +4,7 @@ import com.banhangonline.common.exception.ApiException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import java.security.MessageDigest;
 
 /** Quy tắc chuẩn hoá và kiểm tra dữ liệu dùng chung. */
 public final class Rules {
@@ -24,6 +25,14 @@ public final class Rules {
         String p = normalizePhone(raw == null ? null : raw.trim());
         if (!PHONE.matcher(p).matches()) throw ApiException.validation("Số điện thoại không hợp lệ");
         return p;
+    }
+
+    public static boolean phoneLastFourMatches(String storedPhone, String suppliedLastFour) {
+        if (storedPhone == null || suppliedLastFour == null || !suppliedLastFour.matches("\\d{4}")
+                || !PHONE.matcher(storedPhone).matches()) return false;
+        byte[] expected = storedPhone.substring(storedPhone.length() - 4).getBytes(StandardCharsets.US_ASCII);
+        byte[] supplied = suppliedLastFour.getBytes(StandardCharsets.US_ASCII);
+        return MessageDigest.isEqual(expected, supplied);
     }
 
     public static String email(String raw) {

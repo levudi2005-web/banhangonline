@@ -2,11 +2,6 @@ package com.banhangonline.auth.controller;
 
 import com.banhangonline.auth.dto.ForgotPasswordRequest;
 import com.banhangonline.auth.dto.LoginRequest;
-import com.banhangonline.auth.dto.OtpSendRequest;
-import com.banhangonline.auth.dto.OtpVerificationResponse;
-import com.banhangonline.auth.dto.OtpVerifyRequest;
-import com.banhangonline.auth.entity.OtpChannel;
-import com.banhangonline.auth.entity.OtpPurpose;
 import com.banhangonline.auth.dto.RegisterRequest;
 import com.banhangonline.auth.dto.ResetPasswordRequest;
 import com.banhangonline.auth.dto.UserResponse;
@@ -16,7 +11,8 @@ import com.banhangonline.auth.security.AuthPrincipal;
 import com.banhangonline.auth.security.SessionCookies;
 import com.banhangonline.auth.service.AuthService;
 import com.banhangonline.auth.service.PasswordResetService;
-import com.banhangonline.auth.service.OtpService;
+import com.banhangonline.auth.service.PasswordRecoveryService;
+import com.banhangonline.auth.dto.PasswordResetTokenResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
@@ -30,15 +26,16 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService auth;
     private final PasswordResetService resets;
+    private final PasswordRecoveryService recovery;
     private final SessionCookies cookies;
-    private final OtpService otps;
 
     public AuthController(
-            AuthService auth, PasswordResetService resets, SessionCookies cookies, OtpService otps) {
+            AuthService auth, PasswordResetService resets, PasswordRecoveryService recovery,
+            SessionCookies cookies) {
         this.auth = auth;
         this.resets = resets;
+        this.recovery = recovery;
         this.cookies = cookies;
-        this.otps = otps;
     }
 
     @PostMapping("/login")
@@ -66,10 +63,10 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ApiResponse<Void> forgot(@Valid @RequestBody ForgotPasswordRequest r, HttpServletRequest request) {
-        otps.send(new OtpSendRequest(OtpChannel.EMAIL, OtpPurpose.RESET_PASSWORD, r.account()),
-                request.getRemoteAddr());
-        return ApiResponse.<Void>ok("Nếu email tồn tại, mã OTP sẽ được gửi.", null);
+    public ApiResponse<PasswordResetTokenResponse> forgot(@Valid @RequestBody ForgotPasswordRequest r) {
+        String token = recovery.verifyPhoneAndIssueToken(r.account(), r.phoneLastFour());
+        return ApiResponse.ok("Thông tin xác minh hợp lệ. Bạn có thể đặt mật khẩu mới.",
+                new PasswordResetTokenResponse(token));
     }
 
     @PostMapping("/reset-password")
@@ -78,19 +75,4 @@ public class AuthController {
         return ApiResponse.<Void>ok("Đã đặt lại mật khẩu. Vui lòng đăng nhập lại.", null);
     }
 
-    @PostMapping({"/otp/send", "/otp/resend"})
-    public ApiResponse<Void> sendOtp(@Valid @RequestBody OtpSendRequest request, HttpServletRequest httpRequest) {
-        String message = otps.send(request, httpRequest.getRemoteAddr());
-        return ApiResponse.ok(message, null);
-    }
-
-    @PostMapping("/otp/verify")
-    public ApiResponse<OtpVerificationResponse> verifyOtp(@Valid @RequestBody OtpVerifyRequest request) {
-        OtpVerificationResponse result = otps.verify(request);
-        return ApiResponse.ok(
-                request.purpose() == OtpPurpose.RESET_PASSWORD
-                        ? "Mã xác minh hợp lệ. Bạn có thể đặt lại mật khẩu."
-                        : "Xác minh thành công.",
-                result);
-    }
 }

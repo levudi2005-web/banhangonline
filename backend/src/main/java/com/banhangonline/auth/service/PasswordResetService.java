@@ -31,9 +31,19 @@ public class PasswordResetService {
 
     @Transactional
     public String issueAfterOtp(User user) {
+        return issueForActiveUser(user, "INVALID_OTP",
+                "Mã xác minh không hợp lệ, đã hết hạn hoặc đã được sử dụng.");
+    }
+
+    @Transactional
+    public String issueAfterPhoneVerification(User user) {
+        return issueForActiveUser(user, "INVALID_RECOVERY",
+                "Thông tin xác minh không hợp lệ.");
+    }
+
+    private String issueForActiveUser(User user, String errorCode, String message) {
         if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "INVALID_OTP",
-                    "Mã xác minh không hợp lệ, đã hết hạn hoặc đã được sử dụng.");
+            throw new ApiException(HttpStatus.BAD_REQUEST, errorCode, message);
         }
         tokens.deleteByUser(user);
         String raw = TokenUtil.newToken();

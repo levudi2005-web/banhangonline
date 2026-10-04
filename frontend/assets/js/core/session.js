@@ -39,6 +39,10 @@
         result.data.fullName || result.data.username;
       document.querySelector("#account-roles").textContent =
         roles.join(", ");
+      document.querySelector("#account-phone").textContent = result.data.phone || "Chưa cung cấp";
+      document.querySelector("#profileFullName").value = result.data.fullName || "";
+      document.querySelector("#profileUsername").value = result.data.username || "";
+      document.querySelector("#profileEmail").value = result.data.email || "";
       document.querySelector("#logout-link").href = `/pages/${area}/auth/logout.html`;
       document.body.classList.toggle("staff", area === "staff");
       state.hidden = true;

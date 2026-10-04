@@ -83,31 +83,26 @@ public class AuthService {
         String username = r.username().trim().toLowerCase(Locale.ROOT);
         assertAvailable(username, email, phone);
 
-        User u = newUser(r.fullName(), username, email, phone, r.password(), UserStatus.PENDING_VERIFICATION);
+        User u = newUser(r.fullName(), username, email, phone, r.password(), UserStatus.ACTIVE);
         u.setEmailVerified(false);
         u.getRoles().add(role("CUSTOMER"));
         users.save(u);
 
         AddressRequest ad = r.address();
-        if (ad != null) {
-            UserAddress a = new UserAddress();
-            a.setUser(u);
-            a.setRecipientName(ad.recipientName().trim());
-            a.setPhone(Rules.phone(ad.phone()));
-            a.setProvince(ad.province().trim());
-            a.setDistrict(ad.district().trim());
-            a.setWard(ad.ward().trim());
-            a.setAddressLine(ad.addressLine().trim());
-            a.setDefaultAddress(true);
-            addresses.save(a);
-        }
+        UserAddress a = new UserAddress();
+        a.setUser(u);
+        a.setRecipientName(ad.recipientName().trim());
+        a.setPhone(Rules.phone(ad.phone()));
+        a.setProvince(ad.province().trim());
+        a.setDistrict(ad.district().trim());
+        a.setWard(ad.ward().trim());
+        a.setAddressLine(ad.addressLine().trim());
+        a.setDefaultAddress(true);
+        addresses.save(a);
         return u;
     }
 
-    /**
-     * Đăng ký cửa hàng: tạo tài khoản ở trạng thái PENDING_VERIFICATION và KHÔNG gán role nào.
-     * Role OWNER chỉ được gán khi yêu cầu được duyệt (xem docs/approve-owner.sql).
-     */
+    /** Store accounts remain pending with no role until manually reviewed and approved. */
     @Transactional
     public void registerStore(StaffRegisterRequest r) {
         StaffRegisterRequest.Owner o = r.owner();

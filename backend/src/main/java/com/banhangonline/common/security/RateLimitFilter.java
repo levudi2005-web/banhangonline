@@ -15,7 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateLimitFilter extends OncePerRequestFilter {
     private static final Set<String> LIMITED = Set.of(
             "/api/auth/login", "/api/auth/staff/login", "/api/auth/register",
-            "/api/auth/staff/register", "/api/auth/forgot-password", "/api/auth/reset-password",
+            "/api/auth/forgot-password", "/api/auth/reset-password",
+            "/api/users/profile",
             "/api/auth/otp/send", "/api/auth/otp/resend", "/api/auth/otp/verify");
 
     private final Map<String, long[]> hits = new ConcurrentHashMap<>();

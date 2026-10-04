@@ -60,15 +60,18 @@ class AuthIntegrationTest {
         m.put("phone", phone());
         m.put("password", PW);
         m.put("confirmPassword", PW);
+        m.put("address", Map.of(
+                "recipientName", "Nguyen Van A",
+                "phone", phone(),
+                "province", "Ha Noi",
+                "district", "Ba Dinh",
+                "ward", "Phuc Xa",
+                "addressLine", "1 Test Street"));
         return m;
     }
     private Map<String, Object> registered() throws Exception {
         Map<String, Object> c = customer();
         assertThat(status(post("/api/auth/register", c))).isEqualTo(201);
-        User user = users.findByEmail((String) c.get("email")).orElseThrow();
-        user.setEmailVerified(true);
-        user.setStatus(UserStatus.ACTIVE);
-        users.saveAndFlush(user);
         return c;
     }
     private MvcResult login(String url, String account, String password) throws Exception {
@@ -85,7 +88,7 @@ class AuthIntegrationTest {
         User u = users.findByEmail((String) c.get("email")).orElseThrow();
         assertThat(u.getPasswordHash()).startsWith("$2");
         assertThat(encoder.matches(PW, u.getPasswordHash())).isTrue();
-        assertThat(u.getStatus()).isEqualTo(UserStatus.PENDING_VERIFICATION);
+        assertThat(u.getStatus()).isEqualTo(UserStatus.ACTIVE);
         assertThat(u.isEmailVerified()).isFalse();
         assertThat(u.hasRole("CUSTOMER")).isTrue();
     }
@@ -150,22 +153,9 @@ class AuthIntegrationTest {
         assertThat(code(denied)).isEqualTo("STAFF_ACCESS_DENIED");
     }
 
-    @Test void staffRegister_createsPendingAccount_withoutOwnerRole() throws Exception {
-        int n = SEQ.incrementAndGet();
-        Map<String, Object> owner = Map.of("fullName", "Chu Cua Hang", "username", "owner" + n, "email", "o" + n + "@example.com",
-                "phone", phone(), "password", PW, "confirmPassword", PW);
-        Map<String, Object> store = Map.of("name", "Cua hang " + n, "phone", phone(), "province", "Can Tho",
-                "district", "Ninh Kieu", "ward", "Xuan Khanh", "detailedAddress", "1 Duong A");
-        MvcResult r = post("/api/auth/staff/register", Map.of("owner", owner, "store", store, "termsAccepted", true));
-        assertThat(status(r)).isEqualTo(201);
-
-        User u = users.findByUsername("owner" + n).orElseThrow();
-        assertThat(u.getStatus()).isEqualTo(UserStatus.PENDING_VERIFICATION);
-        assertThat(u.isEmailVerified()).isFalse();
-        assertThat(u.getRoles()).isEmpty();
-        MvcResult l = login("/api/auth/staff/login", "owner" + n, PW);
-        assertThat(status(l)).isEqualTo(403);
-        assertThat(code(l)).isEqualTo("ACCOUNT_PENDING");
+    @Test void publicStaffRegistration_isUnavailable() throws Exception {
+        MvcResult response = post("/api/auth/staff/register", Map.of());
+        assertThat(status(response)).isEqualTo(404);
     }
 
     @Test void validation_rejectsBadInput() throws Exception {
@@ -196,10 +186,7 @@ class AuthIntegrationTest {
         assertThat(customerLogin.getResponse().getContentAsString(StandardCharsets.UTF_8))
                 .contains("/api/auth/login", "../../../assets/css/style.css");
 
-        MvcResult staffRegister = send("GET", "/pages/staff/auth/register.html", null, null, true);
-        assertThat(status(staffRegister)).isEqualTo(200);
-        assertThat(staffRegister.getResponse().getContentAsString(StandardCharsets.UTF_8))
-                .contains("/api/auth/staff/register");
+        assertThat(status(send("GET", "/pages/staff/auth/register.html", null, null, true))).isEqualTo(404);
 
         assertThat(status(send("GET", "/assets/css/style.css", null, null, true))).isEqualTo(200);
         MvcResult appScript = send("GET", "/assets/js/core/app.js", null, null, true);

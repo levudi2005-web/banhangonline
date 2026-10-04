@@ -5,6 +5,15 @@
 <h1>Tài khoản của bạn</h1><p class="sub">Phiên đăng nhập được xác thực từ máy chủ</p>
 <p id="session-state" class="form-msg show" role="status">Đang tải thông tin tài khoản…</p>
 <div id="account-info" hidden><p><b id="account-name"></b></p><p>Vai trò: <span id="account-roles"></span></p>
+<p>Số điện thoại: <span id="account-phone"></span></p>
+<form id="profile-form" data-endpoint="/api/users/profile" novalidate>
+<h2>Thông tin tài khoản</h2>
+<div class="field"><label for="profileFullName">Họ và tên</label><input id="profileFullName" name="fullName" autocomplete="name" data-v="required" data-required-message="Vui lòng nhập họ và tên."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
+<div class="field"><label for="profileUsername">Tên đăng nhập</label><input id="profileUsername" name="username" autocomplete="username" data-v="required username" data-required-message="Vui lòng nhập tên đăng nhập."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
+<div class="field"><label for="profileEmail">Email</label><input id="profileEmail" name="email" type="email" autocomplete="email" data-v="required email" data-required-message="Vui lòng nhập email."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
+<div class="field"><label for="profilePhone">Số điện thoại mới (để trống nếu không đổi)</label><input id="profilePhone" name="phone" type="tel" autocomplete="tel" data-v="phone" placeholder="Nhập số mới nếu cần đổi"><p class="err"></p></div>
+<div class="field"><label for="profilePhoneLastFour">Bốn số cuối của số điện thoại hiện tại</label><input id="profilePhoneLastFour" name="phoneLastFour" inputmode="numeric" autocomplete="off" maxlength="4" data-v="required phoneLastFour" data-required-message="Thông tin bắt buộc"><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
+<p class="form-msg" role="alert" aria-live="polite"></p><button class="btn" type="submit">Xác minh và cập nhật</button></form>
 <a id="logout-link" class="btn" href="/pages/customer/auth/logout.html">Đăng xuất</a></div>
 <p id="session-error" class="form-msg" role="alert" hidden></p>
 </div></section>
