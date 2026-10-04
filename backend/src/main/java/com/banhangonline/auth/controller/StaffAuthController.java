@@ -35,7 +35,7 @@ public class StaffAuthController {
     public ResponseEntity<ApiResponse<Map<String, String>>> register(@Valid @RequestBody StaffRegisterRequest r) {
         auth.registerStore(r);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(
-                "Đã nhận đăng ký. Hãy xác minh email và số điện thoại; tài khoản tiếp tục chờ quản trị viên duyệt.",
+                "Đã nhận đăng ký. Hãy xác minh email; tài khoản tiếp tục chờ quản trị viên duyệt.",
                 Map.of("status", "PENDING_VERIFICATION")));
     }
 }

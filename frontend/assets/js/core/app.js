@@ -58,7 +58,7 @@ const apiError=(body,status)=>{
   OTP_COOLDOWN:"Bạn vừa yêu cầu mã. Vui lòng chờ hết thời gian đếm ngược để gửi lại.",
   OTP_RATE_LIMITED:"Bạn đã yêu cầu quá nhiều mã. Vui lòng thử lại sau.",
   EMAIL_DELIVERY_UNAVAILABLE:"Email OTP chưa sẵn sàng. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
-  EMAIL_DELIVERY_FAILED:"Không gửi được email OTP qua Gmail SMTP. Vui lòng thử lại sau.",
+  EMAIL_DELIVERY_FAILED:"Không gửi được email OTP. Vui lòng thử lại sau.",
   OTP_CONFIGURATION_UNAVAILABLE:"Email OTP chưa được cấu hình đầy đủ trên máy chủ."
  };
  return new Error(messages[body.code]||body.message||({400:"Dữ liệu không hợp lệ.",429:"Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",503:"Dịch vụ hiện chưa khả dụng. Vui lòng thử lại sau."}[status]||"Không thể hoàn tất yêu cầu. Vui lòng thử lại sau."))

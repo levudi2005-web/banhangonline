@@ -1,6 +1,7 @@
 target/
 .env
 *.log
+/*.sql.zst
 .idea/
 .vscode/
 

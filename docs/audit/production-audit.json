@@ -1,0 +1,339 @@
+{
+  "audit": {
+    "scope": "Static production-readiness audit of the current repository",
+    "date": "2026-10-04",
+    "external_services_contacted": false,
+    "tidb_connection_attempted": false,
+    "sql_executed": false,
+    "commit_push_or_deploy": false
+  },
+  "architecture": {
+    "backend": "Java 21, Spring Boot, Maven, JPA repositories and services",
+    "runtime_database": "TiDB Cloud through the MySQL Connector/J datasource; Hibernate validates schema; Flyway is disabled",
+    "authentication": "Stateless Spring Security with HttpOnly SID cookie; only the token hash is persisted",
+    "otp": "Email-only OTP and email password reset; verification_codes stores hashes",
+    "frontend": "Spring-served static HTML, shared app.js/session.js, and shared style.css",
+    "packages": [
+      "com.banhangonline.auth",
+      "com.banhangonline.user",
+      "com.banhangonline.common",
+      "com.banhangonline.config"
+    ],
+    "entry_points": [
+      "BanHangOnlineApplication",
+      "AuthController",
+      "StaffAuthController",
+      "AuthService",
+      "OtpService",
+      "PasswordResetService",
+      "SessionAuthFilter",
+      "SecurityConfig"
+    ]
+  },
+  "frontend": {
+    "active_html_page_count": 13,
+    "active_pages": [
+      "frontend/pages/auth/session.html",
+      "frontend/pages/customer/auth/forgot-password.html",
+      "frontend/pages/customer/auth/login.html",
+      "frontend/pages/customer/auth/logout.html",
+      "frontend/pages/customer/auth/register.html",
+      "frontend/pages/customer/auth/reset-password.html",
+      "frontend/pages/customer/auth/verify-email.html",
+      "frontend/pages/staff/auth/forgot-password.html",
+      "frontend/pages/staff/auth/login.html",
+      "frontend/pages/staff/auth/logout.html",
+      "frontend/pages/staff/auth/register.html",
+      "frontend/pages/staff/auth/reset-password.html",
+      "frontend/pages/staff/auth/verify-email.html"
+    ],
+    "shared_assets": [
+      "frontend/assets/js/core/app.js",
+      "frontend/assets/js/core/session.js",
+      "frontend/assets/css/style.css"
+    ],
+    "frontend_api_calls": [
+      {
+        "method": "POST",
+        "path": "/api/auth/login",
+        "pages": ["frontend/pages/customer/auth/login.html"],
+        "body": "form JSON",
+        "headers": ["Content-Type: application/json", "X-Requested-With: fetch"],
+        "credentials": "include"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/staff/login",
+        "pages": ["frontend/pages/staff/auth/login.html"],
+        "body": "form JSON",
+        "headers": ["Content-Type: application/json", "X-Requested-With: fetch"],
+        "credentials": "include"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/register",
+        "pages": ["frontend/pages/customer/auth/register.html"],
+        "body": "form JSON",
+        "headers": ["Content-Type: application/json", "X-Requested-With: fetch"],
+        "credentials": "include"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/staff/register",
+        "pages": ["frontend/pages/staff/auth/register.html"],
+        "body": "form JSON; creates a pending store/owner application",
+        "headers": ["Content-Type: application/json", "X-Requested-With: fetch"],
+        "credentials": "include"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/otp/send",
+        "pages": [
+          "frontend/pages/customer/auth/verify-email.html",
+          "frontend/pages/staff/auth/verify-email.html",
+          "frontend/pages/customer/auth/forgot-password.html",
+          "frontend/pages/staff/auth/forgot-password.html"
+        ],
+        "body_fields": ["channel", "purpose", "destination"],
+        "headers": ["Content-Type: application/json", "X-Requested-With: fetch"],
+        "credentials": "include"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/otp/verify",
+        "pages": [
+          "frontend/pages/customer/auth/verify-email.html",
+          "frontend/pages/staff/auth/verify-email.html",
+          "frontend/pages/customer/auth/forgot-password.html",
+          "frontend/pages/staff/auth/forgot-password.html"
+        ],
+        "body_fields": ["channel", "purpose", "destination", "code"],
+        "headers": ["Content-Type: application/json", "X-Requested-With: fetch"],
+        "credentials": "include"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/otp/resend",
+        "pages": [
+          "frontend/pages/customer/auth/verify-email.html",
+          "frontend/pages/staff/auth/verify-email.html",
+          "frontend/pages/customer/auth/forgot-password.html",
+          "frontend/pages/staff/auth/forgot-password.html"
+        ],
+        "body_fields": ["channel", "purpose", "destination"],
+        "headers": ["Content-Type: application/json", "X-Requested-With: fetch"],
+        "credentials": "include"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/reset-password",
+        "pages": [
+          "frontend/pages/customer/auth/reset-password.html",
+          "frontend/pages/staff/auth/reset-password.html"
+        ],
+        "body_fields": ["token", "newPassword", "confirmPassword"],
+        "headers": ["Content-Type: application/json", "X-Requested-With: fetch"],
+        "credentials": "include"
+      },
+      {
+        "method": "GET",
+        "path": "/api/auth/me",
+        "pages": ["frontend/pages/auth/session.html"],
+        "condition": "session page initialization",
+        "headers": [],
+        "credentials": "include"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/logout",
+        "pages": [
+          "frontend/pages/customer/auth/logout.html",
+          "frontend/pages/staff/auth/logout.html"
+        ],
+        "condition": "explicit logout button click",
+        "headers": ["X-Requested-With: fetch"],
+        "credentials": "include"
+      }
+    ],
+    "redirects": [
+      {
+        "from": "customer login success",
+        "to": "/pages/auth/session.html?area=customer",
+        "condition": "form data-next after successful API response"
+      },
+      {
+        "from": "staff login success",
+        "to": "/pages/auth/session.html?area=staff",
+        "condition": "form data-next after successful API response"
+      },
+      {
+        "from": "customer registration success",
+        "to": "/pages/customer/auth/verify-email.html",
+        "condition": "form data-next after successful API response"
+      },
+      {
+        "from": "staff store registration success",
+        "to": "/pages/staff/auth/verify-email.html",
+        "condition": "form data-next after successful API response"
+      },
+      {
+        "from": "password-reset OTP verification",
+        "to": "audience-specific reset-password page",
+        "condition": "successful verification returns resetToken; frontend stores it in sessionStorage"
+      },
+      {
+        "from": "password reset success",
+        "to": "audience-specific login page with ?reset=success",
+        "condition": "after 1600 ms"
+      },
+      {
+        "from": "customer email verification success",
+        "to": "/pages/customer/auth/login.html",
+        "condition": "continue link is inserted; no automatic redirect"
+      },
+      {
+        "from": "session page unauthenticated",
+        "to": "/pages/{area}/auth/login.html",
+        "condition": "GET /api/auth/me returns 401; defaults to customer unless area=staff"
+      },
+      {
+        "from": "staff session page with non-staff role",
+        "to": "/pages/customer/auth/login.html",
+        "condition": "role is neither STAFF nor OWNER"
+      },
+      {
+        "from": "customer session page with staff role",
+        "to": "/pages/auth/session.html?area=staff",
+        "condition": "role is STAFF or OWNER"
+      },
+      {
+        "from": "logout success",
+        "to": "/pages/{area}/auth/login.html",
+        "condition": "POST /api/auth/logout succeeds"
+      }
+    ],
+    "storage": [
+      {
+        "storage": "sessionStorage",
+        "key": "otpEmailDestination",
+        "use": "prefills email on verification pages after registration"
+      },
+      {
+        "storage": "sessionStorage",
+        "key": "passwordResetToken",
+        "use": "stores raw reset authorization token for reset form"
+      }
+    ],
+    "stale_or_duplicate_ui": [
+      "Customer and staff auth pages duplicate markup and use shared JS behavior.",
+      "Staff registration avatar/logo file inputs only display filenames and are not uploaded.",
+      "app.js handles ?registered=... although current registration redirects do not set it.",
+      "POST /api/auth/forgot-password is not called by the inspected frontend; forgot-password pages use OTP endpoints.",
+      "Staff email verification has no configured continue link after success.",
+      "OTP resend logic contains both delegated resend handling and explicit resend-button handling."
+    ]
+  },
+  "backend_api_and_access": {
+    "default_policy": "All /api/** require authentication except /api/auth/**; /api/auth/me requires authentication.",
+    "write_request_header": "Every state-changing /api/ request requires X-Requested-With.",
+    "routes": [
+      {"method": "POST", "path": "/api/auth/login", "access": "public", "role": "none"},
+      {"method": "POST", "path": "/api/auth/register", "access": "public", "role": "assigns CUSTOMER"},
+      {"method": "POST", "path": "/api/auth/logout", "access": "public; revokes supplied session cookie", "role": "none"},
+      {"method": "GET", "path": "/api/auth/me", "access": "authenticated session", "role": "current user"},
+      {"method": "POST", "path": "/api/auth/forgot-password", "access": "public; generic response", "role": "none"},
+      {"method": "POST", "path": "/api/auth/reset-password", "access": "public with one-time reset token", "role": "none"},
+      {"method": "POST", "path": "/api/auth/otp/send", "access": "public", "role": "email OTP purpose/channel validation"},
+      {"method": "POST", "path": "/api/auth/otp/resend", "access": "public", "role": "email OTP purpose/channel validation"},
+      {"method": "POST", "path": "/api/auth/otp/verify", "access": "public", "role": "email OTP purpose/channel validation"},
+      {"method": "POST", "path": "/api/auth/staff/login", "access": "public", "role": "requires STAFF or OWNER"},
+      {"method": "POST", "path": "/api/auth/staff/register", "access": "public", "role": "creates pending store/owner application; assigns no role"}
+    ],
+    "role_workflow": {
+      "customer": "assigned during public customer registration",
+      "staff": "no employee creation endpoint found",
+      "owner": "pending application is manually activated and assigned OWNER through documented database procedure",
+      "owner_creates_staff": "not implemented in the inspected backend"
+    },
+    "frontend_api_path_mismatches": []
+  },
+  "database_and_deployment": {
+    "hibernate_ddl_auto": "validate",
+    "flyway_runtime_enabled": false,
+    "h2_runtime_dependency": false,
+    "production_credentials": "environment-variable based; no credentials read, logged, or created",
+    "dot_env_created": false,
+    "schema_export_review": {
+      "method": "in-memory inspection of local schema-only compressed exports",
+      "table_data_exports_opened": false,
+      "live_database_verified": false,
+      "known_snapshot_staleness": "exports are local snapshots; no connection was made to establish whether TiDB changed afterward",
+      "repository_modular_vs_full_schema": "26 table definitions match each other",
+      "verification_codes_export_differences": [
+        "export uses channel VARCHAR(20), purpose VARCHAR(40); Java and checked-in SQL specify lengths 10 and 20",
+        "export uses DATETIME rather than DATETIME(6) for OTP timestamps",
+        "export has max_attempts DEFAULT 5 and created_at DEFAULT CURRENT_TIMESTAMP",
+        "export has one lookup index instead of the three specified by repository SQL/entity",
+        "export user foreign key does not specify ON DELETE CASCADE"
+      ],
+      "other_known_differences": [
+        "export users.email_verified DEFAULT 0 versus repository fresh/upgrade SQL DEFAULT TRUE",
+        "export pickup has confirmed_by_user_id and status; repository SQL has verified_by_user_id and no status",
+        "exported commerce definitions differ in categories, orders, and products; those tables have no current JPA entities",
+        "historical Flyway V1 lacks the current email_verified and verification_codes additions; Flyway is disabled"
+      ]
+    }
+  },
+  "findings": [
+    {
+      "severity": "MEDIUM",
+      "status": "unresolved",
+      "finding": "Raw password-reset authorization token is held in sessionStorage and accepted from a query parameter, making it accessible to same-origin JavaScript.",
+      "evidence": ["frontend/assets/js/core/app.js"],
+      "confidence": "high"
+    },
+    {
+      "severity": "MEDIUM",
+      "status": "unresolved",
+      "finding": "Repository verification_codes mapping/DDL differs from the local schema-only export; actual TiDB startup validation was not performed.",
+      "evidence": [
+        "backend/src/main/java/com/banhangonline/auth/entity/VerificationCode.java",
+        "database/sql/01-auth/004_create_verification_codes.sql",
+        "database/sql/tidb_full_schema.sql"
+      ],
+      "confidence": "high for exported snapshot; live status unknown"
+    },
+    {
+      "severity": "MEDIUM",
+      "status": "unresolved",
+      "finding": "RateLimitFilter clears all clients' active counters after its key map exceeds 50,000 entries.",
+      "evidence": ["backend/src/main/java/com/banhangonline/common/security/RateLimitFilter.java"],
+      "confidence": "high for behavior; medium for exploitability"
+    },
+    {
+      "severity": "LOW",
+      "status": "unresolved",
+      "finding": "There is no owner-protected employee/staff creation endpoint; the public staff/register route only creates a pending store/owner application.",
+      "evidence": [
+        "backend/src/main/java/com/banhangonline/auth/controller/StaffAuthController.java",
+        "backend/src/main/java/com/banhangonline/auth/service/AuthService.java"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "changes_made_during_audit": [
+    ".gitignore",
+    "backend/src/main/java/com/banhangonline/auth/controller/StaffAuthController.java",
+    "frontend/assets/js/core/session.js",
+    "frontend/pages/customer/auth/logout.html",
+    "frontend/pages/staff/auth/logout.html"
+  ],
+  "verification": {
+    "maven_clean_test": "PASS: 29 tests; 0 failures; 0 errors; 10 opt-in live-database tests skipped",
+    "maven_package": "PASS",
+    "frontend_node_check": "PASS: both JavaScript files",
+    "git_diff_check": "PASS",
+    "production_tidb_connectivity": "NOT TESTED; no database connection attempted",
+    "commit_or_push": "NOT DONE"
+  }
+}

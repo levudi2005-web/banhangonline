@@ -72,7 +72,6 @@
 
   if (document.body.dataset.authMode === "logout") {
     document.querySelector("#logout-submit").addEventListener("click", logout);
-    logout();
   } else {
     loadSession();
   }
