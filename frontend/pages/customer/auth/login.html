@@ -1,19 +1,125 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../../assets/css/style.css"><title>Đăng nhập — Cửa hàng</title></head>
-<body class="customer"><main class="auth">
-<section class="panel"><div class="card">
-<a class="brand" href="/pages/customer/auth/login.html"><span class="logo"><i data-i="bag"></i></span>Cửa hàng</a>
-<h1>Chào mừng trở lại</h1><p class="sub">Đăng nhập để tiếp tục mua sắm</p>
-<form data-endpoint="/api/auth/login" data-next="/pages/auth/session.html?area=customer" novalidate>
-<div class="field"><label for="account">Tài khoản</label><input id="account" name="account" autocomplete="username" placeholder="Email / Số điện thoại / Tên đăng nhập" data-v="required" data-required-message="Vui lòng nhập tài khoản."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
-<div class="field"><label for="password">Mật khẩu</label><div class="pw"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu" data-v="required" data-required-message="Vui lòng nhập mật khẩu."><button type="button" class="eye" aria-label="Hiện mật khẩu"><i data-i="eye"></i></button></div><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
-<div class="between"><label class="chk"><input type="checkbox" name="remember"> Ghi nhớ đăng nhập</label><a href="forgot-password.html">Quên mật khẩu?</a></div>
-<p class="form-msg" role="alert"></p>
-<button class="btn" type="submit">Đăng nhập</button></form>
-<p class="center">Chưa có tài khoản? <a href="register.html"><b>Đăng ký ngay</b></a></p>
-<a class="switch" href="/pages/staff/auth/login.html"><span class="ic"><i data-i="shield"></i></span><span><b>Bạn là chủ cửa hàng hoặc nhân viên?</b><small>Đăng nhập quản trị</small></span><i data-i="right"></i></a>
-</div></section>
-<aside class="visual"><h2>Đặt online, đến cửa hàng nhận hàng</h2><ul>
-<li><i data-i="list"></i><span><b>Chọn sản phẩm</b><small>Đặt hàng trong vài bước</small></span></li>
-<li><i data-i="pin"></i><span><b>Chọn cửa hàng gần bạn</b><small>Cửa hàng chuẩn bị sẵn đơn</small></span></li>
-<li><i data-i="store"></i><span><b>Nhận hàng bằng mã 8 chữ số</b><small>Báo mã cho nhân viên khi đến nơi</small></span></li></ul></aside>
-</main><script src="../../../assets/js/core/app.js"></script></body></html>
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/css/style.css">
+  <title>Đăng nhập — Cửa hàng</title>
+</head>
+
+<body class="customer">
+  <main class="auth">
+
+    <!-- ===== Form đăng nhập ===== -->
+    <section class="panel">
+      <div class="card">
+
+        <a class="brand" href="/pages/customer/auth/login.html">
+          <span class="logo"><i data-i="bag"></i></span>
+          Cửa hàng
+        </a>
+
+        <h1>Chào mừng trở lại</h1>
+        <p class="sub">Đăng nhập để tiếp tục mua sắm</p>
+
+        <form data-endpoint="/api/auth/login"
+              data-next="/pages/auth/session.html?area=customer"
+              novalidate>
+
+          <div class="row">
+            <!-- Tài khoản -->
+            <div class="field">
+              <label for="account">Tài khoản</label>
+              <input id="account"
+                     name="account"
+                     autocomplete="username"
+                     placeholder="Email / Số điện thoại / Tên đăng nhập"
+                     data-v="required"
+                     data-required-message="Vui lòng nhập tài khoản.">
+              <small class="required-hint">Thông tin bắt buộc</small>
+              <p class="err"></p>
+            </div>
+
+            <!-- Mật khẩu -->
+            <div class="field">
+              <label for="password">Mật khẩu</label>
+              <div class="pw">
+                <input id="password"
+                       name="password"
+                       type="password"
+                       autocomplete="current-password"
+                       placeholder="Nhập mật khẩu"
+                       data-v="required"
+                       data-required-message="Vui lòng nhập mật khẩu.">
+                <button type="button" class="eye" aria-label="Hiện mật khẩu">
+                  <i data-i="eye"></i>
+                </button>
+              </div>
+              <small class="required-hint">Thông tin bắt buộc</small>
+              <p class="err"></p>
+            </div>
+          </div>
+
+          <!-- Ghi nhớ + Quên mật khẩu -->
+          <div class="between">
+            <label class="chk">
+              <input type="checkbox" name="remember"> Ghi nhớ đăng nhập
+            </label>
+            <a href="forgot-password.html">Quên mật khẩu?</a>
+          </div>
+
+          <p class="form-msg" role="alert"></p>
+
+          <button class="btn" type="submit">Đăng nhập</button>
+        </form>
+
+        <p class="center">
+          Chưa có tài khoản? <a href="register.html"><b>Đăng ký ngay</b></a>
+        </p>
+
+        <!-- Chuyển sang đăng nhập quản trị -->
+        <a class="switch" href="/pages/staff/auth/login.html">
+          <span class="ic"><i data-i="shield"></i></span>
+          <span>
+            <b>Bạn là chủ cửa hàng hoặc nhân viên?</b>
+            <small>Đăng nhập quản trị</small>
+          </span>
+          <i data-i="right"></i>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ===== Cột giới thiệu ===== -->
+    <aside class="visual">
+      <h2>Đặt online, đến cửa hàng nhận hàng</h2>
+      <ul>
+        <li>
+          <i data-i="list"></i>
+          <span>
+            <b>Chọn sản phẩm</b>
+            <small>Đặt hàng trong vài bước</small>
+          </span>
+        </li>
+        <li>
+          <i data-i="pin"></i>
+          <span>
+            <b>Chọn cửa hàng gần bạn</b>
+            <small>Cửa hàng chuẩn bị sẵn đơn</small>
+          </span>
+        </li>
+        <li>
+          <i data-i="store"></i>
+          <span>
+            <b>Nhận hàng bằng mã 8 chữ số</b>
+            <small>Báo mã cho nhân viên khi đến nơi</small>
+          </span>
+        </li>
+      </ul>
+    </aside>
+
+  </main>
+
+  <script src="../../../assets/js/core/app.js"></script>
+</body>
+</html>
