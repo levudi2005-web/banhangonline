@@ -26,12 +26,24 @@
       forgot: "/pages/staff/auth/forgot-password.html",
       reset: "/pages/staff/auth/reset-password.html",
       logout: "/pages/staff/auth/logout.html",
-      home: "/pages/staff/dashboard.html"
+      home: "/pages/staff/dashboard.html",
+      products: "/pages/staff/products.html",
+      inventory: "/pages/staff/inventory.html",
+      orders: "/pages/staff/orders.html",
+      notifications: "/pages/staff/notifications.html"
     },
     owner: {
       login: "/pages/staff/auth/login.html?area=owner",
       logout: "/pages/staff/auth/logout.html",
-      home: "/pages/owner/dashboard.html"
+      home: "/pages/owner/dashboard.html",
+      store: "/pages/owner/store.html",
+      staff: "/pages/owner/staff.html",
+      permissions: "/pages/owner/permissions.html",
+      categories: "/pages/owner/categories.html",
+      products: "/pages/owner/products.html",
+      inventory: "/pages/owner/inventory.html",
+      orders: "/pages/owner/orders.html",
+      notifications: "/pages/owner/notifications.html"
     }
   });
 
@@ -55,9 +67,21 @@
     "staff.reset": ROUTES.staff.reset,
     "staff.logout": ROUTES.staff.logout,
     "staff.home": ROUTES.staff.home,
+    "staff.products": ROUTES.staff.products,
+    "staff.inventory": ROUTES.staff.inventory,
+    "staff.orders": ROUTES.staff.orders,
+    "staff.notifications": ROUTES.staff.notifications,
     "owner.login": ROUTES.owner.login,
     "owner.logout": ROUTES.owner.logout,
-    "owner.home": ROUTES.owner.home
+    "owner.home": ROUTES.owner.home,
+    "owner.store": ROUTES.owner.store,
+    "owner.staff": ROUTES.owner.staff,
+    "owner.permissions": ROUTES.owner.permissions,
+    "owner.categories": ROUTES.owner.categories,
+    "owner.products": ROUTES.owner.products,
+    "owner.inventory": ROUTES.owner.inventory,
+    "owner.orders": ROUTES.owner.orders,
+    "owner.notifications": ROUTES.owner.notifications
   };
 
   function getRoute(routeKey, query = {}) {

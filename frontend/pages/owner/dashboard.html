@@ -4,78 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../../assets/css/dashboard.css">
-  <title>Quản lý cửa hàng — BanHangOnline</title>
+  <title>Tổng quan cửa hàng — BanHangOnline</title>
 </head>
-<body class="dashboard">
-  <main class="dash-shell">
-    <header class="dash-top">
-      <a class="dash-brand" href="/pages/owner/dashboard.html">BanHangOnline · Chủ cửa hàng</a>
-      <nav class="dash-nav" aria-label="Điều hướng chủ cửa hàng">
-        <a href="#stores">Cửa hàng</a><a href="#staff-panel">Nhân viên</a>
-        <a href="#owner-catalog-panel">Sản phẩm</a><a href="#owner-orders-panel">Đơn hàng</a>
-        <a href="/pages/customer/index.html">Xem trang mua sắm</a><a id="owner-logout" href="/">Đăng xuất</a>
-      </nav>
-    </header>
-    <h1 class="dash-title">Xin chào, <span id="owner-name">…</span></h1>
-    <p class="dash-subtitle">Quản lý thông tin cửa hàng và cấp quyền truy cập theo từng cửa hàng.</p>
-    <div id="owner-status" class="dash-status" role="status" aria-live="polite"></div>
-    <div class="dash-grid">
-      <section id="stores" class="dash-card half">
-        <h2>Cửa hàng của bạn</h2>
-        <div id="owner-stores" class="dash-stack" aria-live="polite"></div>
-        <p id="store-review-note" class="dash-alert dash-hidden">Cửa hàng mới cần được kiểm tra và kích hoạt thủ công trước khi quản lý nhân viên.</p>
-      </section>
-      <section id="store-setup-panel" class="dash-card half">
-        <h2>Thiết lập cửa hàng</h2>
-        <p id="store-setup-help" class="dash-muted">Lưu thông tin dưới dạng nháp, kiểm tra lại rồi gửi quản trị viên kiểm duyệt.</p>
-        <form id="store-form" class="dash-form">
-          <div class="dash-field"><label for="store-name">Tên cửa hàng</label><input id="store-name" name="name" maxlength="160" required></div>
-          <div class="dash-field"><label for="store-phone">Điện thoại</label><input id="store-phone" name="phone" type="tel" maxlength="20" required></div>
-          <div class="dash-field"><label for="store-email">Email</label><input id="store-email" name="email" type="email" maxlength="190"></div>
-          <div class="dash-field"><label for="store-province">Tỉnh / thành phố</label><input id="store-province" name="province" maxlength="100" required></div>
-          <div class="dash-field"><label for="store-district">Quận / huyện</label><input id="store-district" name="district" maxlength="100" required></div>
-          <div class="dash-field"><label for="store-ward">Phường / xã</label><input id="store-ward" name="ward" maxlength="100" required></div>
-          <div class="dash-field full"><label for="store-address">Địa chỉ chi tiết</label><input id="store-address" name="addressDetail" maxlength="255" required></div>
-          <div class="dash-field"><label for="store-postal">Mã bưu chính</label><input id="store-postal" name="postalCode" maxlength="20"></div>
-          <div class="dash-field"><label for="store-description">Mô tả</label><input id="store-description" name="description" maxlength="1000"></div>
-          <div class="full"><button id="store-save" class="dash-button" type="submit">Lưu bản nháp</button></div>
-        </form>
-        <button id="submit-store-review" class="dash-button secondary dash-hidden" type="button">Gửi quản trị viên kiểm duyệt</button>
-      </section>
-      <section id="staff-panel" class="dash-card dash-hidden">
-        <h2>Nhân viên và quyền truy cập</h2>
-        <div class="dash-field"><label for="staff-store">Cửa hàng đang quản lý</label><select id="staff-store"></select></div>
-        <p class="dash-muted">Tài khoản nhân viên được tạo với mật khẩu khởi tạo do chủ cửa hàng đặt. Hãy bàn giao mật khẩu an toàn và yêu cầu nhân viên đổi sau khi đăng nhập.</p>
-        <form id="create-staff-form" class="dash-form">
-          <div class="dash-field"><label for="staff-full-name">Họ và tên</label><input id="staff-full-name" name="fullName" maxlength="120" required></div>
-          <div class="dash-field"><label for="staff-username">Tên đăng nhập</label><input id="staff-username" name="username" minlength="4" maxlength="30" required></div>
-          <div class="dash-field"><label for="staff-email">Email</label><input id="staff-email" name="email" type="email" maxlength="190" required></div>
-          <div class="dash-field"><label for="staff-phone">Điện thoại</label><input id="staff-phone" name="phone" type="tel" maxlength="20" required></div>
-          <div class="dash-field full"><label for="staff-password">Mật khẩu khởi tạo (ít nhất 8 ký tự)</label><input id="staff-password" name="initialPassword" type="password" minlength="8" required></div>
-          <fieldset class="full">
-            <legend>Quyền được cấp trong cửa hàng này</legend>
-            <div id="staff-permissions" class="dash-checks"></div>
-          </fieldset>
-          <div class="full"><button class="dash-button" type="submit">Tạo tài khoản nhân viên</button></div>
-        </form>
-        <h3>Danh sách nhân viên</h3>
-        <ul id="staff-list" class="dash-list" aria-live="polite"></ul>
-      </section>
-      <section id="owner-orders-panel" class="dash-card">
-        <h2>Đơn hàng cửa hàng đã chọn</h2>
-        <div id="owner-orders-status" class="dash-status" role="status" aria-live="polite"></div>
-        <ul id="owner-orders" class="dash-list"></ul>
-      </section>
-      <section id="owner-catalog-panel" class="dash-card">
-        <h2>Sản phẩm và tồn kho cửa hàng</h2>
-        <div id="owner-catalog-status" class="dash-status" role="status" aria-live="polite"></div>
-        <div id="owner-catalog" class="dash-stack"></div>
-      </section>
-    </div>
-  </main>
+<body class="dashboard management-dashboard">
+  <div id="management-app" data-management-page="dashboard"></div>
   <script src="../../assets/js/core/routes.js"></script>
-  <script src="../../assets/js/features/store-orders.js"></script>
-  <script src="../../assets/js/features/store-catalog.js"></script>
-  <script src="../../assets/js/features/owner-dashboard.js"></script>
+  <script src="../../assets/js/features/management-app.js"></script>
 </body>
 </html>

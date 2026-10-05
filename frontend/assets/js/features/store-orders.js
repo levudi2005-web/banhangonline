@@ -18,7 +18,7 @@
     });
     const result = await response.json().catch(() => null);
     if (response.status === 401) {
-      AppRoutes.handleSessionExpired("STAFF");
+      AppRoutes.handleSessionExpired(location.pathname.startsWith("/pages/owner/") ? "OWNER" : "STAFF");
       throw new Error("Phiên đăng nhập đã hết hạn.");
     }
     if (!response.ok || !result || !result.success) {
@@ -30,6 +30,7 @@
   async function load(storeId, permissions, isOwner, list, status) {
     list.replaceChildren();
     status.textContent = "Đang tải đơn hàng…";
+    status.className = "dash-status";
     try {
       const orders = await request(`/api/stores/${encodeURIComponent(storeId)}/orders`);
       status.textContent = `${orders.length} đơn hàng.`;
@@ -42,7 +43,7 @@
       orders.forEach(order => {
         const item = document.createElement("li");
         const heading = document.createElement("strong");
-        heading.textContent = `${order.orderCode} · ${order.customerName} · ${order.status}`;
+        heading.textContent = `${order.orderCode} · ${order.status}`;
         const date = document.createElement("p");
         date.className = "dash-muted";
         date.textContent = new Date(order.createdAt).toLocaleString("vi-VN");
