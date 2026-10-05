@@ -8,9 +8,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -26,20 +28,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("e2e")
 @EnabledIfSystemProperty(named = "runLiveDbTests", matches = "true")
 class AuthIntegrationTest {
     private static final String PW = "Passw0rd!x";
     private static final AtomicInteger SEQ = new AtomicInteger(10_000_000);
+    private static final AtomicInteger CLIENT_IP_SEQ = new AtomicInteger(1);
 
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper om;
     @Autowired UserRepository users;
     @Autowired RoleRepository roles;
     @Autowired PasswordEncoder encoder;
+    private String testRemoteAddress;
+
+    @BeforeEach
+    void isolateRateLimitClient() {
+        testRemoteAddress = "198.51.100." + CLIENT_IP_SEQ.getAndIncrement();
+    }
 
     // ---------- helpers ----------
     private MvcResult send(String method, String url, Object body, Cookie cookie, boolean withHeader) throws Exception {
         MockHttpServletRequestBuilder b = method.equals("GET") ? MockMvcRequestBuilders.get(url) : MockMvcRequestBuilders.post(url);
+        b.with(request -> {
+            request.setRemoteAddr(testRemoteAddress);
+            return request;
+        });
         if (withHeader) b.header("X-Requested-With", "test");
         if (body != null) b.contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsString(body));
         if (cookie != null) b.cookie(cookie);

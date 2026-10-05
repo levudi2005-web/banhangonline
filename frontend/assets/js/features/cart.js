@@ -34,10 +34,10 @@
     return `${Number(value).toLocaleString("vi-VN")} ${currency}`;
   }
 
-  async function loadCart() {
+  async function loadCart(preserveConfirmation = false) {
     const storeId = storeSelect.value;
     itemsNode.replaceChildren();
-    confirmation.hidden = true;
+    if (!preserveConfirmation) confirmation.hidden = true;
     clearButton.hidden = true;
     totals.textContent = "0 VND";
     status.className = "dash-status";
@@ -186,7 +186,7 @@
       confirmation.append(heading, orderCode, pickupCode, details);
       confirmation.hidden = false;
       status.textContent = "";
-      await loadCart();
+      await loadCart(true);
     } catch (error) {
       showError(error);
     } finally {

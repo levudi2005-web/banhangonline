@@ -43,7 +43,7 @@ public class ClickCollectService {
         Long cartId = findActiveCart(userId, storeId);
         List<CartItemView> items = cartId == null ? List.of() : jdbc.query("""
                 SELECT ci.id AS cart_item_id, p.id AS product_id, p.name, p.sku,
-                       ci.quantity, p.price AS unit_price, p.currency
+                       ci.quantity, ci.unit_price, ci.currency
                 FROM cart_items ci
                 JOIN products p ON p.id = ci.product_id
                 JOIN carts c ON c.id = ci.cart_id
@@ -65,22 +65,29 @@ public class ClickCollectService {
         requireActiveStore(request.storeId());
         Long cartId = ensureActiveCart(userId, request.storeId());
         StockRow stock = availableStock(request.storeId(), request.productId(), true);
-        List<Integer> existing = jdbc.query("SELECT quantity FROM cart_items WHERE cart_id=? AND product_id=? FOR UPDATE",
-                (rs, row) -> rs.getInt(1), cartId, request.productId());
-        int newQuantity = request.quantity() + existing.stream().findFirst().orElse(0);
+        List<CartItemSnapshot> existing = jdbc.query("""
+                SELECT quantity, unit_price, currency
+                FROM cart_items
+                WHERE cart_id=? AND product_id=? FOR UPDATE
+                """, (rs, row) -> new CartItemSnapshot(rs.getInt("quantity"), rs.getBigDecimal("unit_price"),
+                rs.getString("currency")), cartId, request.productId());
+        CartItemSnapshot snapshot = existing.stream().findFirst().orElse(null);
+        int newQuantity = request.quantity() + (snapshot == null ? 0 : snapshot.quantity());
         if (newQuantity > stock.available()) {
             throw ApiException.conflict("INSUFFICIENT_STOCK", "Số lượng sản phẩm còn lại không đủ");
         }
-        if (existing.isEmpty()) {
+        BigDecimal lockedPrice = snapshot == null || snapshot.unitPrice() == null ? stock.price() : snapshot.unitPrice();
+        String lockedCurrency = snapshot == null || snapshot.currency() == null ? stock.currency() : snapshot.currency();
+        if (snapshot == null) {
             jdbc.update("""
                     INSERT INTO cart_items (cart_id, product_id, quantity, unit_price, currency)
                     VALUES (?, ?, ?, ?, ?)
-                    """, cartId, request.productId(), newQuantity, stock.price(), stock.currency());
+                    """, cartId, request.productId(), newQuantity, lockedPrice, lockedCurrency);
         } else {
             jdbc.update("""
                     UPDATE cart_items SET quantity=?, unit_price=?, currency=?, updated_at=NOW(6)
                     WHERE cart_id=? AND product_id=?
-                    """, newQuantity, stock.price(), stock.currency(), cartId, request.productId());
+                    """, newQuantity, lockedPrice, lockedCurrency, cartId, request.productId());
         }
         return cart(userId, request.storeId());
     }
@@ -92,11 +99,13 @@ public class ClickCollectService {
         if (quantity > stock.available()) {
             throw ApiException.conflict("INSUFFICIENT_STOCK", "Số lượng sản phẩm còn lại không đủ");
         }
+        BigDecimal lockedPrice = item.unitPrice() == null ? stock.price() : item.unitPrice();
+        String lockedCurrency = item.currency() == null ? stock.currency() : item.currency();
         jdbc.update("""
                 UPDATE cart_items ci JOIN carts c ON c.id=ci.cart_id
                 SET ci.quantity=?, ci.unit_price=?, ci.currency=?, ci.updated_at=NOW(6)
                 WHERE ci.id=? AND c.user_id=? AND c.status='ACTIVE'
-                """, quantity, stock.price(), stock.currency(), cartItemId, userId);
+                """, quantity, lockedPrice, lockedCurrency, cartItemId, userId);
         return cart(userId, item.storeId());
     }
 
@@ -128,7 +137,7 @@ public class ClickCollectService {
             throw new ApiException(HttpStatus.CONFLICT, "CART_ALREADY_CHECKED_OUT", "Giỏ hàng đã được đặt hàng");
         }
         List<CheckoutLine> lines = jdbc.query("""
-                SELECT ci.product_id, p.name, p.sku, ci.quantity, p.price, p.currency,
+                SELECT ci.product_id, p.name, p.sku, ci.quantity, ci.unit_price, ci.currency,
                        i.id AS inventory_id, i.quantity AS stock_quantity, i.reserved_quantity
                 FROM cart_items ci
                 JOIN products p ON p.id=ci.product_id
@@ -136,7 +145,7 @@ public class ClickCollectService {
                 WHERE ci.cart_id=? AND i.status='ACTIVE' AND p.status='ACTIVE'
                 ORDER BY p.id
                 """, (rs, row) -> new CheckoutLine(rs.getLong("product_id"), rs.getString("name"),
-                rs.getString("sku"), rs.getInt("quantity"), rs.getBigDecimal("price"),
+                rs.getString("sku"), rs.getInt("quantity"), rs.getBigDecimal("unit_price"),
                 rs.getString("currency"), rs.getLong("inventory_id"), rs.getInt("stock_quantity"),
                 rs.getInt("reserved_quantity")), request.storeId(), cartId);
         if (lines.isEmpty()) {
@@ -469,12 +478,12 @@ public class ClickCollectService {
 
     private CartItemRef lockCartItem(Long userId, Long cartItemId) {
         List<CartItemRef> items = jdbc.query("""
-                SELECT c.id AS cart_id,c.store_id,ci.product_id
+                SELECT c.id AS cart_id,c.store_id,ci.product_id,ci.unit_price,ci.currency
                 FROM cart_items ci JOIN carts c ON c.id=ci.cart_id
                 WHERE ci.id=? AND c.user_id=? AND c.status='ACTIVE'
                 FOR UPDATE
                 """, (rs, row) -> new CartItemRef(rs.getLong("cart_id"), rs.getLong("store_id"),
-                rs.getLong("product_id")), cartItemId, userId);
+                rs.getLong("product_id"), rs.getBigDecimal("unit_price"), rs.getString("currency")), cartItemId, userId);
         return items.stream().findFirst().orElseThrow(() ->
                 new ApiException(HttpStatus.NOT_FOUND, "CART_ITEM_NOT_FOUND", "Không tìm thấy sản phẩm trong giỏ"));
     }
@@ -509,7 +518,8 @@ public class ClickCollectService {
             rs.getLong("store_id"), rs.getString("status"));
 
     private record OrderRow(Long id, String orderCode, Long userId, Long storeId, String status) {}
-    private record CartItemRef(Long cartId, Long storeId, Long productId) {}
+    private record CartItemSnapshot(int quantity, BigDecimal unitPrice, String currency) {}
+    private record CartItemRef(Long cartId, Long storeId, Long productId, BigDecimal unitPrice, String currency) {}
     private record StockRow(BigDecimal price, String currency, int available) {}
     private record CheckoutLine(Long productId, String name, String sku, int quantity, BigDecimal unitPrice,
                                 String currency, Long inventoryId, int stockQuantity, int reservedQuantity) {}

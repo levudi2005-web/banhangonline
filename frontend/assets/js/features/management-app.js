@@ -257,12 +257,12 @@
       orders: ["VIEW_ORDERS", "MANAGE_ORDERS"]
     };
     if (ownerOnly && role !== "OWNER") {
-      location.replace(AppRoutes.getRoute("public.forbidden"));
+      location.replace(AppRoutes.getRoute("forbidden"));
       return false;
     }
     const required = permissionByPage[page];
     if (required && !required.some(has)) {
-      location.replace(AppRoutes.getRoute("public.forbidden"));
+      location.replace(AppRoutes.getRoute("forbidden"));
       return false;
     }
     return true;
