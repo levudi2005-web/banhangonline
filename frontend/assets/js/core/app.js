@@ -12,11 +12,12 @@ phone:v=>!v||/^(0|\+84)\d{9}$/.test(v.replace(/[\s.-]/g,""))?"":"Số điện th
 phoneLastFour:v=>/^\d{4}$/.test(v)?"":"Nhập đúng bốn chữ số.",
 username:v=>!v||/^[A-Za-z0-9_.]{4,30}$/.test(v)?"":"Tên đăng nhập gồm 4–30 ký tự: chữ, số, _ hoặc .",
 min8:v=>!v||v.length>=8?"":"Mật khẩu phải có ít nhất 8 ký tự"};
+const emailValue=el=>{const domain=el.dataset.emailDomain&&document.getElementById(el.dataset.emailDomain);return domain?`${el.value.trim()}${domain.value}`:el.value};
 const check=el=>{let m="";
  for(const r of (el.dataset.v||"").split(" ").filter(Boolean)){const[k,p]=r.split(":");
   if(k==="required")m=el.type==="checkbox"?(el.checked?"":el.dataset.requiredMessage||"Vui lòng xác nhận để tiếp tục"):V.required(el.value);
   else if(k==="match")m=el.value===el.form.elements[p].value?"":"Mật khẩu xác nhận không khớp";
-  else m=V[k](el.value);
+  else m=k==="email"&&el.dataset.emailDomain?V.email(emailValue(el)):V[k](el.value);
   if(m)break}
  const box=el.closest(".field"),e=$(".err",box);if(!e.id)e.id="e"+Math.random().toString(36).slice(2,8);
  box.classList.toggle("invalid",!!m);e.textContent=m;
@@ -27,7 +28,7 @@ const validate=root=>{let ok=$$("[data-v]",root).map(check).every(Boolean);
  if(!ok){const b=$(".invalid input,.invalid textarea",root);b&&b.focus()}return ok};
 document.addEventListener("focusout",e=>e.target.dataset&&e.target.dataset.v&&check(e.target));
 document.addEventListener("input",e=>e.target.closest&&e.target.closest(".invalid")&&check(e.target));
-document.addEventListener("change",e=>{if(e.target.type==="file"){const n=$(".fname",e.target.closest(".drop"));n.textContent=e.target.files[0]?e.target.files[0].name:"Chưa chọn tệp"}});
+document.addEventListener("change",e=>{if(e.target.type==="file"){const n=$(".fname",e.target.closest(".drop"));n.textContent=e.target.files[0]?e.target.files[0].name:"Chưa chọn tệp"}if(e.target.matches("[data-email-domain-select]"))$$("[data-email-domain]").filter(input=>input.dataset.emailDomain===e.target.id&&input.closest(".invalid")).forEach(check)});
 document.addEventListener("click",e=>{
  const b=e.target.closest(".eye");
  if(b){const i=$("input",b.parentNode),show=i.type==="password";i.type=show?"text":"password";
@@ -36,7 +37,7 @@ document.addEventListener("click",e=>{
 
 const collect=f=>{const o={};$$("[name]",f).forEach(el=>{
  if(el.type==="file"||el.dataset.skip!==undefined)return;
- const v=el.type==="checkbox"?el.checked:el.type==="password"?el.value:el.value.trim();
+ const v=el.type==="checkbox"?el.checked:el.type==="password"?el.value:el.dataset.emailDomain?emailValue(el):el.value.trim();
  if(v===""&&!(el.dataset.v||"").includes("required"))return;
  el.name.split(".").reduce((a,k,i,r)=>i===r.length-1?(a[k]=v):(a[k]=a[k]||{}),o)});return o};
 const wiz=$("form[data-wizard]");

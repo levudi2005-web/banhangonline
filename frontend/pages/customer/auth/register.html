@@ -1,22 +1,166 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../../assets/css/style.css"><title>Đăng ký — Cửa hàng</title></head>
-<body class="customer"><main class="auth">
-<section class="panel"><div class="card auth-card">
-<div class="auth-header"><a class="back" data-route="customer.login" href="/pages/customer/auth/login.html"><i data-i="left"></i> Quay lại đăng nhập</a></div>
-<h1>Tạo tài khoản khách hàng</h1><p class="sub">Đăng ký để đặt hàng và nhận hàng tại cửa hàng</p>
-<form data-endpoint="/api/auth/register" data-next-route="customer.login" data-next-query="registered=customer" novalidate>
-<div class="row">
-<div class="field"><label for="fullName">Họ và tên</label><input id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Nguyễn Văn A" data-v="required" data-required-message="Vui lòng nhập họ và tên."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
-<div class="field"><label for="username">Tên đăng nhập</label><input id="username" name="username" type="text" autocomplete="username" placeholder="4–30 ký tự" data-v="required username" data-required-message="Vui lòng nhập tên đăng nhập."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
-</div>
-<div class="row"><div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" placeholder="ten@email.com" data-v="required email" data-required-message="Vui lòng nhập email."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div><div class="field"><label for="phone">Số điện thoại</label><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="0912 345 678" data-v="required phone" data-required-message="Vui lòng nhập số điện thoại."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div></div>
-<div class="row"><div class="field"><label for="password">Mật khẩu</label><div class="pw"><input id="password" name="password" type="password" autocomplete="new-password" placeholder="Ít nhất 8 ký tự" data-v="required min8" data-required-message="Vui lòng nhập mật khẩu."><button type="button" class="eye" aria-label="Hiện mật khẩu"><i data-i="eye"></i></button></div><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div><div class="field"><label for="confirmPassword">Xác nhận mật khẩu</label><div class="pw"><input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Nhập lại mật khẩu" data-v="required match:password" data-required-message="Vui lòng xác nhận mật khẩu."><button type="button" class="eye" aria-label="Hiện mật khẩu"><i data-i="eye"></i></button></div><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div></div>
-<fieldset class="address-fields"><legend>Địa chỉ nhận hàng</legend>
-<div class="row"><div class="field"><label for="recipientName">Người nhận</label><input id="recipientName" name="address.recipientName" autocomplete="name" data-v="required" data-required-message="Vui lòng nhập tên người nhận."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div><div class="field"><label for="addressPhone">Số điện thoại nhận hàng</label><input id="addressPhone" name="address.phone" type="tel" autocomplete="tel" data-v="required phone" data-required-message="Vui lòng nhập số điện thoại nhận hàng."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div></div>
-<div class="row"><div class="field"><label for="province">Tỉnh / Thành phố</label><input id="province" name="address.province" autocomplete="address-level1" data-v="required" data-required-message="Vui lòng nhập tỉnh / thành phố."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div><div class="field"><label for="district">Quận / Huyện</label><input id="district" name="address.district" autocomplete="address-level2" data-v="required" data-required-message="Vui lòng nhập quận / huyện."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div></div>
-<div class="row"><div class="field"><label for="ward">Phường / Xã</label><input id="ward" name="address.ward" autocomplete="address-level3" data-v="required" data-required-message="Vui lòng nhập phường / xã."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div><div class="field"><label for="addressLine">Địa chỉ chi tiết</label><input id="addressLine" name="address.addressLine" autocomplete="street-address" data-v="required" data-required-message="Vui lòng nhập địa chỉ chi tiết."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div></div>
-</fieldset>
-<p class="form-msg" role="alert"></p>
-<button class="btn" type="submit">Tạo tài khoản</button></form>
-<p class="center">Đã có tài khoản? <a data-route="customer.login" href="/pages/customer/auth/login.html"><b>Đăng nhập</b></a></p>
-</div></section>
-</main><script src="../../../assets/js/core/routes.js"></script><script src="../../../assets/js/core/app.js"></script></body></html>
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/css/style.css">
+  <link rel="stylesheet" href="../../../assets/css/auth.css">
+  <title>Đăng ký — Cửa hàng</title>
+</head>
+<body class="customer">
+  <main class="auth">
+    <section class="panel">
+      <div class="card auth-card">
+        <div class="auth-header">
+          <a class="back" data-route="customer.login" href="/pages/customer/auth/login.html">
+            <i data-i="left"></i> Quay lại đăng nhập
+          </a>
+        </div>
+
+        <h1>Tạo tài khoản khách hàng</h1>
+        <p class="sub">Đăng ký để đặt hàng và nhận hàng tại cửa hàng.</p>
+
+        <form data-endpoint="/api/auth/register"
+              data-next-route="customer.login"
+              data-next-query="registered=customer"
+              novalidate>
+          <div class="row">
+            <div class="field">
+              <label for="fullName">Họ và tên</label>
+              <input id="fullName" name="fullName" type="text" autocomplete="name"
+                     placeholder="Nguyễn Văn A" data-v="required"
+                     data-required-message="Vui lòng nhập họ và tên.">
+              <small class="required-hint">Thông tin bắt buộc</small>
+              <p class="err"></p>
+            </div>
+            <div class="field">
+              <label for="username">Tên đăng nhập</label>
+              <input id="username" name="username" type="text" autocomplete="username"
+                     placeholder="4–30 ký tự" data-v="required username"
+                     data-required-message="Vui lòng nhập tên đăng nhập.">
+              <small class="required-hint">Thông tin bắt buộc</small>
+              <p class="err"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="email">Email</label>
+              <div class="email-composer">
+                <input id="email" name="email" type="text" autocomplete="off"
+                       inputmode="text" placeholder="ten.cua.ban"
+                       data-email-domain="email-domain" data-v="required email"
+                       data-required-message="Vui lòng nhập email.">
+                <select id="email-domain" data-email-domain-select aria-label="Phần đuôi email">
+                  <option value="@gmail.com">@gmail.com</option>
+                  <option value="@outlook.com">@outlook.com</option>
+                  <option value="@hotmail.com">@hotmail.com</option>
+                  <option value="@yahoo.com">@yahoo.com</option>
+                  <option value="@icloud.com">@icloud.com</option>
+                </select>
+              </div>
+              <small class="email-hint">Chỉ cần nhập phần trước dấu @ rồi chọn đuôi email.</small>
+              <small class="required-hint">Thông tin bắt buộc</small>
+              <p class="err"></p>
+            </div>
+            <div class="field">
+              <label for="phone">Số điện thoại</label>
+              <input id="phone" name="phone" type="tel" autocomplete="tel"
+                     placeholder="0912 345 678" data-v="required phone"
+                     data-required-message="Vui lòng nhập số điện thoại.">
+              <small class="required-hint">Thông tin bắt buộc</small>
+              <p class="err"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="password">Mật khẩu</label>
+              <div class="pw">
+                <input id="password" name="password" type="password" autocomplete="new-password"
+                       placeholder="Ít nhất 8 ký tự" data-v="required min8"
+                       data-required-message="Vui lòng nhập mật khẩu.">
+                <button type="button" class="eye" aria-label="Hiện mật khẩu"><i data-i="eye"></i></button>
+              </div>
+              <small class="required-hint">Thông tin bắt buộc</small>
+              <p class="err"></p>
+            </div>
+            <div class="field">
+              <label for="confirmPassword">Xác nhận mật khẩu</label>
+              <div class="pw">
+                <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password"
+                       placeholder="Nhập lại mật khẩu" data-v="required match:password"
+                       data-required-message="Vui lòng xác nhận mật khẩu.">
+                <button type="button" class="eye" aria-label="Hiện mật khẩu"><i data-i="eye"></i></button>
+              </div>
+              <small class="required-hint">Thông tin bắt buộc</small>
+              <p class="err"></p>
+            </div>
+          </div>
+
+          <fieldset class="address-fields">
+            <legend>Địa chỉ nhận hàng</legend>
+            <div class="row">
+              <div class="field">
+                <label for="recipientName">Người nhận</label>
+                <input id="recipientName" name="address.recipientName" autocomplete="name"
+                       data-v="required" data-required-message="Vui lòng nhập tên người nhận.">
+                <small class="required-hint">Thông tin bắt buộc</small>
+                <p class="err"></p>
+              </div>
+              <div class="field">
+                <label for="addressPhone">Số điện thoại nhận hàng</label>
+                <input id="addressPhone" name="address.phone" type="tel" autocomplete="tel"
+                       data-v="required phone" data-required-message="Vui lòng nhập số điện thoại nhận hàng.">
+                <small class="required-hint">Thông tin bắt buộc</small>
+                <p class="err"></p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="province">Tỉnh / Thành phố</label>
+                <input id="province" name="address.province" autocomplete="address-level1"
+                       data-v="required" data-required-message="Vui lòng nhập tỉnh / thành phố.">
+                <small class="required-hint">Thông tin bắt buộc</small>
+                <p class="err"></p>
+              </div>
+              <div class="field">
+                <label for="district">Quận / Huyện</label>
+                <input id="district" name="address.district" autocomplete="address-level2"
+                       data-v="required" data-required-message="Vui lòng nhập quận / huyện.">
+                <small class="required-hint">Thông tin bắt buộc</small>
+                <p class="err"></p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="ward">Phường / Xã</label>
+                <input id="ward" name="address.ward" autocomplete="address-level3"
+                       data-v="required" data-required-message="Vui lòng nhập phường / xã.">
+                <small class="required-hint">Thông tin bắt buộc</small>
+                <p class="err"></p>
+              </div>
+              <div class="field">
+                <label for="addressLine">Địa chỉ chi tiết</label>
+                <input id="addressLine" name="address.addressLine" autocomplete="street-address"
+                       data-v="required" data-required-message="Vui lòng nhập địa chỉ chi tiết.">
+                <small class="required-hint">Thông tin bắt buộc</small>
+                <p class="err"></p>
+              </div>
+            </div>
+          </fieldset>
+
+          <p class="form-msg" role="alert" aria-live="polite"></p>
+          <button class="btn" type="submit">Tạo tài khoản</button>
+        </form>
+
+        <p class="center">Đã có tài khoản?
+          <a data-route="customer.login" href="/pages/customer/auth/login.html"><b>Đăng nhập</b></a>
+        </p>
+      </div>
+    </section>
+  </main>
+  <script src="../../../assets/js/core/routes.js"></script>
+  <script src="../../../assets/js/core/app.js"></script>
+</body>
+</html>
