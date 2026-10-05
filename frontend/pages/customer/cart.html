@@ -10,19 +10,33 @@
   <main class="dash-shell">
     <header class="dash-top">
       <a id="cart-back" class="dash-brand" href="/pages/customer/index.html">BanHangOnline</a>
-      <nav class="dash-nav"><a href="/pages/customer/orders.html">Đơn hàng</a><a href="/pages/auth/session.html?area=customer">Tài khoản của <span id="customer-name">bạn</span></a></nav>
+      <nav class="dash-nav" aria-label="Điều hướng khách hàng">
+        <a href="/pages/customer/index.html">Cửa hàng</a>
+        <a href="/pages/customer/orders.html">Đơn hàng</a>
+        <a href="/pages/customer/notifications.html">Thông báo</a>
+        <a href="/pages/auth/session.html?area=customer">Tài khoản của <span id="customer-name">bạn</span></a>
+      </nav>
     </header>
     <h1 class="dash-title">Giỏ hàng</h1>
     <p class="dash-subtitle">Đơn hàng được nhận tại cửa hàng; thanh toán tiền mặt khi nhận.</p>
-    <div class="dash-card">
-      <div class="dash-field"><label for="cart-store">Cửa hàng nhận hàng</label><select id="cart-store"></select></div>
+    <div class="dash-card cart-card">
+      <div class="dash-field cart-store"><label for="cart-store">Cửa hàng nhận hàng</label><select id="cart-store"></select></div>
       <div id="cart-status" class="dash-status" role="status" aria-live="polite">Đang tải…</div>
-      <ul id="cart-items" class="dash-list"></ul>
-      <p><strong>Tạm tính: <span id="cart-total">0 VND</span></strong></p>
-      <form id="checkout-form" class="dash-stack">
-        <div class="dash-field"><label for="order-note">Ghi chú cho cửa hàng (không bắt buộc)</label><textarea id="order-note" maxlength="1000"></textarea></div>
-        <button class="dash-button" type="submit">Đặt hàng nhận tại cửa hàng</button>
-      </form>
+      <div class="cart-layout">
+        <section class="cart-items-panel" aria-label="Sản phẩm trong giỏ">
+          <h2>Sản phẩm đã chọn</h2>
+          <ul id="cart-items" class="dash-list"></ul>
+          <p class="cart-subtotal"><span>Tạm tính</span><strong id="cart-total">0 VND</strong></p>
+        </section>
+        <section class="cart-checkout-panel" aria-label="Xác nhận đơn hàng">
+          <h2>Nhận hàng tại cửa hàng</h2>
+          <p class="dash-muted">Thanh toán tiền mặt khi đến nhận hàng. Giá sẽ được xác nhận khi đặt.</p>
+          <form id="checkout-form" class="dash-stack">
+            <div class="dash-field"><label for="order-note">Ghi chú cho cửa hàng (không bắt buộc)</label><textarea id="order-note" maxlength="1000"></textarea></div>
+            <button class="dash-button" type="submit">Đặt hàng nhận tại cửa hàng</button>
+          </form>
+        </section>
+      </div>
     </div>
     <section id="checkout-result" class="dash-card" aria-live="polite" hidden></section>
   </main>

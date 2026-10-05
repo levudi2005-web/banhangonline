@@ -9,7 +9,13 @@
 <body class="dashboard">
   <main class="dash-shell">
     <header class="dash-top"><a class="dash-brand" href="/pages/customer/index.html">BanHangOnline</a>
-      <nav class="dash-nav"><a href="/pages/customer/orders.html">Đơn hàng</a><a href="/pages/auth/session.html?area=customer">Tài khoản</a></nav>
+      <nav class="dash-nav" aria-label="Điều hướng khách hàng">
+        <a href="/pages/customer/index.html">Cửa hàng</a>
+        <a href="/pages/customer/cart.html">Giỏ hàng</a>
+        <a href="/pages/customer/orders.html">Đơn hàng</a>
+        <a href="/pages/customer/notifications.html" aria-current="page">Thông báo</a>
+        <a href="/pages/auth/session.html?area=customer">Tài khoản</a>
+      </nav>
     </header>
     <h1 class="dash-title">Thông báo</h1>
     <div id="notification-status" class="dash-status" role="status" aria-live="polite"></div>
