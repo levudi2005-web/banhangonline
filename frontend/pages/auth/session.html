@@ -1,23 +1,71 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../assets/css/style.css"><title>Tài khoản — Cửa hàng</title></head>
-<body class="customer" data-auth-mode="session"><main class="auth">
-<section class="panel"><div class="card">
-<a class="brand" href="/pages/customer/auth/login.html"><span class="logo"><i data-i="bag"></i></span>Cửa hàng</a>
-<h1>Tài khoản của bạn</h1><p class="sub">Phiên đăng nhập được xác thực từ máy chủ</p>
-<p id="session-state" class="form-msg show" role="status">Đang tải thông tin tài khoản…</p>
-<div id="account-info" hidden><p><b id="account-name"></b></p><p>Vai trò: <span id="account-roles"></span></p>
-<p>Số điện thoại: <span id="account-phone"></span></p>
-<form id="profile-form" data-endpoint="/api/users/profile" novalidate>
-<h2>Thông tin tài khoản</h2>
-<div class="field"><label for="profileFullName">Họ và tên</label><input id="profileFullName" name="fullName" autocomplete="name" data-v="required" data-required-message="Vui lòng nhập họ và tên."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
-<div class="field"><label for="profileUsername">Tên đăng nhập</label><input id="profileUsername" name="username" autocomplete="username" data-v="required username" data-required-message="Vui lòng nhập tên đăng nhập."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
-<div class="field"><label for="profileEmail">Email</label><input id="profileEmail" name="email" type="email" autocomplete="email" data-v="required email" data-required-message="Vui lòng nhập email."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
-<div class="field"><label for="profilePhone">Số điện thoại mới (để trống nếu không đổi)</label><input id="profilePhone" name="phone" type="tel" autocomplete="tel" data-v="phone" placeholder="Nhập số mới nếu cần đổi"><p class="err"></p></div>
-<div class="field"><label for="profilePhoneLastFour">Bốn số cuối của số điện thoại hiện tại</label><input id="profilePhoneLastFour" name="phoneLastFour" inputmode="numeric" autocomplete="off" maxlength="4" data-v="required phoneLastFour" data-required-message="Thông tin bắt buộc"><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
-<p class="form-msg" role="alert" aria-live="polite"></p><button class="btn" type="submit">Xác minh và cập nhật</button></form>
-<a id="logout-link" class="btn" href="/pages/customer/auth/logout.html">Đăng xuất</a></div>
-<p id="session-error" class="form-msg" role="alert" hidden></p>
-</div></section>
-<aside class="visual"><h2>Đăng nhập an toàn</h2><ul>
-<li><i data-i="lock"></i><span><b>Phiên được bảo vệ</b><small>Cookie HttpOnly, token chỉ lưu dạng hash</small></span></li>
-<li><i data-i="shield"></i><span><b>Thông tin tài khoản</b><small>Được tải từ phiên hiện tại</small></span></li></ul></aside>
-</main><script src="../../assets/js/core/app.js"></script><script src="../../assets/js/core/session.js"></script></body></html>
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <title>Tài khoản — BanHangOnline</title>
+</head>
+<body class="customer" data-auth-mode="session">
+  <main class="auth">
+    <section class="panel">
+      <div class="card auth-card">
+        <a class="brand" data-route="gateway" href="/pages/auth/index.html">
+          <span class="logo"><i data-i="bag"></i></span>BanHangOnline
+        </a>
+        <h1>Tài khoản của bạn</h1>
+        <p class="sub">Thông tin được xác thực từ phiên hiện tại trên máy chủ.</p>
+        <p id="session-state" class="form-msg show" role="status">Đang tải thông tin tài khoản…</p>
+        <div id="account-info" hidden>
+          <p><b id="account-name"></b></p>
+          <p>Vai trò: <span id="account-roles"></span></p>
+          <p>Số điện thoại: <span id="account-phone"></span></p>
+          <p id="capability-note" class="form-msg" role="status" hidden>
+            Đăng nhập và hồ sơ hiện có thể sử dụng. Các chức năng quản lý cửa hàng, sản phẩm và đơn hàng chưa có API hoạt động trong backend.
+          </p>
+          <form id="profile-form" data-endpoint="/api/users/profile" novalidate>
+            <h2>Thông tin tài khoản</h2>
+            <div class="row">
+              <div class="field">
+                <label for="profileFullName">Họ và tên</label>
+                <input id="profileFullName" name="fullName" autocomplete="name" data-v="required" data-required-message="Vui lòng nhập họ và tên.">
+                <small class="required-hint">Thông tin bắt buộc</small><p class="err"></p>
+              </div>
+              <div class="field">
+                <label for="profileUsername">Tên đăng nhập</label>
+                <input id="profileUsername" name="username" autocomplete="username" data-v="required username" data-required-message="Vui lòng nhập tên đăng nhập.">
+                <small class="required-hint">Thông tin bắt buộc</small><p class="err"></p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="profileEmail">Email</label>
+                <input id="profileEmail" name="email" type="email" autocomplete="email" data-v="required email" data-required-message="Vui lòng nhập email.">
+                <small class="required-hint">Thông tin bắt buộc</small><p class="err"></p>
+              </div>
+              <div class="field">
+                <label for="profilePhone">Số điện thoại mới (để trống nếu không đổi)</label>
+                <input id="profilePhone" name="phone" type="tel" autocomplete="tel" data-v="phone" placeholder="Nhập số mới nếu cần đổi">
+                <p class="err"></p>
+              </div>
+            </div>
+            <div class="field">
+              <label for="profilePhoneLastFour">Bốn số cuối của số điện thoại hiện tại</label>
+              <input id="profilePhoneLastFour" name="phoneLastFour" inputmode="numeric" autocomplete="off" maxlength="4" data-v="required phoneLastFour" data-required-message="Thông tin bắt buộc">
+              <small class="required-hint">Thông tin bắt buộc</small><p class="err"></p>
+            </div>
+            <p class="form-msg" role="alert" aria-live="polite"></p>
+            <button class="btn" type="submit">Xác minh và cập nhật</button>
+          </form>
+          <a id="logout-link" class="btn" href="/pages/customer/auth/logout.html">Đăng xuất</a>
+        </div>
+        <p id="session-error" class="form-msg" role="alert" hidden></p>
+        <button id="session-retry" class="btn ghost" type="button" hidden>Thử tải lại</button>
+      </div>
+    </section>
+  </main>
+  <script src="../../assets/js/core/routes.js"></script>
+  <script src="../../assets/js/core/app.js"></script>
+  <script src="../../assets/js/core/session.js"></script>
+</body>
+</html>

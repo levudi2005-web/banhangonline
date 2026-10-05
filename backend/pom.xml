@@ -32,6 +32,8 @@
         <directory>${project.basedir}/../frontend</directory>
         <targetPath>static</targetPath>
         <includes>
+          <include>index.html</include>
+          <include>error/**</include>
           <include>pages/**</include>
           <include>assets/**</include>
         </includes>

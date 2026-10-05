@@ -34,25 +34,6 @@ document.addEventListener("click",e=>{
   b.setAttribute("aria-label",show?"Ẩn mật khẩu":"Hiện mật khẩu");b.innerHTML=svg(show?"off":"eye")}
 });
 
-const applyGlassMotion = () => {
-  const items = [...document.querySelectorAll(".card, .switch")];
-  items.forEach((el, index) => {
-    el.style.transform = "translateY(0)";
-    el.style.transition = "transform .28s ease, box-shadow .28s ease, border-color .28s ease";
-    el.addEventListener("pointermove", event => {
-      const rect = el.getBoundingClientRect();
-      const rotateX = ((event.clientY - rect.top) / rect.height - 0.5) * 4;
-      const rotateY = ((event.clientX - rect.left) / rect.width - 0.5) * 6;
-      el.style.transform = `perspective(1200px) rotateX(${(-rotateX).toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
-    });
-    el.addEventListener("pointerleave", () => {
-      el.style.transform = `translateY(${index % 2 === 0 ? 0 : 0}px)`;
-    });
-  });
-};
-
-applyGlassMotion();
-
 const collect=f=>{const o={};$$("[name]",f).forEach(el=>{
  if(el.type==="file"||el.dataset.skip!==undefined)return;
  const v=el.type==="checkbox"?el.checked:el.type==="password"?el.value:el.value.trim();
@@ -82,21 +63,52 @@ document.addEventListener("submit",async e=>{const f=e.target;if(!f.dataset.endp
  if(f.dataset.endpoint==="/api/auth/reset-password"&&!$("[name=token]",f).value){msg.textContent="Thông tin xác minh bị thiếu hoặc không hợp lệ. Vui lòng xác minh lại tài khoản.";msg.classList.add("show");btn.removeAttribute("aria-busy");btn.disabled=false;btn.textContent=originalText;return}
  try{const r=await fetch(API+f.dataset.endpoint,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json","X-Requested-With":"fetch"},body:JSON.stringify(collect(f))});
   const d=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(d.message||({400:"Dữ liệu không hợp lệ.",429:"Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",503:"Dịch vụ hiện chưa khả dụng. Vui lòng thử lại sau."}[r.status]||"Không thể hoàn tất yêu cầu. Vui lòng thử lại sau."));
+  if(!r.ok){
+   if(r.status===401&&f.dataset.endpoint==="/api/users/profile"&&window.AppRoutes){
+    const area=document.body.dataset.authArea||new URLSearchParams(location.search).get("area")||"customer";
+    AppRoutes.handleSessionExpired(AppRoutes.roleForArea(area));return
+   }
+   throw new Error(d.message||({400:"Dữ liệu không hợp lệ.",429:"Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",503:"Dịch vụ hiện chưa khả dụng. Vui lòng thử lại sau."}[r.status]||"Không thể hoàn tất yêu cầu. Vui lòng thử lại sau."))
+  }
+  if(f.dataset.loginRole){
+   if(!d.success||!d.data||!Array.isArray(d.data.roles))throw new Error("Máy chủ không trả về thông tin vai trò hợp lệ.");
+   const roles=d.data&&Array.isArray(d.data.roles)?d.data.roles:[];
+   const requestedArea=new URLSearchParams(location.search).get("area");
+   const requiredRole=requestedArea==="owner"?"OWNER":requestedArea==="staff"?"STAFF":f.dataset.loginRole;
+   const allowed=requiredRole==="MANAGEMENT"?["OWNER","STAFF"]:[requiredRole];
+   const role=allowed.find(candidate=>roles.includes(candidate));
+   if(!role){
+    const revoked=await fetch(API+"/api/auth/logout",{method:"POST",credentials:"include",headers:{"X-Requested-With":"fetch"}});
+    if(!revoked.ok)throw new Error("Tài khoản không thuộc khu vực này và máy chủ chưa thể thu hồi phiên đăng nhập. Vui lòng đăng xuất rồi thử lại.");
+    throw new Error("Tài khoản này không có quyền đăng nhập vào khu vực đã chọn.")
+   }
+   const returnUrl=new URLSearchParams(location.search).get("returnUrl");
+   location.assign(AppRoutes.redirectByRole(role,returnUrl));return
+  }
   if(f.dataset.resetRequest){
    const token=d.data&&d.data.resetToken;
    if(!token)throw new Error("Không thể xác minh thông tin. Vui lòng thử lại.");
+   const resetPage=AppRoutes.getRoute(f.dataset.resetRoute);
+   if(!resetPage)throw new Error("Đường dẫn đặt lại mật khẩu chưa được cấu hình.");
    sessionStorage.setItem("passwordResetToken",token);
-   location.href=f.dataset.resetPage;
+   location.href=resetPage;
    return
   }
   if(f.dataset.endpoint==="/api/auth/reset-password")sessionStorage.removeItem("passwordResetToken");
-  if(f.dataset.success){msg.textContent=f.dataset.success;msg.classList.add("show","success");if(f.dataset.next)setTimeout(()=>{location.href=f.dataset.next},1600);return}
-  const next=d.redirect||f.dataset.next;if(next)location.href=next;else{msg.textContent=d.message||"Yêu cầu đã được xử lý.";msg.classList.add("show","success")}}
+  if(f.dataset.endpoint==="/api/users/profile"&&d.data){
+   const fullName=$("#account-name"),phone=$("#account-phone");
+   if(fullName)fullName.textContent=d.data.fullName||d.data.username||"";
+   if(phone)phone.textContent=d.data.phone||"Chưa cung cấp";
+   const lastFour=$("[name=phoneLastFour]",f);if(lastFour)lastFour.value=""
+  }
+  const nextRoute=f.dataset.nextRoute?AppRoutes.getRoute(f.dataset.nextRoute,Object.fromEntries(new URLSearchParams(f.dataset.nextQuery||""))):null;
+  if(f.dataset.success){msg.textContent=f.dataset.success;msg.classList.add("show","success");if(nextRoute)setTimeout(()=>{location.href=nextRoute},1600);return}
+  const next=d.redirect||nextRoute;if(next)location.href=next;else{msg.textContent=d.message||"Yêu cầu đã được xử lý.";msg.classList.add("show","success")}}
  catch(x){msg.textContent=x instanceof TypeError?"Không thể kết nối máy chủ. Vui lòng thử lại sau.":x.message;msg.classList.add("show")}
  finally{btn.removeAttribute("aria-busy");btn.disabled=false;btn.textContent=originalText}});
 const resetToken=new URLSearchParams(location.search).get("token")||sessionStorage.getItem("passwordResetToken");if(resetToken){const token=$("[name=token]");if(token)token.value=resetToken}
 const registered=new URLSearchParams(location.search).get("registered");
 if(registered){const s=$(".sub");if(s)s.textContent=registered==="customer"?"Tài khoản đã được tạo. Bạn có thể đăng nhập.":"Đã nhận đăng ký cửa hàng. Tài khoản đang chờ quản trị viên duyệt."}
 if(new URLSearchParams(location.search).get("reset")==="success"){const s=$(".sub");if(s)s.textContent="Mật khẩu đã được cập nhật. Hãy đăng nhập bằng mật khẩu mới."}
+if(new URLSearchParams(location.search).get("expired")==="1"){const msg=$(".form-msg");if(msg){msg.textContent="Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";msg.classList.add("show")}}
 })();

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <title>BanHangOnline — Chọn khu vực</title>
+</head>
+<body class="customer">
+  <main class="auth auth-landing">
+    <section class="panel panel-landing">
+      <div class="card launcher-card">
+        <div class="auth-header launcher-header">
+          <a class="brand" data-route="gateway" href="/pages/auth/index.html">
+            <span class="logo"><i data-i="bag"></i></span>
+            BanHangOnline
+          </a>
+        </div>
+
+        <div class="launcher-intro">
+          <span class="eyebrow">BanHangOnline</span>
+          <h1>Chào mừng bạn</h1>
+          <p class="sub">Chọn khu vực phù hợp để tiếp tục.</p>
+        </div>
+
+        <div class="role-grid">
+          <section class="role-card">
+            <span class="role-icon customer"><i data-i="bag"></i></span>
+            <span class="role-meta">
+              <strong>Khách hàng</strong>
+              <small>Đăng nhập tài khoản khách hàng.</small>
+            </span>
+            <div class="role-actions">
+              <a class="role-action" data-route="customer.login" href="/pages/customer/auth/login.html">Đăng nhập <i data-i="right"></i></a>
+              <a class="role-action secondary" data-route="customer.register" href="/pages/customer/auth/register.html">Tạo tài khoản khách hàng <i data-i="right"></i></a>
+            </div>
+          </section>
+
+          <section class="role-card">
+            <span class="role-icon staff"><i data-i="shield"></i></span>
+            <span class="role-meta">
+              <strong>Nhân viên</strong>
+              <small>Dành cho nhân viên đã được cấp tài khoản.</small>
+            </span>
+            <a class="role-action" data-route="staff.login" href="/pages/staff/auth/login.html?area=staff">Đăng nhập <i data-i="right"></i></a>
+          </section>
+
+          <section class="role-card">
+            <span class="role-icon owner"><i data-i="store"></i></span>
+            <span class="role-meta">
+              <strong>Chủ cửa hàng</strong>
+              <small>Dành cho chủ cửa hàng đã được duyệt.</small>
+            </span>
+            <a class="role-action" data-route="owner.login" href="/pages/staff/auth/login.html?area=owner">Đăng nhập <i data-i="right"></i></a>
+          </section>
+        </div>
+        <p class="gateway-note">Tài khoản chủ cửa hàng và nhân viên được cấp hoặc duyệt theo quy trình quản trị.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="../../assets/js/core/routes.js"></script>
+  <script src="../../assets/js/core/app.js"></script>
+</body>
+</html>

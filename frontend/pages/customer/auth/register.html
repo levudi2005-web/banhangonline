@@ -1,9 +1,9 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../../assets/css/style.css"><title>Đăng ký — Cửa hàng</title></head>
 <body class="customer"><main class="auth">
 <section class="panel"><div class="card auth-card">
-<div class="auth-header"><a class="back" href="/pages/customer/auth/login.html"><i data-i="left"></i> Quay lại đăng nhập</a></div>
+<div class="auth-header"><a class="back" data-route="customer.login" href="/pages/customer/auth/login.html"><i data-i="left"></i> Quay lại đăng nhập</a></div>
 <h1>Tạo tài khoản khách hàng</h1><p class="sub">Đăng ký để đặt hàng và nhận hàng tại cửa hàng</p>
-<form data-endpoint="/api/auth/register" data-next="/pages/customer/auth/login.html?registered=customer" novalidate>
+<form data-endpoint="/api/auth/register" data-next-route="customer.login" data-next-query="registered=customer" novalidate>
 <div class="row">
 <div class="field"><label for="fullName">Họ và tên</label><input id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Nguyễn Văn A" data-v="required" data-required-message="Vui lòng nhập họ và tên."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
 <div class="field"><label for="username">Tên đăng nhập</label><input id="username" name="username" type="text" autocomplete="username" placeholder="4–30 ký tự" data-v="required username" data-required-message="Vui lòng nhập tên đăng nhập."><small class="required-hint">Thông tin bắt buộc</small><p class="err"></p></div>
@@ -17,6 +17,6 @@
 </fieldset>
 <p class="form-msg" role="alert"></p>
 <button class="btn" type="submit">Tạo tài khoản</button></form>
-<p class="center">Đã có tài khoản? <a href="/pages/customer/auth/login.html"><b>Đăng nhập</b></a></p>
+<p class="center">Đã có tài khoản? <a data-route="customer.login" href="/pages/customer/auth/login.html"><b>Đăng nhập</b></a></p>
 </div></section>
-</main><script src="../../../assets/js/core/app.js"></script></body></html>
+</main><script src="../../../assets/js/core/routes.js"></script><script src="../../../assets/js/core/app.js"></script></body></html>

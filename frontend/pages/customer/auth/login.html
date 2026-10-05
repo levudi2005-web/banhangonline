@@ -15,7 +15,7 @@
       <div class="card auth-card">
 
         <div class="auth-header">
-          <a class="brand" href="/pages/customer/auth/login.html">
+          <a class="brand" data-route="gateway" href="/pages/auth/index.html">
             <span class="logo"><i data-i="bag"></i></span>
             Cửa hàng
           </a>
@@ -25,7 +25,7 @@
         <p class="sub">Đăng nhập để tiếp tục mua sắm</p>
 
         <form data-endpoint="/api/auth/login"
-              data-next="/pages/auth/session.html?area=customer"
+              data-login-role="CUSTOMER"
               novalidate>
 
           <div class="row">
@@ -67,7 +67,7 @@
             <label class="chk">
               <input type="checkbox" name="remember"> Ghi nhớ đăng nhập
             </label>
-            <a href="forgot-password.html">Quên mật khẩu?</a>
+            <a data-route="customer.forgot" href="forgot-password.html">Quên mật khẩu?</a>
           </div>
 
           <p class="form-msg" role="alert"></p>
@@ -76,15 +76,15 @@
         </form>
 
         <p class="center">
-          Chưa có tài khoản? <a href="register.html"><b>Đăng ký ngay</b></a>
+          Chưa có tài khoản? <a data-route="customer.register" href="register.html"><b>Đăng ký ngay</b></a>
         </p>
 
         <!-- Chuyển sang đăng nhập quản trị -->
-        <a class="switch" href="/pages/staff/auth/login.html">
+        <a class="switch" data-route="gateway" href="/pages/auth/index.html">
           <span class="ic"><i data-i="shield"></i></span>
           <span>
             <b>Bạn là chủ cửa hàng hoặc nhân viên?</b>
-            <small>Đăng nhập quản trị</small>
+            <small>Chọn đúng khu vực đăng nhập</small>
           </span>
           <i data-i="right"></i>
         </a>
@@ -94,6 +94,7 @@
 
   </main>
 
+  <script src="../../../assets/js/core/routes.js"></script>
   <script src="../../../assets/js/core/app.js"></script>
 </body>
 </html>
