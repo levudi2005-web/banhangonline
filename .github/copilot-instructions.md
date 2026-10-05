@@ -12,12 +12,12 @@ The app requires `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, 
 ## Architecture
 
 - This is a Java 25 / Spring Boot application built with Maven. `BanHangOnlineApplication` starts the app, enables configuration-property scanning, and schedules maintenance tasks.
-- The backend is under `backend/` and groups the implemented auth, user, address, role, permission, and store-registration code by feature. Controllers bind and validate DTOs, services implement transactional business rules, repositories access JPA entities, and `GlobalExceptionHandler` maps API and persistence errors to the shared `ApiResponse` envelope.
+- The backend is under `backend/` and groups auth, user, address, roles/permissions, store management, product catalog, inventory, click-and-collect orders, and notifications by feature. Controllers bind and validate DTOs, services implement transactional business rules, repositories access JPA entities, and `GlobalExceptionHandler` maps API and persistence errors to the shared `ApiResponse` envelope.
 - Authentication is stateless at the Spring Security layer. Auth-owned session code under `auth/security` issues and resolves an HttpOnly `SID` cookie; only a SHA-256 hash of its token is stored in the `sessions` table. `SecurityConfig` installs those session components and the shared request-header and rate-limit filters under `common/security`.
 - Customer and staff authentication endpoints live under `/api/auth`. Staff-store registration creates a pending account with no role; owner activation and role assignment are a manual database operation documented in `docs/approve-owner.sql`.
 - Frontend pages and shared assets live under `frontend/` by audience and responsibility. Maven packages them into Spring's `static` resources; the shared JavaScript submits forms marked with `data-endpoint` as JSON and includes `X-Requested-With`.
 - Historical Flyway SQL in `backend/src/main/resources/db/migration` documents the current auth schema and reference seed, but Flyway is not a runtime dependency and is disabled. The intended schema source is PowerDesigner MCD → MLD → MPD → reviewed SQL under `database/sql/`, manually applied only after review. Hibernate is validation-only.
-- The current implementation is authentication, user, address, role/permission, and store registration only. `archive/` contains an older auth UI and an unrelated standalone Java sample; neither is built or served by the main application.
+- The current implementation includes customer browsing and carts, owner-managed products/prices/inventory, store-scoped staff permissions, click-and-collect checkout and order processing, plus auth, user, address, and store registration. Chat and AI chat are outside these implemented flows and must remain separate. `archive/` contains an older auth UI and an unrelated standalone Java sample; neither is built or served by the main application.
 
 ## Repository-specific conventions
 

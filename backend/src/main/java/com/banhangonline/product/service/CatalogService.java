@@ -72,7 +72,9 @@ public class CatalogService {
     @Transactional
     public ProductView create(Long storeId, Long userId, Set<String> roles, ProductRequest request) {
         storePermissions.require(storeId, userId, roles, "MANAGE_PRODUCTS");
-        storePermissions.require(storeId, userId, roles, "MANAGE_INVENTORY");
+        if (request.quantity() != null || request.reorderLevel() != null) {
+            storePermissions.require(storeId, userId, roles, "MANAGE_INVENTORY");
+        }
         Store store = stores.getReferenceById(storeId);
         Category category = categories.findByIdAndStatus(request.categoryId(), "ACTIVE").orElseThrow(() ->
                 new ApiException(HttpStatus.BAD_REQUEST, "CATEGORY_NOT_FOUND", "Danh mục không tồn tại hoặc đã ẩn"));
@@ -88,7 +90,7 @@ public class CatalogService {
         Inventory stock = new Inventory();
         stock.setStore(store);
         stock.setProduct(product);
-        stock.setQuantity(request.quantity());
+        stock.setQuantity(request.quantity() == null ? 0 : request.quantity());
         stock.setReservedQuantity(0);
         stock.setReorderLevel(request.reorderLevel() == null ? 0 : request.reorderLevel());
         stock.setStatus("ACTIVE");
@@ -99,7 +101,9 @@ public class CatalogService {
     @Transactional
     public ProductView update(Long storeId, Long productId, Long userId, Set<String> roles, ProductRequest request) {
         storePermissions.require(storeId, userId, roles, "MANAGE_PRODUCTS");
-        storePermissions.require(storeId, userId, roles, "MANAGE_INVENTORY");
+        if (request.quantity() != null || request.reorderLevel() != null) {
+            storePermissions.require(storeId, userId, roles, "MANAGE_INVENTORY");
+        }
         Inventory stock = inventory.findByStoreIdAndProductId(storeId, productId).orElseThrow(() ->
                 new ApiException(HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND", "Sản phẩm không có trong cửa hàng này"));
         if (inventory.existsByProductIdAndStoreIdNot(productId, storeId)) {
@@ -111,15 +115,30 @@ public class CatalogService {
                 || !product.getSlug().equalsIgnoreCase(request.slug().trim())) {
             throw ApiException.validation("Không thể đổi SKU hoặc đường dẫn sau khi tạo sản phẩm");
         }
-        if (request.quantity() < stock.getReservedQuantity()) {
+        if (request.quantity() != null && request.quantity() < stock.getReservedQuantity()) {
             throw ApiException.validation("Tồn kho không được thấp hơn số lượng đã giữ cho đơn hàng");
         }
         Category category = categories.findByIdAndStatus(request.categoryId(), "ACTIVE").orElseThrow(() ->
                 new ApiException(HttpStatus.BAD_REQUEST, "CATEGORY_NOT_FOUND", "Danh mục không tồn tại hoặc đã ẩn"));
         updateProduct(product, request, category, product.getSku(), product.getSlug());
-        stock.setQuantity(request.quantity());
-        stock.setReorderLevel(request.reorderLevel() == null ? 0 : request.reorderLevel());
+        if (request.quantity() != null) {
+            stock.setQuantity(request.quantity());
+        }
+        if (request.reorderLevel() != null) {
+            stock.setReorderLevel(request.reorderLevel());
+        }
         return ProductView.from(stock);
+    }
+
+    @Transactional
+    public void archive(Long storeId, Long productId, Long userId, Set<String> roles) {
+        storePermissions.require(storeId, userId, roles, "MANAGE_PRODUCTS");
+        Inventory stock = inventory.findByStoreIdAndProductId(storeId, productId).orElseThrow(() ->
+                new ApiException(HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND", "Sản phẩm không có trong cửa hàng này"));
+        stock.setStatus("INACTIVE");
+        if (!inventory.existsByProductIdAndStoreIdNot(productId, storeId)) {
+            stock.getProduct().setStatus("INACTIVE");
+        }
     }
 
     @Transactional

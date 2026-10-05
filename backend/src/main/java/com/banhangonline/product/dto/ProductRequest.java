@@ -13,5 +13,5 @@ public record ProductRequest(
         @NotNull @DecimalMin(value = "0.0001") @Digits(integer = 15, fraction = 4) BigDecimal price,
         @Pattern(regexp = "^$|[A-Z]{3}") String currency,
         @Pattern(regexp = "^$|https?://.{1,490}$") String imageUrl,
-        @NotNull @Min(0) Integer quantity,
+        @Min(0) Integer quantity,
         @Min(0) Integer reorderLevel) {}

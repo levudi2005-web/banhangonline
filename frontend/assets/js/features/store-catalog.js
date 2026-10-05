@@ -5,6 +5,7 @@
     ["VIEW_PRODUCTS", "Xem sản phẩm"], ["MANAGE_PRODUCTS", "Quản lý sản phẩm"],
     ["VIEW_INVENTORY", "Xem tồn kho"], ["MANAGE_INVENTORY", "Quản lý tồn kho"]
   ];
+  let fieldSequence = 0;
 
   function element(tag, text, className) {
     const node = document.createElement(tag);
@@ -36,7 +37,7 @@
 
   function field(label, name, type = "text", required = false, value = "") {
     const wrapper = element("div", undefined, "dash-field");
-    const inputId = `catalog-${name}`;
+    const inputId = `catalog-${name}-${++fieldSequence}`;
     const title = element("label", label);
     title.htmlFor = inputId;
     const input = element(type === "textarea" ? "textarea" : "input");
@@ -44,8 +45,11 @@
     input.name = name;
     if (type !== "textarea") input.type = type;
     input.required = required;
-    if (value) input.value = value;
-    if (type === "number") input.min = "0";
+    if (value !== "") input.value = value;
+    if (type === "number") {
+      input.min = "0";
+      input.step = "1";
+    }
     wrapper.append(title, input);
     return wrapper;
   }
@@ -57,6 +61,7 @@
     try {
       const products = await request(`/api/owner/stores/${encodeURIComponent(storeId)}/products`);
       status.textContent = `${products.length} sản phẩm trong cửa hàng.`;
+      const categories = has("MANAGE_PRODUCTS") ? await request("/api/catalog/categories") : [];
       if (!products.length) {
         root.append(element("div", "Cửa hàng chưa có sản phẩm.", "dash-empty"));
       }
@@ -71,6 +76,90 @@
           ? `${detailText} · Số lượng: ${product.quantity} · Đã giữ: ${product.reservedQuantity}`
           : detailText);
         card.append(title, detail);
+        if (has("MANAGE_PRODUCTS")) {
+          const actions = element("div", undefined, "dash-inline");
+          const editToggle = element("button", "Sửa thông tin / giá", "dash-button secondary");
+          editToggle.type = "button";
+          const archive = element("button", "Ẩn sản phẩm", "dash-button danger");
+          archive.type = "button";
+          archive.disabled = product.status === "INACTIVE";
+          if (archive.disabled) archive.textContent = "Đã ẩn";
+          actions.append(editToggle, archive);
+          card.append(actions);
+
+          const editForm = element("form", undefined, "dash-form shop-admin-form");
+          editForm.hidden = true;
+          const categoryField = element("div", undefined, "dash-field");
+          const categoryLabel = element("label", "Danh mục");
+          const categorySelect = element("select");
+          categorySelect.id = `catalog-category-${++fieldSequence}`;
+          categoryLabel.htmlFor = categorySelect.id;
+          categorySelect.name = "categoryId";
+          categorySelect.required = true;
+          categories.forEach(category => {
+            const option = element("option", category.name);
+            option.value = category.id;
+            categorySelect.append(option);
+          });
+          categorySelect.value = String(product.categoryId);
+          categoryField.append(categoryLabel, categorySelect);
+          const skuField = field("SKU (không thể đổi)", "sku", "text", true, product.sku);
+          skuField.querySelector("input").readOnly = true;
+          const slugField = field("Đường dẫn (không thể đổi)", "slug", "text", true, product.slug);
+          slugField.querySelector("input").readOnly = true;
+          const nameField = field("Tên sản phẩm", "name", "text", true, product.name);
+          const priceField = field("Giá", "price", "number", true, String(product.price));
+          priceField.querySelector("input").min = "0.0001";
+          priceField.querySelector("input").step = "0.0001";
+          const currencyField = field("Tiền tệ", "currency", "text", true, product.currency);
+          currencyField.querySelector("input").maxLength = 3;
+          currencyField.querySelector("input").pattern = "[A-Z]{3}";
+          const descriptionField = field("Mô tả", "description", "textarea", false, product.description || "");
+          const imageField = field("Ảnh HTTPS", "imageUrl", "url", false, product.imageUrl || "");
+          editForm.append(categoryField, skuField, nameField, slugField, priceField,
+            currencyField, imageField, descriptionField);
+          const saveProduct = element("button", "Lưu thông tin sản phẩm", "dash-button");
+          saveProduct.type = "submit";
+          editForm.append(saveProduct);
+          editToggle.addEventListener("click", () => {
+            editForm.hidden = !editForm.hidden;
+            editToggle.textContent = editForm.hidden ? "Sửa thông tin / giá" : "Đóng chỉnh sửa";
+          });
+          editForm.addEventListener("submit", async event => {
+            event.preventDefault();
+            saveProduct.disabled = true;
+            const values = Object.fromEntries(new FormData(editForm).entries());
+            values.categoryId = Number(values.categoryId);
+            try {
+              await request(`/api/owner/stores/${storeId}/products/${product.id}`, {
+                method: "PUT",
+                body: JSON.stringify(values)
+              });
+              await load(storeId, permissions, isOwner, root, status);
+              status.textContent = "Đã cập nhật thông tin và giá sản phẩm.";
+              status.className = "dash-status success";
+            } catch (error) {
+              status.textContent = error.message;
+              status.className = "dash-status error";
+              saveProduct.disabled = false;
+            }
+          });
+          archive.addEventListener("click", async () => {
+            if (!window.confirm(`Ẩn "${product.name}" khỏi cửa hàng này? Lịch sử đơn hàng sẽ được giữ nguyên.`)) return;
+            archive.disabled = true;
+            try {
+              await request(`/api/owner/stores/${storeId}/products/${product.id}`, { method: "DELETE" });
+              await load(storeId, permissions, isOwner, root, status);
+              status.textContent = "Đã ẩn sản phẩm khỏi cửa hàng.";
+              status.className = "dash-status success";
+            } catch (error) {
+              status.textContent = error.message;
+              status.className = "dash-status error";
+              archive.disabled = false;
+            }
+          });
+          card.append(editForm);
+        }
         if (has("MANAGE_INVENTORY")) {
           const form = element("form", undefined, "dash-form");
           const quantity = field("Tồn kho", "quantity", "number", true, String(product.quantity));
@@ -78,6 +167,8 @@
           const statusField = element("div", undefined, "dash-field");
           const label = element("label", "Trạng thái tồn kho");
           const select = element("select");
+          select.id = `catalog-status-${++fieldSequence}`;
+          label.htmlFor = select.id;
           select.name = "status";
           [["ACTIVE", "Đang bán"], ["INACTIVE", "Tạm ẩn"]].forEach(([value, text]) => {
             const option = element("option", text);
@@ -117,8 +208,7 @@
         root.append(card);
       });
 
-      if (has("MANAGE_PRODUCTS") && has("MANAGE_INVENTORY")) {
-        const categories = await request("/api/catalog/categories");
+      if (has("MANAGE_PRODUCTS")) {
         const section = element("section", undefined, "dash-card");
         section.append(element("h3", "Thêm sản phẩm"));
         if (!categories.length && isOwner) {
@@ -150,6 +240,8 @@
           const categoryField = element("div", undefined, "dash-field");
           const label = element("label", "Danh mục");
           const select = element("select");
+          select.id = `catalog-category-${++fieldSequence}`;
+          label.htmlFor = select.id;
           select.name = "categoryId";
           select.required = true;
           categories.forEach(category => {
@@ -163,10 +255,18 @@
             field("Tên sản phẩm", "name", "text", true),
             field("Slug", "slug", "text", true),
             field("Giá (VND)", "price", "number", true),
-            field("Số lượng", "quantity", "number", true),
-            field("Mức cảnh báo tồn kho", "reorderLevel", "number", true),
-            field("Đường dẫn ảnh HTTPS", "imageUrl"),
+            field("Đường dẫn ảnh HTTPS", "imageUrl", "url"),
             field("Mô tả", "description", "textarea"));
+          if (has("MANAGE_INVENTORY")) {
+            form.append(field("Số lượng ban đầu", "quantity", "number", true, "0"),
+              field("Mức cảnh báo tồn kho", "reorderLevel", "number", true, "0"));
+          } else {
+            section.append(element("p",
+              "Sản phẩm được tạo với tồn kho 0. Cần quyền quản lý tồn kho để nhập số lượng bán."));
+          }
+          const priceInput = form.querySelector('[name="price"]');
+          priceInput.min = "0.0001";
+          priceInput.step = "0.0001";
           const submit = element("button", "Tạo sản phẩm", "dash-button");
           submit.type = "submit";
           form.append(submit);
@@ -176,13 +276,15 @@
             try {
               const values = Object.fromEntries([...new FormData(form).entries()].filter(([, value]) => value !== ""));
               values.categoryId = Number(values.categoryId);
-              values.quantity = Number(values.quantity);
-              values.reorderLevel = Number(values.reorderLevel);
+              if (values.quantity !== undefined) values.quantity = Number(values.quantity);
+              if (values.reorderLevel !== undefined) values.reorderLevel = Number(values.reorderLevel);
               values.currency = "VND";
               await request(`/api/owner/stores/${storeId}/products`, {
                 method: "POST", body: JSON.stringify(values)
               });
               await load(storeId, permissions, isOwner, root, status);
+              status.textContent = "Đã thêm sản phẩm vào cửa hàng.";
+              status.className = "dash-status success";
             } catch (error) {
               status.textContent = error.message;
               status.className = "dash-status error";

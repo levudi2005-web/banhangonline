@@ -36,7 +36,7 @@ public class StoreCatalogController {
     public ApiResponse<ProductView> create(@AuthenticationPrincipal AuthPrincipal principal,
                                            @PathVariable Long storeId,
                                            @Valid @RequestBody ProductRequest request) {
-        return ApiResponse.ok("Đã thêm sản phẩm và tồn kho",
+        return ApiResponse.ok("Đã thêm sản phẩm",
                 catalog.create(storeId, principal.userId(), principal.roles(), request));
     }
 
@@ -44,8 +44,15 @@ public class StoreCatalogController {
     public ApiResponse<ProductView> update(@AuthenticationPrincipal AuthPrincipal principal,
                                            @PathVariable Long storeId, @PathVariable Long productId,
                                            @Valid @RequestBody ProductRequest request) {
-        return ApiResponse.ok("Đã cập nhật sản phẩm và tồn kho",
+        return ApiResponse.ok("Đã cập nhật sản phẩm",
                 catalog.update(storeId, productId, principal.userId(), principal.roles(), request));
+    }
+
+    @DeleteMapping("/stores/{storeId}/products/{productId}")
+    public ApiResponse<Void> archive(@AuthenticationPrincipal AuthPrincipal principal,
+                                     @PathVariable Long storeId, @PathVariable Long productId) {
+        catalog.archive(storeId, productId, principal.userId(), principal.roles());
+        return ApiResponse.ok("Đã ẩn sản phẩm khỏi cửa hàng", null);
     }
 
     @PatchMapping("/stores/{storeId}/inventory/{productId}")

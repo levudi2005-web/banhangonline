@@ -8,6 +8,21 @@
   const catalogPanel = document.querySelector("#staff-catalog-panel");
   const catalogList = document.querySelector("#staff-catalog");
   const catalogStatus = document.querySelector("#staff-catalog-status");
+  const permissionLabels = {
+    VIEW_ORDERS: "Xem đơn hàng",
+    MANAGE_ORDERS: "Xử lý đơn hàng",
+    CONFIRM_PICKUP: "Xác nhận khách nhận hàng",
+    VIEW_PRODUCTS: "Xem sản phẩm",
+    MANAGE_PRODUCTS: "Quản lý sản phẩm",
+    VIEW_INVENTORY: "Xem tồn kho",
+    MANAGE_INVENTORY: "Điều chỉnh tồn kho",
+    VIEW_STAFF: "Xem nhân viên",
+    MANAGE_STAFF: "Quản lý nhân viên",
+    VIEW_STORES: "Xem cửa hàng",
+    MANAGE_STORES: "Quản lý cửa hàng",
+    VIEW_REPORTS: "Xem báo cáo",
+    MANAGE_SETTINGS: "Quản lý cài đặt"
+  };
 
   async function initialize() {
     const user = await AppRoutes.requireAuth("STAFF");
@@ -34,7 +49,7 @@
       const permissions = document.createElement("p");
       permissions.className = "dash-muted";
       permissions.textContent = store.permissions.length
-        ? `Quyền được cấp: ${store.permissions.join(", ")}`
+        ? `Quyền được cấp: ${store.permissions.map(permission => permissionLabels[permission] || permission).join(", ")}`
         : "Chưa được cấp quyền nghiệp vụ.";
       item.append(name, permissions);
       if (store.permissions.includes("VIEW_ORDERS") || store.permissions.includes("MANAGE_ORDERS")) {

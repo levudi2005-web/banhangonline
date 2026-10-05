@@ -16,6 +16,21 @@
   const ordersStatus = $("#owner-orders-status");
   const catalogList = $("#owner-catalog");
   const catalogStatus = $("#owner-catalog-status");
+  const permissionLabels = {
+    VIEW_ORDERS: "Xem đơn hàng",
+    MANAGE_ORDERS: "Xử lý đơn hàng",
+    CONFIRM_PICKUP: "Xác nhận khách nhận hàng",
+    VIEW_PRODUCTS: "Xem sản phẩm",
+    MANAGE_PRODUCTS: "Thêm, sửa, ẩn sản phẩm và giá",
+    VIEW_INVENTORY: "Xem tồn kho",
+    MANAGE_INVENTORY: "Điều chỉnh số lượng tồn kho",
+    VIEW_STAFF: "Xem nhân viên",
+    MANAGE_STAFF: "Quản lý nhân viên",
+    VIEW_STORES: "Xem cửa hàng",
+    MANAGE_STORES: "Quản lý cửa hàng",
+    VIEW_REPORTS: "Xem báo cáo",
+    MANAGE_SETTINGS: "Quản lý cài đặt"
+  };
   const permissionNames = [
     "VIEW_ORDERS", "MANAGE_ORDERS", "CONFIRM_PICKUP", "VIEW_PRODUCTS",
     "MANAGE_PRODUCTS", "VIEW_INVENTORY", "MANAGE_INVENTORY", "VIEW_STAFF",
@@ -134,7 +149,7 @@
           checkbox.value = permission;
           checkbox.checked = permissionSet.has(permission);
           const name = document.createElement("span");
-          name.textContent = permission;
+          name.textContent = permissionLabels[permission] || permission;
           label.append(checkbox, name);
           permissionChoices.append(label);
         });
@@ -299,7 +314,12 @@
     }
   });
 
-  storeSelect.addEventListener("change", () => loadStaff(storeSelect.value));
+  storeSelect.addEventListener("change", () => {
+    const storeId = storeSelect.value;
+    loadStaff(storeId);
+    window.StoreOrders.load(storeId, [], true, ordersList, ordersStatus);
+    window.StoreCatalog.load(storeId, [], true, catalogList, catalogStatus);
+  });
   const permissionContainer = $("#staff-permissions");
   permissionNames.forEach(name => {
     const label = document.createElement("label");
@@ -309,7 +329,7 @@
     checkbox.name = "permissions";
     checkbox.value = name;
     const text = document.createElement("span");
-    text.textContent = name;
+    text.textContent = permissionLabels[name] || name;
     label.append(checkbox, text);
     permissionContainer.append(label);
   });

@@ -20,13 +20,38 @@
       </nav>
     </header>
     <h1 class="dash-title">Nhận hàng tại cửa hàng</h1>
-    <p class="dash-subtitle">Chọn cửa hàng để xem sản phẩm và đặt hàng nhận trực tiếp.</p>
+    <p class="dash-subtitle">Khám phá sản phẩm, chọn cửa hàng nhận hàng và đặt trực tuyến dễ dàng.</p>
     <section class="dash-card">
-      <h2>Chọn cửa hàng nhận hàng</h2>
+      <div class="shop-heading">
+        <div>
+          <h2>Chọn cửa hàng nhận hàng</h2>
+          <p class="dash-muted">Sản phẩm và tồn kho được cập nhật trực tiếp từ cửa hàng.</p>
+        </div>
+        <a class="dash-button secondary" href="/pages/customer/cart.html">Mở giỏ hàng</a>
+      </div>
       <div id="store-status" class="dash-status" role="status" aria-live="polite">Đang tải cửa hàng…</div>
       <div class="dash-field"><label for="store-select">Cửa hàng</label><select id="store-select"></select></div>
-      <h2 class="dash-section-title">Sản phẩm còn hàng</h2>
-      <ul id="product-list" class="dash-list"></ul>
+      <div class="shop-toolbar">
+        <div class="dash-field">
+          <label for="product-search">Tìm sản phẩm</label>
+          <input id="product-search" type="search" placeholder="Tên, mô tả hoặc mã hàng">
+        </div>
+        <div class="dash-field">
+          <label for="category-filter">Danh mục</label>
+          <select id="category-filter"><option value="">Tất cả danh mục</option></select>
+        </div>
+        <div class="dash-field">
+          <label for="product-sort">Sắp xếp</label>
+          <select id="product-sort">
+            <option value="recommended">Mặc định</option>
+            <option value="price-asc">Giá thấp đến cao</option>
+            <option value="price-desc">Giá cao đến thấp</option>
+            <option value="name">Tên A–Z</option>
+          </select>
+        </div>
+        <span id="product-count" class="dash-muted" aria-live="polite"></span>
+      </div>
+      <div id="product-list" class="shop-grid" aria-live="polite"></div>
     </section>
   </main>
   <script src="../../assets/js/core/routes.js"></script>
