@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     List<Category> findByStatusOrderByName(String status);
     Optional<Category> findByIdAndStatus(Long id, String status);
+    boolean existsBySlug(String slug);
 }

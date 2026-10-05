@@ -24,7 +24,10 @@
       <div id="cart-status" class="dash-status" role="status" aria-live="polite">Đang tải…</div>
       <div class="cart-layout">
         <section class="cart-items-panel" aria-label="Sản phẩm trong giỏ">
-          <h2>Sản phẩm đã chọn</h2>
+          <div class="cart-items-heading">
+            <h2>Sản phẩm đã chọn</h2>
+            <button id="cart-clear" class="dash-button secondary" type="button" hidden>Xóa toàn bộ</button>
+          </div>
           <ul id="cart-items" class="dash-list"></ul>
           <p class="cart-subtotal"><span>Tạm tính</span><strong id="cart-total">0 VND</strong></p>
         </section>

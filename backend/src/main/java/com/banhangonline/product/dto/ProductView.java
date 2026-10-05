@@ -23,4 +23,13 @@ public record ProductView(Long id, Long categoryId, String categoryName, String 
                 includeInventory ? inventory.getReorderLevel() : null,
                 includeInventory ? inventory.getStatus() : product.getStatus());
     }
+
+    public static ProductView forCustomer(Inventory inventory) {
+        Product product = inventory.getProduct();
+        return new ProductView(product.getId(), product.getCategory().getId(), product.getCategory().getName(),
+                product.getSku(), product.getName(), product.getSlug(), product.getDescription(), product.getPrice(),
+                product.getCurrency(), product.getImageUrl(),
+                Math.max(0, inventory.getQuantity() - inventory.getReservedQuantity()), null, null,
+                product.getStatus());
+    }
 }

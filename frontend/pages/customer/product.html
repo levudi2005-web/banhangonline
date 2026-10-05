@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7fb">
+  <link rel="stylesheet" href="../../assets/css/dashboard.css">
+  <title>Chi tiết sản phẩm — BanHangOnline</title>
+</head>
+<body class="dashboard">
+  <main class="dash-shell">
+    <header class="dash-top">
+      <a class="dash-brand" href="/pages/customer/index.html">BanHangOnline</a>
+      <nav class="dash-nav" aria-label="Điều hướng khách hàng">
+        <a href="/pages/customer/index.html">Cửa hàng</a>
+        <a href="/pages/customer/cart.html">Giỏ hàng</a>
+        <a href="/pages/customer/orders.html">Đơn hàng</a>
+        <a href="/pages/auth/session.html?area=customer">Tài khoản</a>
+      </nav>
+    </header>
+    <p class="product-breadcrumb"><a href="/pages/customer/index.html">Cửa hàng</a><span aria-hidden="true">/</span><span id="product-category-crumb">Sản phẩm</span></p>
+    <div id="product-status" class="dash-status" role="status" aria-live="polite">Đang tải thông tin sản phẩm…</div>
+    <section id="product-detail" class="product-detail-card" aria-busy="true" hidden>
+      <div id="product-media" class="product-detail-media"></div>
+      <div class="product-detail-content">
+        <span id="product-category" class="dash-badge"></span>
+        <h1 id="product-name" class="product-detail-title"></h1>
+        <p id="product-sku" class="dash-muted"></p>
+        <p id="product-description" class="product-detail-description"></p>
+        <div class="product-detail-price-row">
+          <strong id="product-price" class="product-detail-price"></strong>
+          <span id="product-availability" class="product-availability"></span>
+        </div>
+        <div class="product-pickup">
+          <span class="pickup-mark" aria-hidden="true">✓</span>
+          <span><strong>Nhận hàng tại cửa hàng</strong><small id="product-store"></small></span>
+        </div>
+        <form id="product-cart-form" class="product-purchase">
+          <div class="dash-field">
+            <label for="product-quantity">Số lượng</label>
+            <input id="product-quantity" type="number" min="1" value="1" required>
+          </div>
+          <button id="product-add" class="dash-button" type="submit">Thêm vào giỏ hàng</button>
+          <a id="product-cart-link" class="dash-button secondary" href="/pages/customer/cart.html">Xem giỏ hàng</a>
+        </form>
+      </div>
+    </section>
+    <div class="product-back-link"><a href="/pages/customer/index.html">← Tiếp tục xem sản phẩm</a></div>
+  </main>
+  <script src="../../assets/js/core/routes.js"></script>
+  <script src="../../assets/js/features/customer-product.js"></script>
+</body>
+</html>

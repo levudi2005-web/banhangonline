@@ -56,7 +56,16 @@ public class CatalogService {
     @Transactional(readOnly = true)
     public List<ProductView> customerProducts(Long storeId) {
         requireActiveStore(storeId);
-        return inventory.findAvailableByStoreId(storeId).stream().map(ProductView::from).toList();
+        return inventory.findAvailableByStoreId(storeId).stream().map(ProductView::forCustomer).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ProductView customerProduct(Long storeId, Long productId) {
+        requireActiveStore(storeId);
+        Inventory stock = inventory.findAvailableByStoreIdAndProductId(storeId, productId).orElseThrow(() ->
+                new ApiException(HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND",
+                        "Không tìm thấy sản phẩm đang được bán tại cửa hàng này"));
+        return ProductView.forCustomer(stock);
     }
 
     @Transactional(readOnly = true)
@@ -166,9 +175,13 @@ public class CatalogService {
         if (!actor.hasRole("OWNER")) {
             throw new ApiException(HttpStatus.FORBIDDEN, "OWNER_REQUIRED", "Chỉ chủ cửa hàng mới được tạo danh mục");
         }
+        String slug = request.slug().trim().toLowerCase(Locale.ROOT);
+        if (categories.existsBySlug(slug)) {
+            throw ApiException.conflict("CATEGORY_SLUG_TAKEN", "Đường dẫn danh mục đã được sử dụng");
+        }
         Category category = new Category();
         category.setName(request.name().trim());
-        category.setSlug(request.slug().trim().toLowerCase(Locale.ROOT));
+        category.setSlug(slug);
         category.setDescription(request.description() == null || request.description().isBlank()
                 ? null : request.description().trim());
         category.setStatus("ACTIVE");

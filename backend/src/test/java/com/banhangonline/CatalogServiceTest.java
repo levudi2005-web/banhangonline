@@ -4,6 +4,7 @@ import com.banhangonline.category.entity.Category;
 import com.banhangonline.category.repository.CategoryRepository;
 import com.banhangonline.inventory.entity.Inventory;
 import com.banhangonline.inventory.repository.InventoryRepository;
+import com.banhangonline.product.dto.CategoryRequest;
 import com.banhangonline.product.dto.ProductRequest;
 import com.banhangonline.product.entity.Product;
 import com.banhangonline.product.repository.ProductRepository;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class CatalogServiceTest {
@@ -90,6 +92,51 @@ class CatalogServiceTest {
 
         assertThat(stock.getStatus()).isEqualTo("INACTIVE");
         assertThat(stock.getProduct().getStatus()).isEqualTo("INACTIVE");
+    }
+
+    @Test
+    void customerProductIncludesAvailableQuantityButNotInternalInventoryFields() {
+        Inventory stock = stock();
+        when(stores.findById(7L)).thenReturn(Optional.of(activeStore()));
+        when(inventory.findAvailableByStoreIdAndProductId(7L, 22L)).thenReturn(Optional.of(stock));
+
+        var product = service.customerProduct(7L, 22L);
+
+        assertThat(product.quantity()).isEqualTo(17);
+        assertThat(product.reservedQuantity()).isNull();
+        assertThat(product.reorderLevel()).isNull();
+    }
+
+    @Test
+    void customerProductRejectsProductsUnavailableAtSelectedStore() {
+        when(stores.findById(7L)).thenReturn(Optional.of(activeStore()));
+        when(inventory.findAvailableByStoreIdAndProductId(7L, 22L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.customerProduct(7L, 22L))
+                .isInstanceOf(com.banhangonline.common.exception.ApiException.class)
+                .hasMessageContaining("Không tìm thấy sản phẩm");
+    }
+
+    @Test
+    void duplicateCategorySlugIsRejectedWithoutWriting() {
+        var owner = new com.banhangonline.user.entity.User();
+        var ownerRole = new com.banhangonline.role.entity.Role();
+        ownerRole.setName("OWNER");
+        owner.setRoles(Set.of(ownerRole));
+        when(users.findById(12L)).thenReturn(Optional.of(owner));
+        when(categories.existsBySlug("dien-thoai")).thenReturn(true);
+
+        assertThatThrownBy(() -> service.createCategory(12L, Set.of("OWNER"),
+                new CategoryRequest("Điện thoại", "Dien-Thoai", null)))
+                .isInstanceOf(com.banhangonline.common.exception.ApiException.class)
+                .hasMessageContaining("đã được sử dụng");
+        verify(categories, never()).save(any());
+    }
+
+    private static Store activeStore() {
+        Store store = new Store();
+        store.setStatus("ACTIVE");
+        return store;
     }
 
     private static ProductRequest request(Integer quantity, Integer reorderLevel) {

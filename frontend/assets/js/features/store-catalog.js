@@ -26,7 +26,8 @@
     });
     const result = await response.json().catch(() => null);
     if (response.status === 401) {
-      AppRoutes.handleSessionExpired("STAFF");
+      const area = location.pathname === AppRoutes.ROUTES.owner.home ? "OWNER" : "STAFF";
+      AppRoutes.handleSessionExpired(area);
       throw new Error("Phiên đăng nhập đã hết hạn.");
     }
     if (!response.ok || !result || !result.success) {
@@ -209,9 +210,9 @@
       });
 
       if (has("MANAGE_PRODUCTS")) {
-        const section = element("section", undefined, "dash-card");
-        section.append(element("h3", "Thêm sản phẩm"));
-        if (!categories.length && isOwner) {
+        if (isOwner) {
+          const categorySection = element("section", undefined, "dash-card");
+          categorySection.append(element("h3", "Tạo danh mục sản phẩm"));
           const categoryForm = element("form", undefined, "dash-form");
           categoryForm.append(field("Tên danh mục", "name", "text", true), field("Slug danh mục", "slug", "text", true));
           const description = field("Mô tả danh mục", "description", "text");
@@ -226,15 +227,24 @@
               const body = Object.fromEntries([...new FormData(categoryForm).entries()].filter(([, value]) => value !== ""));
               await request("/api/owner/categories", { method: "POST", body: JSON.stringify(body) });
               await load(storeId, permissions, isOwner, root, status);
+              status.textContent = "Đã tạo danh mục sản phẩm.";
+              status.className = "dash-status success";
             } catch (error) {
               status.textContent = error.message;
               status.className = "dash-status error";
               createCategory.disabled = false;
             }
           });
-          section.append(categoryForm);
-        } else if (!categories.length) {
-          section.append(element("p", "Chưa có danh mục. Hãy nhờ chủ cửa hàng tạo danh mục trước."));
+          categorySection.append(categoryForm);
+          root.append(categorySection);
+        }
+
+        const section = element("section", undefined, "dash-card");
+        section.append(element("h3", "Thêm sản phẩm"));
+        if (!categories.length) {
+          section.append(element("p", isOwner
+            ? "Tạo danh mục trước để có thể thêm sản phẩm."
+            : "Chưa có danh mục. Hãy nhờ chủ cửa hàng tạo danh mục trước."));
         } else {
           const form = element("form", undefined, "dash-form");
           const categoryField = element("div", undefined, "dash-field");

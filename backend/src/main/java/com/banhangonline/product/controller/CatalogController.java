@@ -26,4 +26,9 @@ public class CatalogController {
     public ApiResponse<List<ProductView>> products(@PathVariable Long storeId) {
         return ApiResponse.ok("Sản phẩm còn hàng", catalog.customerProducts(storeId));
     }
+
+    @GetMapping("/stores/{storeId}/products/{productId}")
+    public ApiResponse<ProductView> product(@PathVariable Long storeId, @PathVariable Long productId) {
+        return ApiResponse.ok("Chi tiết sản phẩm", catalog.customerProduct(storeId, productId));
+    }
 }

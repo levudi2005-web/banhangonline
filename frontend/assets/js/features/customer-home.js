@@ -41,13 +41,18 @@
     visible.forEach(product => {
       const card = document.createElement("article");
       card.className = "shop-product-card";
-      const art = document.createElement("div");
+      const productUrl = AppRoutes.getRoute("customer.product", {
+        store: storeSelect.value,
+        product: product.id
+      });
+      const art = document.createElement("a");
       art.className = "shop-product-art";
-      art.setAttribute("aria-hidden", "true");
+      art.href = productUrl;
+      art.setAttribute("aria-label", `Xem chi tiết ${product.name}`);
       if (product.imageUrl) {
         const image = document.createElement("img");
         image.src = product.imageUrl;
-        image.alt = "";
+        image.alt = product.name;
         image.loading = "lazy";
         image.referrerPolicy = "no-referrer";
         image.addEventListener("error", () => {
@@ -65,9 +70,12 @@
       content.className = "shop-product-content";
       const category = document.createElement("span");
       category.className = "dash-badge";
-      category.textContent = product.categoryName;
+      category.textContent = product.categoryName || "Sản phẩm";
       const name = document.createElement("h3");
-      name.textContent = product.name;
+      const nameLink = document.createElement("a");
+      nameLink.href = productUrl;
+      nameLink.textContent = product.name;
+      name.append(nameLink);
       const description = document.createElement("p");
       description.className = "shop-product-description";
       description.textContent = product.description || "Sản phẩm được chuẩn bị tại cửa hàng.";
@@ -79,7 +87,7 @@
       price.textContent = money(product.price, product.currency);
       const stock = document.createElement("span");
       stock.className = "shop-stock";
-      stock.textContent = `Còn ${product.quantity - product.reservedQuantity}`;
+      stock.textContent = `Còn ${product.quantity}`;
       content.append(category, name, description, sku);
 
       const footer = document.createElement("div");
@@ -89,6 +97,7 @@
       add.className = "dash-button";
       add.textContent = "Thêm vào giỏ";
       add.setAttribute("aria-label", `Thêm ${product.name} vào giỏ`);
+      add.disabled = Number(product.quantity) < 1;
       add.addEventListener("click", async () => {
         add.disabled = true;
         try {
@@ -120,7 +129,11 @@
           add.disabled = false;
         }
       });
-      footer.append(price, stock, add);
+      const details = document.createElement("a");
+      details.className = "dash-button secondary shop-detail-link";
+      details.href = productUrl;
+      details.textContent = "Chi tiết";
+      footer.append(price, stock, details, add);
       content.append(footer);
       card.append(art, content);
       list.append(card);

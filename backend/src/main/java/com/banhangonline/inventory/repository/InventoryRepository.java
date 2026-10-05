@@ -21,6 +21,14 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
     @Query("""
             select i from Inventory i join fetch i.product p join fetch p.category
+            where i.store.id = :storeId and p.id = :productId
+              and i.status = 'ACTIVE' and p.status = 'ACTIVE'
+              and i.quantity > i.reservedQuantity and i.store.status = 'ACTIVE'
+            """)
+    Optional<Inventory> findAvailableByStoreIdAndProductId(Long storeId, Long productId);
+
+    @Query("""
+            select i from Inventory i join fetch i.product p join fetch p.category
             where i.store.id = :storeId
             order by p.name
             """)

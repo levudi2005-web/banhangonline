@@ -6,6 +6,7 @@
   const totals = document.querySelector("#cart-total");
   const storeSelect = document.querySelector("#cart-store");
   const confirmation = document.querySelector("#checkout-result");
+  const clearButton = document.querySelector("#cart-clear");
 
   async function request(path, options = {}) {
     const response = await fetch(`${API}${path}`, {
@@ -37,6 +38,9 @@
     const storeId = storeSelect.value;
     itemsNode.replaceChildren();
     confirmation.hidden = true;
+    clearButton.hidden = true;
+    totals.textContent = "0 VND";
+    status.className = "dash-status";
     if (!storeId) {
       status.textContent = "Chọn cửa hàng để xem giỏ hàng.";
       return;
@@ -49,6 +53,7 @@
         empty.textContent = "Giỏ hàng đang trống.";
         itemsNode.append(empty);
       }
+      clearButton.hidden = !cart.items.length;
       cart.items.forEach(item => {
         const row = document.createElement("li");
         const name = document.createElement("strong");
@@ -87,7 +92,22 @@
             await loadCart();
           } catch (error) { showError(error); }
         });
-        controls.append(minus, quantity, plus);
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "dash-button secondary";
+        remove.textContent = "Xóa";
+        remove.setAttribute("aria-label", `Xóa ${item.name} khỏi giỏ`);
+        remove.addEventListener("click", async () => {
+          remove.disabled = true;
+          try {
+            await request(`/api/customer/cart/items/${item.cartItemId}`, { method: "DELETE" });
+            await loadCart();
+          } catch (error) {
+            showError(error);
+            remove.disabled = false;
+          }
+        });
+        controls.append(minus, quantity, plus, remove);
         row.append(name, amount, controls);
         itemsNode.append(row);
       });
@@ -97,6 +117,23 @@
       showError(error);
     }
   }
+
+  clearButton.addEventListener("click", async () => {
+    clearButton.disabled = true;
+    try {
+      const cart = await request(`/api/customer/cart/${encodeURIComponent(storeSelect.value)}`);
+      for (const item of cart.items) {
+        await request(`/api/customer/cart/items/${item.cartItemId}`, { method: "DELETE" });
+      }
+      await loadCart();
+    } catch (error) {
+      showError(error);
+      await loadCart();
+      showError(error);
+    } finally {
+      clearButton.disabled = false;
+    }
+  });
 
   function showError(error) {
     status.textContent = error.message;
