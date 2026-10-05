@@ -10,7 +10,6 @@ import com.banhangonline.auth.service.AuthService;
 import com.banhangonline.common.exception.ApiException;
 import com.banhangonline.role.entity.Role;
 import com.banhangonline.role.repository.RoleRepository;
-import com.banhangonline.store.repository.StoreRegistrationRequestRepository;
 import com.banhangonline.user.entity.User;
 import com.banhangonline.user.entity.UserStatus;
 import com.banhangonline.user.repository.UserRepository;
@@ -25,9 +24,8 @@ class AuthServiceTest {
     private final UserRepository users = mock(UserRepository.class);
     private final RoleRepository roles = mock(RoleRepository.class);
     private final UserAddressRepository addresses = mock(UserAddressRepository.class);
-    private final StoreRegistrationRequestRepository storeRequests = mock(StoreRegistrationRequestRepository.class);
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    private final AuthService auth = new AuthService(users, roles, addresses, storeRequests, encoder);
+    private final AuthService auth = new AuthService(users, roles, addresses, encoder);
 
     @BeforeEach
     void setUp() {

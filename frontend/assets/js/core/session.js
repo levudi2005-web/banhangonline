@@ -41,10 +41,8 @@
       const user = await AppRoutes.requireAuth(role);
       if (!user) return;
       const roles = Array.isArray(user.roles) ? user.roles : [];
-      const managementNote = document.querySelector("#capability-note");
-      if (managementNote && (roles.includes("OWNER") || roles.includes("STAFF"))) {
-        managementNote.hidden = false;
-      }
+      const customerLinks = document.querySelector("#customer-links");
+      if (customerLinks) customerLinks.hidden = !roles.includes("CUSTOMER");
 
       const accountName = document.querySelector("#account-name");
       const accountRoles = document.querySelector("#account-roles");

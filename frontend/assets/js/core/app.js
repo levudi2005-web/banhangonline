@@ -108,7 +108,7 @@ document.addEventListener("submit",async e=>{const f=e.target;if(!f.dataset.endp
  finally{btn.removeAttribute("aria-busy");btn.disabled=false;btn.textContent=originalText}});
 const resetToken=new URLSearchParams(location.search).get("token")||sessionStorage.getItem("passwordResetToken");if(resetToken){const token=$("[name=token]");if(token)token.value=resetToken}
 const registered=new URLSearchParams(location.search).get("registered");
-if(registered){const s=$(".sub");if(s)s.textContent=registered==="customer"?"Tài khoản đã được tạo. Bạn có thể đăng nhập.":"Đã nhận đăng ký cửa hàng. Tài khoản đang chờ quản trị viên duyệt."}
+if(registered==="customer"){const s=$(".sub");if(s)s.textContent="Tài khoản đã được tạo. Bạn có thể đăng nhập."}
 if(new URLSearchParams(location.search).get("reset")==="success"){const s=$(".sub");if(s)s.textContent="Mật khẩu đã được cập nhật. Hãy đăng nhập bằng mật khẩu mới."}
 if(new URLSearchParams(location.search).get("expired")==="1"){const msg=$(".form-msg");if(msg){msg.textContent="Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";msg.classList.add("show")}}
 })();

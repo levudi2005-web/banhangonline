@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/css/dashboard.css">
+  <title>Cửa hàng — BanHangOnline</title>
+</head>
+<body class="dashboard">
+  <main class="dash-shell">
+    <header class="dash-top">
+      <a class="dash-brand" href="/pages/customer/index.html">BanHangOnline</a>
+      <nav class="dash-nav" aria-label="Điều hướng khách hàng">
+        <a href="/pages/auth/session.html?area=customer">Tài khoản</a>
+        <a href="/pages/customer/orders.html">Đơn hàng</a>
+        <a href="/pages/customer/notifications.html">Thông báo</a>
+        <a href="/pages/customer/cart.html">Giỏ hàng</a>
+        <a href="/pages/customer/auth/login.html">Đăng nhập</a>
+        <a href="/pages/customer/auth/register.html">Đăng ký</a>
+      </nav>
+    </header>
+    <h1 class="dash-title">Nhận hàng tại cửa hàng</h1>
+    <p class="dash-subtitle">Chọn cửa hàng để xem sản phẩm và đặt hàng nhận trực tiếp.</p>
+    <section class="dash-card">
+      <h2>Chọn cửa hàng nhận hàng</h2>
+      <div id="store-status" class="dash-status" role="status" aria-live="polite">Đang tải cửa hàng…</div>
+      <div class="dash-field"><label for="store-select">Cửa hàng</label><select id="store-select"></select></div>
+      <h2 class="dash-section-title">Sản phẩm còn hàng</h2>
+      <ul id="product-list" class="dash-list"></ul>
+    </section>
+  </main>
+  <script src="../../assets/js/core/routes.js"></script>
+  <script src="../../assets/js/features/customer-home.js"></script>
+</body>
+</html>

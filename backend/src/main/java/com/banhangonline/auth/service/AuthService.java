@@ -4,13 +4,10 @@ import com.banhangonline.address.dto.AddressRequest;
 import com.banhangonline.address.entity.UserAddress;
 import com.banhangonline.address.repository.UserAddressRepository;
 import com.banhangonline.auth.dto.RegisterRequest;
-import com.banhangonline.auth.dto.StaffRegisterRequest;
 import com.banhangonline.auth.security.TokenUtil;
 import com.banhangonline.common.exception.ApiException;
 import com.banhangonline.role.entity.Role;
 import com.banhangonline.role.repository.RoleRepository;
-import com.banhangonline.store.entity.StoreRegistrationRequest;
-import com.banhangonline.store.repository.StoreRegistrationRequestRepository;
 import com.banhangonline.user.entity.User;
 import com.banhangonline.user.entity.UserStatus;
 import com.banhangonline.user.repository.UserRepository;
@@ -26,17 +23,15 @@ public class AuthService {
     private final UserRepository users;
     private final RoleRepository roles;
     private final UserAddressRepository addresses;
-    private final StoreRegistrationRequestRepository storeRequests;
     private final PasswordEncoder encoder;
     /** Hash giả để thời gian xử lý như nhau khi tài khoản không tồn tại (chống dò tài khoản). */
     private final String dummyHash;
 
     public AuthService(UserRepository users, RoleRepository roles, UserAddressRepository addresses,
-                       StoreRegistrationRequestRepository storeRequests, PasswordEncoder encoder) {
+                       PasswordEncoder encoder) {
         this.users = users;
         this.roles = roles;
         this.addresses = addresses;
-        this.storeRequests = storeRequests;
         this.encoder = encoder;
         this.dummyHash = encoder.encode(TokenUtil.newToken());
     }
@@ -100,36 +95,6 @@ public class AuthService {
         a.setDefaultAddress(true);
         addresses.save(a);
         return u;
-    }
-
-    /** Store accounts remain pending with no role until manually reviewed and approved. */
-    @Transactional
-    public void registerStore(StaffRegisterRequest r) {
-        StaffRegisterRequest.Owner o = r.owner();
-        StaffRegisterRequest.Store s = r.store();
-        Rules.password(o.password(), o.confirmPassword());
-        String email = Rules.email(o.email());
-        String phone = Rules.phone(o.phone());
-        String username = o.username().trim().toLowerCase(Locale.ROOT);
-        String storePhone = Rules.phone(s.phone());
-        assertAvailable(username, email, phone);
-
-        User u = newUser(o.fullName(), username, email, phone, o.password(), UserStatus.PENDING_VERIFICATION);
-        u.setEmailVerified(false);
-        users.save(u);
-
-        StoreRegistrationRequest req = new StoreRegistrationRequest();
-        req.setOwner(u);
-        req.setStoreName(s.name().trim());
-        req.setStorePhone(storePhone);
-        req.setStoreEmail(s.email() == null || s.email().isBlank() ? null : Rules.email(s.email()));
-        req.setProvince(s.province().trim());
-        req.setDistrict(s.district().trim());
-        req.setWard(s.ward().trim());
-        req.setAddressDetail(s.detailedAddress().trim());
-        req.setPostalCode(s.postalCode() == null || s.postalCode().isBlank() ? null : s.postalCode().trim());
-        req.setDescription(s.description() == null || s.description().isBlank() ? null : s.description().trim());
-        storeRequests.save(req);
     }
 
     private void assertAvailable(String username, String email, String phone) {

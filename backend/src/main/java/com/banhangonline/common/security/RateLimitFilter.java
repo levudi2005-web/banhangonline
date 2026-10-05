@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 /** Giới hạn số lần gọi các endpoint nhạy cảm theo IP (bộ nhớ của một instance). */
 public class RateLimitFilter extends OncePerRequestFilter {
@@ -18,6 +19,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
             "/api/auth/forgot-password", "/api/auth/reset-password",
             "/api/users/profile",
             "/api/auth/otp/send", "/api/auth/otp/resend", "/api/auth/otp/verify");
+    private static final Pattern PICKUP_CONFIRMATION =
+            Pattern.compile("^/api/stores/\\d+/orders/\\d+/pickup-confirmation$");
 
     private final Map<String, long[]> hits = new ConcurrentHashMap<>();
     private final int max;
@@ -31,12 +34,15 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
-        if ("POST".equals(req.getMethod()) && LIMITED.contains(req.getRequestURI())) {
+        if ("POST".equals(req.getMethod())
+                && (LIMITED.contains(req.getRequestURI()) || PICKUP_CONFIRMATION.matcher(req.getRequestURI()).matches())) {
             if (hits.size() > 50_000) hits.clear();
             long now = System.currentTimeMillis();
             String path = req.getRequestURI().startsWith("/api/auth/otp/")
                     ? "/api/auth/otp"
-                    : req.getRequestURI();
+                    : PICKUP_CONFIRMATION.matcher(req.getRequestURI()).matches()
+                            ? "/api/stores/pickup-confirmation"
+                            : req.getRequestURI();
             long[] w = hits.compute(req.getRemoteAddr() + "|" + path, (k, v) -> {
                 if (v == null || now - v[0] >= windowMs) return new long[]{now, 1};
                 v[1]++;

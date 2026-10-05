@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="../../assets/css/dashboard.css">
   <title>Tài khoản — BanHangOnline</title>
 </head>
 <body class="customer" data-auth-mode="session">
@@ -20,8 +21,10 @@
           <p><b id="account-name"></b></p>
           <p>Vai trò: <span id="account-roles"></span></p>
           <p>Số điện thoại: <span id="account-phone"></span></p>
-          <p id="capability-note" class="form-msg" role="status" hidden>
-            Đăng nhập và hồ sơ hiện có thể sử dụng. Các chức năng quản lý cửa hàng, sản phẩm và đơn hàng chưa có API hoạt động trong backend.
+          <p id="customer-links" class="dash-inline" hidden>
+            <a class="dash-link" href="/pages/customer/orders.html">Đơn hàng</a>
+            <a class="dash-link" href="/pages/customer/addresses.html">Địa chỉ</a>
+            <a class="dash-link" href="/pages/customer/notifications.html">Thông báo</a>
           </p>
           <form id="profile-form" data-endpoint="/api/users/profile" novalidate>
             <h2>Thông tin tài khoản</h2>

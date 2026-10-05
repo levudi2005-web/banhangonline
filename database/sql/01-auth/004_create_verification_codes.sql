@@ -1,20 +1,23 @@
-CREATE TABLE verification_codes (
-  id BIGINT NOT NULL AUTO_INCREMENT,
-  user_id BIGINT NOT NULL,
-  channel VARCHAR(10) NOT NULL,
-  purpose VARCHAR(20) NOT NULL,
-  destination_hash VARCHAR(64) NOT NULL,
-  code_hash VARCHAR(64) NOT NULL,
-  ip_address VARCHAR(45) NULL,
-  expires_at DATETIME(6) NOT NULL,
-  attempts INT NOT NULL DEFAULT 0,
-  max_attempts INT NOT NULL,
-  used_at DATETIME(6) NULL,
-  invalidated_at DATETIME(6) NULL,
-  created_at DATETIME(6) NOT NULL,
-  PRIMARY KEY (id),
-  KEY idx_verification_destination_purpose_created (destination_hash, purpose, created_at),
-  KEY idx_verification_ip_created (ip_address, created_at),
-  KEY idx_verification_user_channel_purpose (user_id, channel, purpose, created_at),
-  CONSTRAINT fk_verification_codes_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Reconciled to the TiDB schema export for: verification_codes.
+
+-- Logical model types use BIGINT, VARCHAR, CHAR, DECIMAL, DATETIME, INT, TINYINT, TEXT, and JSON.
+
+-- verification_codes
+CREATE TABLE `verification_codes` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `channel` varchar(20) NOT NULL,
+  `purpose` varchar(40) NOT NULL,
+  `code_hash` varchar(64) NOT NULL,
+  `destination_hash` varchar(64) NOT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `attempts` int NOT NULL DEFAULT '0',
+  `max_attempts` int NOT NULL DEFAULT '5',
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `invalidated_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) ,
+  KEY `idx_verification_codes_lookup` (`user_id`,`channel`,`purpose`,`destination_hash`,`created_at`),
+  CONSTRAINT `fk_verification_codes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;

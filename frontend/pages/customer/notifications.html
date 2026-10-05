@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/css/dashboard.css">
+  <title>Thông báo — BanHangOnline</title>
+</head>
+<body class="dashboard">
+  <main class="dash-shell">
+    <header class="dash-top"><a class="dash-brand" href="/pages/customer/index.html">BanHangOnline</a>
+      <nav class="dash-nav"><a href="/pages/customer/orders.html">Đơn hàng</a><a href="/pages/auth/session.html?area=customer">Tài khoản</a></nav>
+    </header>
+    <h1 class="dash-title">Thông báo</h1>
+    <div id="notification-status" class="dash-status" role="status" aria-live="polite"></div>
+    <button id="notifications-read-all" class="dash-button secondary" type="button">Đánh dấu tất cả đã đọc</button>
+    <ul id="notifications" class="dash-list"></ul>
+  </main>
+  <script src="../../assets/js/core/routes.js"></script>
+  <script src="../../assets/js/features/notifications.js"></script>
+</body>
+</html>

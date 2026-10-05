@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/css/dashboard.css">
+  <title>Địa chỉ — BanHangOnline</title>
+</head>
+<body class="dashboard">
+  <main class="dash-shell">
+    <header class="dash-top"><a class="dash-brand" href="/pages/customer/index.html">BanHangOnline</a>
+      <nav class="dash-nav"><a href="/pages/customer/orders.html">Đơn hàng</a><a href="/pages/auth/session.html?area=customer">Tài khoản</a></nav>
+    </header>
+    <h1 class="dash-title">Địa chỉ nhận hàng</h1>
+    <div id="address-status" class="dash-status" role="status" aria-live="polite"></div>
+    <div class="dash-grid">
+      <section class="dash-card half">
+        <h2>Địa chỉ đã lưu</h2>
+        <ul id="address-list" class="dash-list"></ul>
+      </section>
+      <section class="dash-card half">
+        <h2>Thêm hoặc sửa địa chỉ</h2>
+        <form id="address-form" class="dash-form">
+          <div class="dash-field full"><label for="address-recipient">Người nhận</label><input id="address-recipient" name="recipientName" maxlength="120" required></div>
+          <div class="dash-field"><label for="address-phone">Điện thoại</label><input id="address-phone" name="phone" type="tel" maxlength="20" required></div>
+          <div class="dash-field"><label for="address-province">Tỉnh / thành phố</label><input id="address-province" name="province" maxlength="100" required></div>
+          <div class="dash-field"><label for="address-district">Quận / huyện</label><input id="address-district" name="district" maxlength="100" required></div>
+          <div class="dash-field"><label for="address-ward">Phường / xã</label><input id="address-ward" name="ward" maxlength="100" required></div>
+          <div class="dash-field full"><label for="address-line">Địa chỉ chi tiết</label><input id="address-line" name="addressLine" maxlength="255" required></div>
+          <div class="full dash-inline"><button class="dash-button" type="submit">Thêm địa chỉ</button><button id="address-reset" class="dash-button secondary" type="button">Làm mới</button></div>
+        </form>
+      </section>
+    </div>
+  </main>
+  <script src="../../assets/js/core/routes.js"></script>
+  <script src="../../assets/js/features/addresses.js"></script>
+</body>
+</html>

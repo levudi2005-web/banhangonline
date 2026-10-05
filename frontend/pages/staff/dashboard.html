@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/css/dashboard.css">
+  <title>Khu vực nhân viên — BanHangOnline</title>
+</head>
+<body class="dashboard">
+  <main class="dash-shell">
+    <header class="dash-top">
+      <a class="dash-brand" href="/pages/staff/dashboard.html">BanHangOnline · Nhân viên</a>
+      <nav class="dash-nav" aria-label="Điều hướng nhân viên">
+        <a href="/pages/customer/index.html">Xem trang mua sắm</a><a id="staff-logout" href="/">Đăng xuất</a>
+      </nav>
+    </header>
+    <h1 class="dash-title">Xin chào, <span id="staff-name">…</span></h1>
+    <p class="dash-subtitle">Cửa hàng và quyền nghiệp vụ được chủ cửa hàng phân công.</p>
+    <div id="staff-status" class="dash-status" role="status" aria-live="polite"></div>
+    <section class="dash-card">
+      <h2>Cửa hàng được phân công</h2>
+      <ul id="staff-stores" class="dash-list" aria-live="polite"></ul>
+    </section>
+    <section class="dash-card">
+      <h2>Công việc cửa hàng</h2>
+      <p>Các thao tác đơn hàng và nhận hàng chỉ khả dụng khi được cấp quyền tương ứng.</p>
+    </section>
+    <section id="staff-orders-panel" class="dash-card" hidden>
+      <h2>Đơn hàng cửa hàng</h2>
+      <div id="staff-orders-status" class="dash-status" role="status" aria-live="polite"></div>
+      <ul id="staff-orders" class="dash-list"></ul>
+    </section>
+    <section id="staff-catalog-panel" class="dash-card" hidden>
+      <h2>Sản phẩm và tồn kho</h2>
+      <div id="staff-catalog-status" class="dash-status" role="status" aria-live="polite"></div>
+      <div id="staff-catalog" class="dash-stack"></div>
+    </section>
+  </main>
+  <script src="../../assets/js/core/routes.js"></script>
+  <script src="../../assets/js/features/store-orders.js"></script>
+  <script src="../../assets/js/features/store-catalog.js"></script>
+  <script src="../../assets/js/features/staff-dashboard.js"></script>
+</body>
+</html>

@@ -12,13 +12,16 @@ Unless marked optional, child-to-parent relationships are mandatory.
 - `users` 1 — 0..N `verification_codes`
 - `users` N — M `roles` through `user_roles`
 - `roles` N — M `permissions` through `role_permissions`
-- `users` 1 — 0..N `store_registration_requests` as applicant/owner
+- `users` 1 — 0..N `store_registration_requests` as legacy applicant/owner
 - `users` 1 — 0..N `stores` as owner
+- `stores` 1 — 0..N `store_staff`
+- `users` 1 — 0..N `store_staff`
+- `store_staff` N — M `permissions` through `store_staff_permissions`
+- `users` 1 — 0..N `store_staff_permissions` as permission grantor
 
 ## Catalog and stock
 
 - `categories` 1 — 0..N `products`
-- `categories` 1 — 0..N `categories` as parent/child; parent is optional
 - `stores` 1 — 0..N `inventory`
 - `products` 1 — 0..N `inventory`
 - `stores` 1 — 0..N `carts`
@@ -36,18 +39,15 @@ Unless marked optional, child-to-parent relationships are mandatory.
 - `users` 0..1 — 0..N `order_status_history` as actor; null means system
 - `orders` 1 — 0..1 `pickup`
 - `users` 0..1 — 0..N `pickup` as verifier
-- `orders` 1 — 0..N `payments`
+- `orders` 1 — 0..1 `payments`
 - `users` 1 — 0..N `notifications`
-- `users` 0..1 — 0..N `orders` as cancellation actor
 
-The database records status snapshots/history. `OrderService`, not SQL,
-validates allowed status transitions and cancellation policy.
+The deployed schema records a single status and note per history row;
+`OrderService`, not SQL, validates allowed transitions and cancellation policy.
 
 ## Store chat and audit
 
 - `stores` 1 — 0..N `chat_conversations`
-- `orders` 0..1 — 0..N `chat_conversations`; a conversation may concern an order
-- `users` 1 — 0..N `chat_conversations` as creator
 - `chat_conversations` 1 — 1..N `chat_participants`
 - `users` 1 — 0..N `chat_participants`
 - `chat_conversations` 1 — 0..N `chat_messages`
@@ -60,10 +60,9 @@ make AI impersonate store participants.
 
 ## MLD-to-MPD notes
 
-Each table, including N:M junctions, has a `BIGINT AUTO_INCREMENT` surrogate
-primary key; each junction also has a unique constraint on its FK pair. All
-relationships become named foreign keys
-with explicit supporting indexes. Monetary attributes use fixed-precision
-decimal plus currency code; status attributes remain service-validated text.
-See `table-specification.md` and `foreign-key-dependencies.md` for the physical
-table and creation details.
+Existing primary keys, constraints, and attributes follow the local TiDB
+schema exports except for the intentionally unchanged chat model. The additive
+staff model uses `BIGINT`, `VARCHAR`, and
+`DATETIME(6)` attributes, with unique pairs and named foreign keys. Verify all
+exports against the live database before deriving deployment SQL. See
+`table-specification.md` and `foreign-key-dependencies.md` for table details.

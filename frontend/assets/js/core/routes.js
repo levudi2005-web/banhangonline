@@ -14,19 +14,23 @@
       forgot: "/pages/customer/auth/forgot-password.html",
       reset: "/pages/customer/auth/reset-password.html",
       logout: "/pages/customer/auth/logout.html",
-      home: "/pages/auth/session.html?area=customer"
+      home: "/pages/customer/index.html",
+      cart: "/pages/customer/cart.html",
+      orders: "/pages/customer/orders.html",
+      notifications: "/pages/customer/notifications.html",
+      addresses: "/pages/customer/addresses.html"
     },
     staff: {
       login: "/pages/staff/auth/login.html?area=staff",
       forgot: "/pages/staff/auth/forgot-password.html",
       reset: "/pages/staff/auth/reset-password.html",
       logout: "/pages/staff/auth/logout.html",
-      home: "/pages/auth/session.html?area=staff"
+      home: "/pages/staff/dashboard.html"
     },
     owner: {
       login: "/pages/staff/auth/login.html?area=owner",
       logout: "/pages/staff/auth/logout.html",
-      home: "/pages/auth/session.html?area=owner"
+      home: "/pages/owner/dashboard.html"
     }
   });
 
@@ -39,12 +43,19 @@
     "customer.forgot": ROUTES.customer.forgot,
     "customer.reset": ROUTES.customer.reset,
     "customer.logout": ROUTES.customer.logout,
+    "customer.home": ROUTES.customer.home,
+    "customer.cart": ROUTES.customer.cart,
+    "customer.orders": ROUTES.customer.orders,
+    "customer.notifications": ROUTES.customer.notifications,
+    "customer.addresses": ROUTES.customer.addresses,
     "staff.login": ROUTES.staff.login,
     "staff.forgot": ROUTES.staff.forgot,
     "staff.reset": ROUTES.staff.reset,
     "staff.logout": ROUTES.staff.logout,
+    "staff.home": ROUTES.staff.home,
     "owner.login": ROUTES.owner.login,
-    "owner.logout": ROUTES.owner.logout
+    "owner.logout": ROUTES.owner.logout,
+    "owner.home": ROUTES.owner.home
   };
 
   function getRoute(routeKey, query = {}) {

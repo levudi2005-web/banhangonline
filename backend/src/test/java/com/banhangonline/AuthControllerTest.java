@@ -5,8 +5,10 @@ import static org.mockito.Mockito.*;
 
 import com.banhangonline.address.dto.AddressRequest;
 import com.banhangonline.auth.controller.AuthController;
-import com.banhangonline.auth.dto.RegisterRequest;
+import com.banhangonline.auth.controller.StaffAuthController;
 import com.banhangonline.auth.dto.ForgotPasswordRequest;
+import com.banhangonline.auth.dto.LoginRequest;
+import com.banhangonline.auth.dto.RegisterRequest;
 import com.banhangonline.auth.security.SessionCookies;
 import com.banhangonline.auth.service.AuthService;
 import com.banhangonline.auth.service.PasswordRecoveryService;
@@ -14,6 +16,7 @@ import com.banhangonline.auth.service.PasswordResetService;
 import com.banhangonline.role.entity.Role;
 import com.banhangonline.user.entity.User;
 import com.banhangonline.user.entity.UserStatus;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
@@ -23,6 +26,7 @@ class AuthControllerTest {
     private final PasswordRecoveryService recovery = mock(PasswordRecoveryService.class);
     private final SessionCookies cookies = mock(SessionCookies.class);
     private final AuthController controller = new AuthController(auth, resets, recovery, cookies);
+    private final StaffAuthController staffController = new StaffAuthController(auth, cookies);
 
     @Test
     void customerRegistrationDoesNotInvokeOtpServiceOrEmailSender() {
@@ -57,5 +61,22 @@ class AuthControllerTest {
 
         assertThat(response.data().resetToken()).isEqualTo("reset-token");
         verify(recovery).verifyPhoneAndIssueToken("buyer@example.com", "5678");
+    }
+
+    @Test
+    void managementLoginAcceptsOnlyStaffOrOwnerAuthenticationPath() {
+        LoginRequest request = new LoginRequest("owner1", "Test-password-25", true);
+        HttpServletRequest servletRequest = mock(HttpServletRequest.class);
+        User owner = new User();
+        owner.setId(7L);
+        Role role = new Role();
+        role.setName("OWNER");
+        owner.getRoles().add(role);
+        when(auth.authenticateStaff(request.account(), request.password())).thenReturn(owner);
+
+        staffController.login(request, servletRequest);
+
+        verify(auth).authenticateStaff(request.account(), request.password());
+        verify(cookies).start(owner, true, "Đăng nhập quản trị thành công", servletRequest);
     }
 }
