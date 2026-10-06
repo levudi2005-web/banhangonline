@@ -57,7 +57,7 @@ listed below.
 | UI-032 | Staff orders | `/pages/staff/orders.html` | `pages/staff/orders.html`; `features/management-app.js`, `features/store-orders.js`; `dashboard.css` | Refactored |
 | UI-033 | Staff notifications | `/pages/staff/notifications.html` | `pages/staff/notifications.html`; `features/management-app.js`; `dashboard.css` | Refactored |
 | UI-034 | Product create / edit dialog | `/pages/owner/products.html` and `/pages/staff/products.html` | `features/management-app.js`; shared product dialog in `dashboard.css` | Implemented / Refactored |
-| UI-035 | Product image empty, preview, upload, replace and error states | Same product management routes | `features/management-app.js`; S3-compatible image API; `dashboard.css` | Implemented / Refactored; multi-image gallery is incomplete |
+| UI-035 | Product image empty, preview, upload, reorder, replace, remove and error states | Same product management routes | `features/management-app.js`; product image gallery API; `dashboard.css` | Implemented / Refactored |
 | UI-036 | Inventory adjustment dialog | `/pages/owner/inventory.html` and `/pages/staff/inventory.html` | `features/management-app.js`; shared inventory dialog in `dashboard.css` | Implemented / Refactored |
 
 ## Canonical public URLs
@@ -84,15 +84,20 @@ the existing order list.
   component, or dialog/state mapping. Product-image validation, preview,
   replacement, removal, busy/error/empty states, and inventory adjustment are
   represented.
-- **Refactored to match the PDF:** tall centered 403/404 cards, compact
+- **Refactored to match the PDF:** red/orange retail accents, the red storefront
+  hero, policy and API-backed store hotline strip, light-gray retail canvas,
+  tall centered 403/404 cards, compact
   authentication forms, the logout confirmation card and neutral cancel action,
-  dashboard recent-order activity, blue brand accents, product/inventory
+  dashboard recent-order activity, product/inventory
   layouts, and responsive dialog behavior.
 - **Blocked:** persistent image upload requires production S3-compatible
   storage configuration. With storage disabled, the API correctly returns
   `IMAGE_STORAGE_UNAVAILABLE` (HTTP 503); the UI reports that the image was not
   uploaded and does not write files to local or Render ephemeral storage.
 - Dynamic fixture values remain different from the illustrative PDF data.
+- Product APIs do not expose a previous/list price or discount value, so the
+  storefront and product detail show the actual current price only rather than
+  inventing a crossed-out price or discount badge.
 - `database/sql/12-chat/` was not modified.
 
 ## Runtime visual audit
@@ -162,11 +167,30 @@ the existing order list.
   storefront was checked in the integrated browser at 360, 375, 390, 768,
   1024, and 1440 CSS pixels; authenticated management pages were not rerun in
   that pass.
-- UI-035 currently manages one product image through `products.image_url`.
-  An eight-image gallery with persistent metadata, ordering, and main-image
-  selection is not implemented. The current database schema has no
-  `product_images` table, and schema deployment remains a reviewed manual
-  operation.
+- UI-035 supports up to eight images, main-image selection by order, local
+  previews, HTTPS image URLs, uploads, replacement, removal, and persistent
+  gallery ordering through the product image API. Storage-dependent uploads
+  still require configured S3-compatible storage.
+- The latest shared UI changes refine the storefront hero and hotline,
+  management inventory availability/status labels, store-order status badges,
+  product image gallery upload progress, auth gateway/cards, and narrow-screen
+  cart/category/order layouts. Management navigation now traps keyboard focus
+  while its mobile drawer is open, closes with Escape or navigation, and
+  restores focus after dismissal. Dashboard product/order data loads
+  independently so one failed API does not hide the other metrics. Category,
+  order, inventory, product, staff, and notification views expose loading
+  state to assistive technology; product search has a no-match state. The
+  inventory editor shows current, reserved, available, and an explicitly
+  estimated available quantity for the proposed stock before saving. The
+  shared browser rendered the storefront,
+  gateway, staff login, password recovery/reset/logout, product detail, cart,
+  and customer order empty/error state from workspace files. Management pages
+  require an authenticated session; direct local-file preview received HTTP
+  403, so no protected data or controls were bypassed.
+  API access remained blocked for product/store data, and the order page had
+  no authenticated session, so authenticated data states were not verified.
+  The browser could not be resized to run the requested full responsive
+  viewport matrix; those breakpoints were checked from the CSS.
 - Visual styling and UI rendering changes are in frontend CSS/JS/markup. Clean
   page URLs are forwarded by a GET-only Spring MVC controller and covered by
   `CleanUrlControllerTest`; `/api/**` mappings are not changed. Authentication,

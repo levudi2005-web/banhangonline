@@ -142,13 +142,35 @@
   }
 
   function statusBadge(value) {
-    const node = element("span", value, "dash-badge");
-    if (["DRAFT", "PENDING", "PENDING_REVIEW", "READY_FOR_PICKUP"].includes(value)) {
+    const labels = {
+      ACTIVE: "Đang hoạt động",
+      CANCELLED: "Đã hủy",
+      COMPLETED: "Hoàn tất",
+      CONFIRMED: "Đã xác nhận",
+      DISABLED: "Đã khóa",
+      DRAFT: "Bản nháp",
+      INACTIVE: "Tạm ẩn",
+      PENDING: "Đang chờ",
+      PENDING_REVIEW: "Chờ duyệt",
+      PENDING_VERIFICATION: "Chờ xác minh",
+      PREPARING: "Đang chuẩn bị",
+      READY_FOR_PICKUP: "Sẵn sàng nhận",
+      SUSPENDED: "Tạm dừng"
+    };
+    const node = element("span", labels[value] || value || "Chưa xác định", "dash-badge");
+    if (["DRAFT", "PENDING", "PENDING_REVIEW", "PENDING_VERIFICATION", "READY_FOR_PICKUP"].includes(value)) {
       node.classList.add("pending");
     } else if (["DISABLED", "SUSPENDED", "CANCELLED", "INACTIVE"].includes(value)) {
       node.classList.add("disabled");
     }
     return node;
+  }
+
+  function loadingNotice(message, tagName = "div") {
+    const notice = element(tagName, message, "dash-empty");
+    notice.setAttribute("role", "status");
+    notice.setAttribute("aria-live", "polite");
+    return notice;
   }
 
   function has(permission) {
@@ -179,6 +201,9 @@
     const layout = element("div", undefined, "management-layout");
     const sidebar = element("aside", undefined, "management-sidebar");
     sidebar.id = "management-sidebar";
+    const mobileNavigation = window.matchMedia("(max-width: 960px)");
+    sidebar.inert = mobileNavigation.matches;
+    sidebar.setAttribute("aria-hidden", String(mobileNavigation.matches));
     const brand = document.createElement("a");
     brand.className = "management-brand";
     brand.href = AppRoutes.getRoute(routeKey("dashboard"));
@@ -200,6 +225,9 @@
       icon.append(navigationIcon(item.icon));
       link.append(icon, element("span", labels[item.page]));
       if (item.page === page) link.classList.add("active");
+      link.addEventListener("click", () => {
+        if (mobileNavigation.matches) closeSidebar(true);
+      });
       nav.append(link);
     });
     const sidebarFoot = element("div", undefined, "management-sidebar-foot");
@@ -219,9 +247,33 @@
     const menuButton = button("☰", "secondary management-menu-toggle");
     menuButton.setAttribute("aria-label", "Mở menu điều hướng");
     menuButton.setAttribute("aria-expanded", "false");
+    menuButton.setAttribute("aria-controls", sidebar.id);
+    function closeSidebar(restoreFocus = false) {
+      const wasOpen = layout.classList.contains("sidebar-open");
+      layout.classList.remove("sidebar-open");
+      menuButton.setAttribute("aria-expanded", "false");
+      menuButton.setAttribute("aria-label", "Mở menu điều hướng");
+      backdrop.tabIndex = -1;
+      sidebar.inert = mobileNavigation.matches;
+      sidebar.setAttribute("aria-hidden", String(mobileNavigation.matches));
+      if (restoreFocus && wasOpen) menuButton.focus();
+    }
+    function openSidebar() {
+      layout.classList.add("sidebar-open");
+      menuButton.setAttribute("aria-expanded", "true");
+      menuButton.setAttribute("aria-label", "Đóng menu điều hướng");
+      backdrop.tabIndex = 0;
+      sidebar.inert = false;
+      sidebar.setAttribute("aria-hidden", "false");
+      const activeLink = sidebar.querySelector(".management-nav-link.active");
+      (activeLink || sidebar.querySelector(".management-nav-link"))?.focus();
+    }
+    const sidebarClose = button("×", "secondary management-sidebar-close", () => closeSidebar(true));
+    sidebarClose.setAttribute("aria-label", "Đóng menu điều hướng");
+    sidebar.insertBefore(sidebarClose, sidebar.firstChild);
     menuButton.addEventListener("click", () => {
-      const opened = layout.classList.toggle("sidebar-open");
-      menuButton.setAttribute("aria-expanded", String(opened));
+      if (layout.classList.contains("sidebar-open")) closeSidebar(true);
+      else openSidebar();
     });
     const topTitle = element("span", labels[page] || "Quản lý", "management-top-title");
     const storeGroup = element("div", undefined, "management-store-picker");
@@ -278,7 +330,39 @@
     const backdrop = element("button", "", "management-backdrop");
     backdrop.type = "button";
     backdrop.setAttribute("aria-label", "Đóng menu");
-    backdrop.addEventListener("click", () => layout.classList.remove("sidebar-open"));
+    backdrop.tabIndex = -1;
+    backdrop.addEventListener("click", () => closeSidebar(true));
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && layout.classList.contains("sidebar-open")) {
+        closeSidebar(true);
+        return;
+      }
+      if (event.key !== "Tab" || !layout.classList.contains("sidebar-open")) return;
+      const focusable = sidebar.querySelectorAll(
+        'a[href], button:not(:disabled), select:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) {
+        event.preventDefault();
+        menuButton.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !sidebar.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !sidebar.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+    mobileNavigation.addEventListener("change", event => {
+      if (!event.matches) closeSidebar();
+      else {
+        sidebar.inert = !layout.classList.contains("sidebar-open");
+        sidebar.setAttribute("aria-hidden", String(sidebar.inert));
+      }
+    });
     layout.append(backdrop);
     root.replaceChildren(layout);
   }
@@ -387,66 +471,85 @@
     const canSeeOrders = has("VIEW_ORDERS") || has("MANAGE_ORDERS");
     const activityCard = addCard("Hoạt động gần đây", "Đơn nhận tại cửa hàng gần nhất.");
     activityCard.classList.add("management-activity-card");
+    let activityLoading;
     if (!canSeeOrders) {
       activityCard.append(element("div", "Hoạt động đơn hàng không hiển thị theo quyền hiện tại.", "dash-empty"));
+    } else {
+      activityLoading = loadingNotice("Đang tải hoạt động đơn hàng…");
+      activityCard.append(activityLoading);
     }
     if (!canSeeProducts && !canSeeOrders) return;
-    try {
-      const metricResults = await Promise.all([
-        canSeeProducts ? request(`/api/owner/stores/${context.selectedStoreId}/products`) : Promise.resolve(null),
-        canSeeOrders ? request(`/api/stores/${context.selectedStoreId}/orders`) : Promise.resolve(null)
-      ]);
-      if (metricResults[0]) {
-        const products = metricResults[0];
-        const card = element("article", undefined, "management-metric");
-        card.append(element("span", "SẢN PHẨM"), element("strong", String(products.length)),
-          element("small", "Có trong cửa hàng"));
-        metrics.append(card);
-        if (has("VIEW_INVENTORY") || has("MANAGE_INVENTORY")) {
-          const lowStock = products.filter(product =>
-            Number(product.quantity || 0) <= Number(product.reorderLevel || 0)).length;
-          const stock = element("article", undefined, "management-metric");
-          stock.append(element("span", "CẦN KIỂM TRA TỒN"), element("strong", String(lowStock)),
-            element("small", "Số lượng không vượt mức cảnh báo"));
-          metrics.append(stock);
-        }
+    const metricResults = await Promise.allSettled([
+      canSeeProducts ? request(`/api/owner/stores/${context.selectedStoreId}/products`) : Promise.resolve(null),
+      canSeeOrders ? request(`/api/stores/${context.selectedStoreId}/orders`) : Promise.resolve(null)
+    ]);
+    const productResult = metricResults[0];
+    const orderResult = metricResults[1];
+    if (productResult.status === "fulfilled" && Array.isArray(productResult.value)) {
+      const products = productResult.value;
+      const card = element("article", undefined, "management-metric");
+      card.append(element("span", "SẢN PHẨM"), element("strong", String(products.length)),
+        element("small", "Có trong cửa hàng"));
+      metrics.append(card);
+      if (has("VIEW_INVENTORY") || has("MANAGE_INVENTORY")) {
+        const lowStock = products.filter(product => {
+          if (product.quantity === null || product.quantity === undefined
+              || product.reservedQuantity === null || product.reservedQuantity === undefined
+              || product.reorderLevel === null || product.reorderLevel === undefined
+              || !Number.isFinite(Number(product.quantity))
+              || !Number.isFinite(Number(product.reservedQuantity))
+              || !Number.isFinite(Number(product.reorderLevel))) return false;
+          const available = Number(product.quantity) - Number(product.reservedQuantity);
+          return Number.isFinite(available) && available <= Number(product.reorderLevel);
+        }).length;
+        const stock = element("article", undefined, "management-metric");
+        stock.append(element("span", "CẦN KIỂM TRA TỒN"), element("strong", String(lowStock)),
+          element("small", "Số lượng không vượt mức cảnh báo"));
+        metrics.append(stock);
       }
-      if (metricResults[1]) {
-        const orders = metricResults[1];
-        const pendingCount = orders.filter(order => ["PENDING", "CONFIRMED", "PREPARING"].includes(order.status)).length;
-        const card = element("article", undefined, "management-metric");
-        card.append(element("span", "ĐƠN CẦN XỬ LÝ"), element("strong", String(pendingCount)),
-          element("small", `Tổng ${orders.length} đơn`));
-        metrics.append(card);
-        const recent = element("ul", undefined, "management-activity-list");
-        const latestOrders = [...orders]
-          .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
-          .slice(0, 5);
-        if (!latestOrders.length) {
-          recent.append(element("li", "Chưa có hoạt động đơn hàng.", "dash-empty"));
-        } else {
-          latestOrders.forEach(order => {
-            const item = element("li", undefined, "management-activity-item");
-            const heading = element("div", undefined, "management-activity-heading");
-            heading.append(element("strong", order.orderCode), statusBadge(order.status));
-            const lines = (order.items || [])
-              .map(line => `${line.productName} × ${line.quantity}`)
-              .join(" · ");
-            item.append(heading,
-              element("span", lines || order.storeName || "Đơn nhận tại cửa hàng", "dash-muted"),
-              element("time", order.createdAt
-                ? new Date(order.createdAt).toLocaleString("vi-VN")
-                : "Thời gian chưa có", "dash-muted"));
-            recent.append(item);
-          });
-        }
-        activityCard.append(recent);
+    } else if (canSeeProducts) {
+      const message = productResult.status === "rejected"
+        ? productResult.reason.message : "Máy chủ không trả về danh sách sản phẩm hợp lệ.";
+      metrics.append(element("div", "Không thể tải số liệu sản phẩm và tồn kho.", "dash-empty"));
+      setStatus(message, "error");
+    }
+    if (orderResult.status === "fulfilled" && Array.isArray(orderResult.value)) {
+      const orders = orderResult.value;
+      activityLoading.remove();
+      const pendingCount = orders.filter(order => ["PENDING", "CONFIRMED", "PREPARING"].includes(order.status)).length;
+      const card = element("article", undefined, "management-metric");
+      card.append(element("span", "ĐƠN CẦN XỬ LÝ"), element("strong", String(pendingCount)),
+        element("small", `Tổng ${orders.length} đơn`));
+      metrics.append(card);
+      const recent = element("ul", undefined, "management-activity-list");
+      const latestOrders = [...orders]
+        .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
+        .slice(0, 5);
+      if (!latestOrders.length) {
+        recent.append(element("li", "Chưa có hoạt động đơn hàng.", "dash-empty"));
+      } else {
+        latestOrders.forEach(order => {
+          const item = element("li", undefined, "management-activity-item");
+          const heading = element("div", undefined, "management-activity-heading");
+          heading.append(element("strong", order.orderCode), statusBadge(order.status));
+          const lines = (order.items || [])
+            .map(line => `${line.productName} × ${line.quantity}`)
+            .join(" · ");
+          item.append(heading,
+            element("span", lines || order.storeName || "Đơn nhận tại cửa hàng", "dash-muted"),
+            element("time", order.createdAt
+              ? new Date(order.createdAt).toLocaleString("vi-VN")
+              : "Thời gian chưa có", "dash-muted"));
+          recent.append(item);
+        });
       }
-    } catch (error) {
-      if (!activityCard.querySelector("ul, .dash-empty")) {
-        activityCard.append(element("div", "Không thể tải hoạt động gần đây.", "dash-empty"));
-      }
-      setStatus(error.message, "error");
+      activityCard.append(recent);
+    } else if (canSeeOrders) {
+      const message = orderResult.status === "rejected"
+        ? orderResult.reason.message : "Máy chủ không trả về danh sách đơn hàng hợp lệ.";
+      activityLoading.remove();
+      activityCard.append(element("div", "Không thể tải hoạt động gần đây.", "dash-empty"));
+      setStatus(message, "error");
     }
   }
 
@@ -596,10 +699,12 @@
   }
 
   async function loadStaffList(list) {
-    list.replaceChildren(element("li", "Đang tải nhân viên…", "dash-empty"));
+    list.setAttribute("aria-busy", "true");
+    list.replaceChildren(loadingNotice("Đang tải nhân viên…", "li"));
     try {
       const people = await request(`/api/owner/stores/${context.selectedStoreId}/staff`);
       list.replaceChildren();
+      list.setAttribute("aria-busy", "false");
       if (!people.length) list.append(element("li", "Cửa hàng chưa có nhân viên.", "dash-empty"));
       people.forEach(person => {
         const item = element("li", undefined, "management-staff-item");
@@ -630,6 +735,7 @@
         list.append(item);
       });
     } catch (error) {
+      list.setAttribute("aria-busy", "false");
       list.replaceChildren(element("li", error.message, "dash-empty"));
       setStatus(error.message, "error");
     }
@@ -643,17 +749,19 @@
       "Các quyền được máy chủ kiểm tra tại từng API; thay đổi tại đây có hiệu lực trong cửa hàng đang chọn.");
     const list = element("ul", undefined, "dash-list management-permission-list");
     card.append(list);
-    list.append(element("li", "Đang tải nhân viên…", "dash-empty"));
+    list.setAttribute("aria-busy", "true");
+    list.append(loadingNotice("Đang tải nhân viên…", "li"));
     try {
       const people = await request(`/api/owner/stores/${context.selectedStoreId}/staff`);
       list.replaceChildren();
+      list.setAttribute("aria-busy", "false");
       if (!people.length) list.append(element("li", "Chưa có nhân viên để phân quyền.", "dash-empty"));
       people.forEach(person => {
         const item = element("li", undefined, "management-permission-item");
         const header = element("div", undefined, "management-staff-top");
         const identity = element("div");
         identity.append(element("strong", person.fullName),
-          element("span", `${person.username} · ${person.status}`, "dash-muted"));
+          element("span", person.username, "dash-muted"));
         header.append(identity, statusBadge(person.status));
         const form = element("form", undefined, "management-permission-form");
         form.append(permissionChoices(person.permissions || [], true));
@@ -680,6 +788,7 @@
         list.append(item);
       });
     } catch (error) {
+      list.setAttribute("aria-busy", "false");
       list.replaceChildren(element("li", error.message, "dash-empty"));
       setStatus(error.message, "error");
     }
@@ -692,8 +801,12 @@
     const card = addCard("Danh mục hiện có");
     const list = element("div", undefined, "management-category-list");
     card.append(list);
+    list.setAttribute("aria-busy", "true");
+    list.append(loadingNotice("Đang tải danh mục…"));
     try {
       const categories = await request("/api/catalog/categories");
+      list.replaceChildren();
+      list.setAttribute("aria-busy", "false");
       if (!categories.length) list.append(element("div", "Chưa có danh mục.", "dash-empty"));
       categories.forEach(category => {
         const row = element("div", undefined, "management-category-row");
@@ -702,7 +815,8 @@
         list.append(row);
       });
     } catch (error) {
-      list.append(element("div", error.message, "dash-empty"));
+      list.setAttribute("aria-busy", "false");
+      list.replaceChildren(element("div", error.message, "dash-empty"));
       setStatus(error.message, "error");
     }
     const formCard = addCard("Tạo danh mục", "Chức năng API hiện hỗ trợ tạo mới; sửa/xóa danh mục chưa được cung cấp.");
@@ -753,9 +867,39 @@
       element("strong", `${Number(product.price).toLocaleString("vi-VN")} ${product.currency}`),
       statusBadge(product.status));
     if (inventoryMode) {
-      details.append(element("span",
-        `Tồn ${product.quantity ?? "—"} · Đã giữ ${product.reservedQuantity ?? "—"} · Cảnh báo ${product.reorderLevel ?? "—"}`,
-        "dash-muted"));
+      const hasStockValues = product.quantity !== null && product.quantity !== undefined
+        && product.reservedQuantity !== null && product.reservedQuantity !== undefined
+        && Number.isFinite(Number(product.quantity))
+        && Number.isFinite(Number(product.reservedQuantity));
+      const availableQuantity = hasStockValues
+        ? Number(product.quantity) - Number(product.reservedQuantity)
+        : null;
+      const summary = element("div", undefined, "management-inventory-summary");
+      [
+        ["Tồn hiện tại", product.quantity],
+        ["Đã giữ", product.reservedQuantity],
+        ["Khả dụng", availableQuantity]
+      ].forEach(([label, value]) => {
+        const metric = element("span", undefined, "management-inventory-value");
+        metric.append(element("small", label),
+          element("strong", value === null || value === undefined
+            ? "—" : Number(value).toLocaleString("vi-VN")));
+        summary.append(metric);
+      });
+      const hasReorderLevel = product.reorderLevel !== null && product.reorderLevel !== undefined
+        && Number.isFinite(Number(product.reorderLevel));
+      const reorderLevel = Number(product.reorderLevel);
+      const stockState = !hasStockValues || !hasReorderLevel
+        ? ["Chưa đủ dữ liệu ngưỡng", "pending"]
+        : availableQuantity <= 0
+          ? ["Hết hàng", "disabled"]
+          : availableQuantity <= reorderLevel
+            ? ["Tồn kho thấp", "pending"]
+            : ["Đủ hàng", ""];
+      const stockBadge = statusBadge(stockState[0]);
+      if (stockState[1]) stockBadge.classList.add(stockState[1]);
+      summary.append(stockBadge);
+      details.append(summary);
     }
     const actions = element("div", undefined, "management-product-actions");
     if (inventoryMode && has("MANAGE_INVENTORY")) {
@@ -884,7 +1028,13 @@
     status.id = "management-image-status";
     status.setAttribute("role", "status");
     status.setAttribute("aria-live", "polite");
-    controls.append(fileInput, actions, imageUrlField, addUrl, status);
+    const progress = document.createElement("progress");
+    progress.className = "management-image-progress";
+    progress.max = 100;
+    progress.value = 0;
+    progress.hidden = true;
+    progress.setAttribute("aria-label", "Tiến độ tải ảnh");
+    controls.append(fileInput, actions, imageUrlField, addUrl, status, progress);
     const gallery = element("div", undefined, "management-image-gallery");
     gallery.setAttribute("aria-label", "Thư viện ảnh, ảnh đầu tiên là ảnh chính");
     editor.append(dropzone, controls, gallery);
@@ -1122,6 +1272,8 @@
       setBusy,
       setError(message) {
         setBusy(false);
+        progress.hidden = true;
+        progress.value = 0;
         render();
         setStatus(message, true);
       },
@@ -1131,9 +1283,13 @@
         releaseEntry(entry);
         entry.url = url;
         entry.file = null;
+        progress.hidden = true;
+        progress.value = 0;
         render();
       },
       setUploadProgress(index, percent) {
+        progress.hidden = false;
+        progress.value = percent;
         setStatus(`Đang tải ảnh ${index + 1}/${entries.length}: ${percent}%`);
       },
       destroy() {
@@ -1292,8 +1448,10 @@
 
   function editInventory(product) {
     const form = element("form", undefined, "dash-form management-dialog-form");
-    form.append(field("Số lượng đang có", "quantity", "number", true, product.quantity),
-      field("Mức cảnh báo nhập thêm", "reorderLevel", "number", true, product.reorderLevel));
+    const quantityField = field("Tồn hiện tại mới", "quantity", "number", true, product.quantity);
+    const quantityInput = quantityField.querySelector("input");
+    const reorderField = field("Mức cảnh báo nhập thêm", "reorderLevel", "number", true, product.reorderLevel);
+    form.append(quantityField, reorderField);
     const wrapper = element("div", undefined, "dash-field");
     const id = "management-inventory-status";
     const label = element("label", "Trạng thái tồn kho");
@@ -1308,7 +1466,45 @@
       select.append(option);
     });
     wrapper.append(label, select);
+    const hasStockValues = product.quantity !== null && product.quantity !== undefined
+      && product.reservedQuantity !== null && product.reservedQuantity !== undefined
+      && Number.isFinite(Number(product.quantity))
+      && Number.isFinite(Number(product.reservedQuantity));
+    const availableQuantity = hasStockValues
+      ? Number(product.quantity) - Number(product.reservedQuantity)
+      : null;
+    const stockSummary = element("div", undefined, "management-inventory-summary");
+    const summaryValue = value => value === null || value === undefined
+      || !Number.isFinite(Number(value)) ? "—" : Number(value).toLocaleString("vi-VN");
+    [
+      ["Tồn hiện tại", product.quantity],
+      ["Đã giữ", product.reservedQuantity],
+      ["Khả dụng", availableQuantity]
+    ].forEach(([labelText, value]) => {
+      const metric = element("span", undefined, "management-inventory-value");
+      metric.append(element("small", labelText), element("strong", summaryValue(value)));
+      stockSummary.append(metric);
+    });
+    const estimatedAvailableMetric = element("span", undefined, "management-inventory-value");
+    const estimatedAvailableLabel = element("small", "Khả dụng nếu lưu (ước tính)");
+    const estimatedAvailableValue = element("strong", "—");
+    estimatedAvailableMetric.append(estimatedAvailableLabel, estimatedAvailableValue);
+    stockSummary.append(estimatedAvailableMetric);
+    stockSummary.setAttribute("aria-label", "Số lượng tồn hiện tại, đã giữ và khả dụng");
+    form.append(stockSummary);
+    const updateAvailableEstimate = () => {
+      const newQuantity = quantityInput.valueAsNumber;
+      estimatedAvailableValue.textContent = hasStockValues && Number.isSafeInteger(newQuantity)
+        && newQuantity >= 0
+        ? summaryValue(newQuantity - Number(product.reservedQuantity))
+        : "—";
+    };
+    quantityInput.addEventListener("input", updateAvailableEstimate);
+    updateAvailableEstimate();
     form.append(wrapper);
+    form.append(element("p",
+      "Khả dụng = tồn hiện tại − đã giữ. Số khả dụng sau khi lưu chỉ là ước tính; máy chủ là nguồn xác nhận cuối cùng. Hàng đã giữ do đơn hàng quản lý.",
+      "dash-muted full"));
     const footer = element("div", undefined, "management-dialog-actions");
     footer.append(button("Hủy", "secondary", () => form.closest("dialog").close()));
     const save = element("button", "Lưu tồn kho", "dash-button");
@@ -1358,24 +1554,36 @@
     card.append(toolbar);
     const grid = element("div", undefined, "management-product-grid");
     card.append(grid);
-    grid.append(element("div", "Đang tải sản phẩm…", "dash-empty"));
+    grid.setAttribute("aria-busy", "true");
+    grid.append(loadingNotice("Đang tải sản phẩm…"));
     try {
       const [products, categories] = await Promise.all([
         productData(),
         has("MANAGE_PRODUCTS") ? request("/api/catalog/categories") : Promise.resolve([])
       ]);
       grid.replaceChildren();
+      grid.setAttribute("aria-busy", "false");
       if (!products.length) grid.append(element("div", "Chưa có sản phẩm trong cửa hàng.", "dash-empty"));
       products.forEach(product => grid.append(renderProductCard(product, false, categories)));
+      const noMatches = element("div", "Không tìm thấy sản phẩm phù hợp.", "dash-empty");
+      noMatches.hidden = true;
+      noMatches.setAttribute("role", "status");
+      grid.append(noMatches);
       search.querySelector("input").addEventListener("input", event => {
         const term = event.target.value.trim().toLocaleLowerCase("vi");
+        let visibleCount = 0;
         [...grid.children].forEach((node, index) => {
+          if (node === noMatches) return;
           const product = products[index];
-          node.hidden = Boolean(term && !`${product.name} ${product.sku} ${product.categoryName}`
+          const hidden = Boolean(term && !`${product.name} ${product.sku} ${product.categoryName}`
             .toLocaleLowerCase("vi").includes(term));
+          node.hidden = hidden;
+          if (!hidden) visibleCount++;
         });
+        noMatches.hidden = !term || visibleCount > 0;
       });
     } catch (error) {
+      grid.setAttribute("aria-busy", "false");
       grid.replaceChildren(element("div", error.message, "dash-empty"));
       setStatus(error.message, "error");
     }
@@ -1389,13 +1597,16 @@
     const card = addCard("Tồn kho");
     const list = element("div", undefined, "management-inventory-list");
     card.append(list);
-    list.append(element("div", "Đang tải tồn kho…", "dash-empty"));
+    list.setAttribute("aria-busy", "true");
+    list.append(loadingNotice("Đang tải tồn kho…"));
     try {
       const products = await productData();
       list.replaceChildren();
+      list.setAttribute("aria-busy", "false");
       if (!products.length) list.append(element("div", "Chưa có sản phẩm để quản lý tồn kho.", "dash-empty"));
       products.forEach(product => list.append(renderProductCard(product, true)));
     } catch (error) {
+      list.setAttribute("aria-busy", "false");
       list.replaceChildren(element("div", error.message, "dash-empty"));
       setStatus(error.message, "error");
     }
@@ -1433,9 +1644,16 @@
     toolbar.append(readAll);
     const list = element("ul", undefined, "dash-list management-notification-list");
     card.append(toolbar, list);
+    list.setAttribute("aria-busy", "true");
+    list.append(loadingNotice("Đang tải thông báo…", "li"));
+    readAll.disabled = true;
     try {
       const notifications = await request("/api/notifications");
       list.replaceChildren();
+      list.setAttribute("aria-busy", "false");
+      const hasUnread = notifications.some(notification => !notification.read);
+      readAll.hidden = !hasUnread;
+      readAll.disabled = !hasUnread;
       if (!notifications.length) list.append(element("li", "Chưa có thông báo.", "dash-empty"));
       notifications.forEach(notification => {
         const item = element("li", undefined, notification.read
@@ -1460,6 +1678,7 @@
         list.append(item);
       });
     } catch (error) {
+      list.setAttribute("aria-busy", "false");
       list.replaceChildren(element("li", error.message, "dash-empty"));
       setStatus(error.message, "error");
     }

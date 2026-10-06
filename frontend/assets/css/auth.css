@@ -44,9 +44,9 @@
   overflow: hidden;
   padding: clamp(24px, 3vw, 32px);
   border: 1px solid #e1e3e6;
-  border-radius: 12px;
+  border-radius: var(--ui-card-radius);
   background: #fff;
-  box-shadow: 0 12px 28px rgba(32, 35, 40, .07);
+  box-shadow: var(--ui-shadow-card);
   transform: none;
 }
 
@@ -346,7 +346,7 @@
 .auth:not(.auth-landing) .logout-card {
   width: min(100%, 640px);
   max-width: 640px;
-  min-height: 560px;
+  min-height: 0;
   padding: 48px;
 }
 

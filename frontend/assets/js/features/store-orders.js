@@ -6,6 +6,27 @@
     return isOwner || permissions.includes(name);
   }
 
+  const statusLabels = {
+    CANCELLED: "Đã hủy",
+    COMPLETED: "Đã nhận hàng",
+    CONFIRMED: "Đã xác nhận",
+    PENDING: "Chờ xác nhận",
+    PREPARING: "Đang chuẩn bị",
+    READY_FOR_PICKUP: "Sẵn sàng nhận"
+  };
+
+  function orderStatusBadge(status) {
+    const badge = document.createElement("span");
+    badge.className = "dash-badge";
+    badge.textContent = statusLabels[status] || status;
+    if (["PENDING", "READY_FOR_PICKUP"].includes(status)) {
+      badge.classList.add("pending");
+    } else if (status === "CANCELLED") {
+      badge.classList.add("disabled");
+    }
+    return badge;
+  }
+
   async function request(path, options = {}) {
     const response = await fetch(`${API}${path}`, {
       credentials: "include",
@@ -29,10 +50,12 @@
 
   async function load(storeId, permissions, isOwner, list, status) {
     list.replaceChildren();
+    list.setAttribute("aria-busy", "true");
     status.textContent = "Đang tải đơn hàng…";
     status.className = "dash-status";
     try {
       const orders = await request(`/api/stores/${encodeURIComponent(storeId)}/orders`);
+      list.setAttribute("aria-busy", "false");
       status.textContent = `${orders.length} đơn hàng.`;
       if (!orders.length) {
         const empty = document.createElement("li");
@@ -42,8 +65,11 @@
       }
       orders.forEach(order => {
         const item = document.createElement("li");
-        const heading = document.createElement("strong");
-        heading.textContent = `${order.orderCode} · ${order.status}`;
+        const heading = document.createElement("div");
+        heading.className = "management-order-heading";
+        const code = document.createElement("strong");
+        code.textContent = order.orderCode;
+        heading.append(code, orderStatusBadge(order.status));
         const date = document.createElement("p");
         date.className = "dash-muted";
         date.textContent = new Date(order.createdAt).toLocaleString("vi-VN");
@@ -72,6 +98,7 @@
               });
               await load(storeId, permissions, isOwner, list, status);
             } catch (error) {
+              list.setAttribute("aria-busy", "false");
               status.textContent = error.message;
               status.className = "dash-status error";
               button.disabled = false;

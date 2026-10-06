@@ -9,8 +9,23 @@
   const categoryNav = document.querySelector("#shop-category-nav");
   const sortSelect = document.querySelector("#product-sort");
   const productCount = document.querySelector("#product-count");
+  const hotline = document.querySelector("#shop-hotline");
   let products = [];
   let categories = [];
+
+  function setStoreHotline(store) {
+    if (!hotline) return;
+    const phone = (store && store.phone || "").trim();
+    const dialablePhone = phone.replace(/[^\d+]/g, "");
+    if (!phone || !/^\+?\d{6,15}$/.test(dialablePhone)) {
+      hotline.hidden = true;
+      hotline.removeAttribute("href");
+      return;
+    }
+    hotline.href = `tel:${dialablePhone}`;
+    hotline.querySelector("strong").textContent = phone;
+    hotline.hidden = false;
+  }
 
   function money(value, currency) {
     return `${Number(value).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} ${currency}`;
@@ -257,6 +272,7 @@
         const option = document.createElement("option");
         option.value = store.id;
         option.textContent = `${store.name} — ${store.addressDetail}, ${store.ward}, ${store.district}`;
+        option.dataset.phone = store.phone || "";
         storeSelect.append(option);
       });
       const requested = new URLSearchParams(location.search).get("store");
@@ -266,10 +282,12 @@
       if (selected) {
         storeSelect.value = String(selected.id);
         localStorage.setItem("selectedStoreId", String(selected.id));
+        setStoreHotline(selected);
         await loadCategories();
         await loadProducts(storeSelect.value);
         status.textContent = `${stores.length} cửa hàng đang hoạt động.`;
       } else {
+        setStoreHotline(null);
         status.textContent = "Hiện chưa có cửa hàng nào được kích hoạt.";
         status.className = "dash-status";
       }
@@ -283,6 +301,11 @@
     localStorage.setItem("selectedStoreId", storeSelect.value);
     status.className = "dash-status";
     try {
+      const selectedStore = Array.from(storeSelect.options)
+        .filter(option => option.value)
+        .map(option => ({ id: option.value, phone: option.dataset.phone }))
+        .find(store => String(store.id) === storeSelect.value);
+      setStoreHotline(selectedStore);
       await loadProducts(storeSelect.value);
       status.textContent = storeSelect.value
         ? "Danh sách sản phẩm đã được cập nhật."
