@@ -5,12 +5,17 @@ import com.banhangonline.common.response.ApiResponse;
 import com.banhangonline.product.dto.CategoryRequest;
 import com.banhangonline.product.dto.CategoryView;
 import com.banhangonline.product.dto.InventoryRequest;
+import com.banhangonline.product.dto.ProductImageDeleteRequest;
+import com.banhangonline.product.dto.ProductImageUploadView;
 import com.banhangonline.product.dto.ProductRequest;
 import com.banhangonline.product.dto.ProductView;
 import com.banhangonline.product.service.CatalogService;
+import com.banhangonline.product.storage.ProductImageStorageService;
+import com.banhangonline.store.service.StorePermissionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,9 +24,14 @@ import java.util.List;
 @RequestMapping("/api/owner")
 public class StoreCatalogController {
     private final CatalogService catalog;
+    private final ProductImageStorageService images;
+    private final StorePermissionService storePermissions;
 
-    public StoreCatalogController(CatalogService catalog) {
+    public StoreCatalogController(CatalogService catalog, ProductImageStorageService images,
+                                  StorePermissionService storePermissions) {
         this.catalog = catalog;
+        this.images = images;
+        this.storePermissions = storePermissions;
     }
 
     @GetMapping("/stores/{storeId}/products")
@@ -46,6 +56,25 @@ public class StoreCatalogController {
                                            @Valid @RequestBody ProductRequest request) {
         return ApiResponse.ok("Đã cập nhật sản phẩm",
                 catalog.update(storeId, productId, principal.userId(), principal.roles(), request));
+    }
+
+    @PostMapping(path = "/stores/{storeId}/products/images",
+            consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<ProductImageUploadView> uploadImage(@AuthenticationPrincipal AuthPrincipal principal,
+                                                           @PathVariable Long storeId,
+                                                           @RequestParam("file") MultipartFile file) {
+        storePermissions.require(storeId, principal.userId(), principal.roles(), "MANAGE_PRODUCTS");
+        return ApiResponse.ok("Đã tải ảnh sản phẩm", new ProductImageUploadView(images.upload(storeId, file)));
+    }
+
+    @DeleteMapping("/stores/{storeId}/products/images")
+    public ApiResponse<Boolean> deleteImage(@AuthenticationPrincipal AuthPrincipal principal,
+                                            @PathVariable Long storeId,
+                                            @Valid @RequestBody ProductImageDeleteRequest request) {
+        storePermissions.require(storeId, principal.userId(), principal.roles(), "MANAGE_PRODUCTS");
+        return ApiResponse.ok("Đã xử lý ảnh sản phẩm",
+                images.deleteIfManaged(storeId, request.imageUrl()));
     }
 
     @DeleteMapping("/stores/{storeId}/products/{productId}")

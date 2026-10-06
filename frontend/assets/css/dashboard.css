@@ -280,6 +280,21 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 127, 105, .4)
 .management-product-details > strong { font-size: 14px; }
 .management-product-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding: 0 15px 15px; }
 .management-product-actions .dash-button { min-height: 37px; padding: 7px 11px; font-size: 11px; }
+.management-dialog.product-image-dialog { width: min(860px, calc(100% - 32px)); }
+.management-image-editor { display: grid; grid-column: 1 / -1; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 18px; align-items: stretch; }
+.management-image-dropzone { display: grid; min-height: 240px; overflow: hidden; place-items: center; border: 1px dashed #c7d3e2; border-radius: 15px; background: #f4f7fa; color: #77879c; cursor: pointer; transition: border-color .18s ease, background .18s ease, box-shadow .18s ease; }
+.management-image-dropzone:hover, .management-image-dropzone.dragging { border-color: var(--dash-accent); background: #eef4ff; box-shadow: inset 0 0 0 1px rgba(66,111,187,.12); }
+.management-image-dropzone:focus-visible { outline: 3px solid rgba(66,111,187,.4); outline-offset: 3px; }
+.management-image-dropzone img { width: 100%; height: 100%; min-height: 240px; object-fit: contain; }
+.management-image-placeholder { display: grid; justify-items: center; gap: 6px; padding: 18px; text-align: center; }
+.management-image-placeholder strong { color: #7a8ba1; font-size: 15px; }
+.management-image-placeholder span { color: var(--dash-muted); font-size: 11px; }
+.management-image-controls { display: grid; align-content: start; gap: 11px; min-width: 0; }
+.management-image-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.management-image-url { margin-top: 2px; }
+.management-image-status { min-height: 20px; margin: 0; overflow-wrap: anywhere; }
+.management-image-status.error { color: var(--dash-danger); }
+.management-file-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); }
 .management-orders-list li { display: grid; gap: 10px; }
 .management-notification { display: grid; gap: 8px; }
 .management-notification.unread { border-color: #c8d6e9; background: #f9fbfe; }
@@ -339,6 +354,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 127, 105, .4)
   .management-toolbar { align-items: stretch; flex-direction: column; }
   .management-toolbar .dash-field { width: 100%; }
   .management-staff-top { align-items: flex-start; flex-direction: column; }
+  .management-image-editor { grid-template-columns: 1fr; }
+  .management-image-dropzone, .management-image-dropzone img { min-height: 190px; }
   .management-dialog-actions { flex-direction: column-reverse; }
   .management-dialog-actions .dash-button { width: 100%; }
 }

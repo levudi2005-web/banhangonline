@@ -67,11 +67,12 @@
   }
 
   async function request(path, options = {}) {
+    const isFormData = options.body instanceof FormData;
     const response = await fetch(`${API}${path}`, {
       credentials: "include",
       ...options,
       headers: {
-        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(options.body && !isFormData ? { "Content-Type": "application/json" } : {}),
         ...(options.method && options.method !== "GET" ? { "X-Requested-With": "fetch" } : {}),
         ...(options.headers || {})
       }
@@ -711,9 +712,9 @@
     return card;
   }
 
-  function openDialog(title, form) {
+  function openDialog(title, form, className = "", onClose = () => {}) {
     const dialog = document.createElement("dialog");
-    dialog.className = "management-dialog";
+    dialog.className = `management-dialog ${className}`.trim();
     const formHeader = element("div", undefined, "management-dialog-heading");
     formHeader.append(element("h2", title));
     const close = button("×", "secondary management-dialog-close", () => dialog.close());
@@ -721,7 +722,10 @@
     formHeader.append(close);
     dialog.append(formHeader, form);
     document.body.append(dialog);
-    dialog.addEventListener("close", () => dialog.remove(), { once: true });
+    dialog.addEventListener("close", () => {
+      onClose();
+      dialog.remove();
+    }, { once: true });
     dialog.showModal();
   }
 
@@ -744,13 +748,169 @@
     return wrapper;
   }
 
+  function productImageEditor(initialUrl) {
+    const editor = element("section", undefined, "management-image-editor");
+    const dropzone = element("div", undefined, "management-image-dropzone");
+    dropzone.tabIndex = 0;
+    dropzone.setAttribute("role", "button");
+    dropzone.setAttribute("aria-label", "Chọn hoặc thả ảnh sản phẩm vào đây");
+    const preview = document.createElement("img");
+    preview.alt = "Ảnh xem trước sản phẩm";
+    preview.hidden = true;
+    const placeholder = element("div", undefined, "management-image-placeholder");
+    placeholder.append(element("strong", "Kéo thả / chọn ảnh"),
+      element("span", "PNG, JPG hoặc WEBP · tối đa 5 MB"));
+    dropzone.append(preview, placeholder);
+
+    const controls = element("div", undefined, "management-image-controls");
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/png,image/jpeg,image/webp";
+    fileInput.className = "management-file-input";
+    fileInput.tabIndex = -1;
+    fileInput.setAttribute("aria-label", "Tệp ảnh sản phẩm");
+    const choose = button("Chọn ảnh", "secondary", () => fileInput.click());
+    const clear = button("Gỡ ảnh", "secondary", clearImage);
+    clear.hidden = !initialUrl;
+    const actions = element("div", undefined, "management-image-actions");
+    actions.append(choose, clear);
+    const imageUrlField = field("Hoặc dùng đường dẫn ảnh HTTPS", "imageUrl", "url", false, initialUrl || "");
+    imageUrlField.classList.add("management-image-url");
+    const imageUrlInput = imageUrlField.querySelector("input");
+    const status = element("p", "Chưa chọn ảnh mới.", "management-image-status dash-muted");
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    controls.append(fileInput, actions, imageUrlField, status);
+    editor.append(dropzone, controls);
+
+    let selectedFile = null;
+    let objectUrl = null;
+    let previousImageUrl = initialUrl || "";
+
+    function setStatus(message, isError = false) {
+      status.textContent = message;
+      status.classList.toggle("error", isError);
+    }
+
+    function releaseObjectUrl() {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = null;
+    }
+
+    function showPreview(url) {
+      preview.hidden = !url;
+      placeholder.hidden = Boolean(url);
+      if (url) {
+        preview.src = url;
+      } else {
+        preview.removeAttribute("src");
+      }
+    }
+
+    function clearImage() {
+      selectedFile = null;
+      releaseObjectUrl();
+      previousImageUrl = "";
+      imageUrlInput.value = "";
+      fileInput.value = "";
+      showPreview("");
+      clear.hidden = true;
+      setStatus("Ảnh hiện tại sẽ được gỡ khi lưu sản phẩm.");
+    }
+
+    function chooseFile(file) {
+      if (!file) return;
+      const extension = file.name.split(".").pop().toLowerCase();
+      const supportedExtensions = ["png", "jpg", "jpeg", "webp"];
+      if (!supportedExtensions.includes(extension)
+          || (file.type && !["image/png", "image/jpeg", "image/webp"].includes(file.type))) {
+        setStatus("Chọn tệp PNG, JPG hoặc WEBP.", true);
+        selectedFile = null;
+        releaseObjectUrl();
+        imageUrlInput.value = previousImageUrl;
+        showPreview(previousImageUrl);
+        clear.hidden = !previousImageUrl;
+        fileInput.value = "";
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setStatus("Ảnh sản phẩm không được vượt quá 5 MB.", true);
+        selectedFile = null;
+        releaseObjectUrl();
+        imageUrlInput.value = previousImageUrl;
+        showPreview(previousImageUrl);
+        clear.hidden = !previousImageUrl;
+        fileInput.value = "";
+        return;
+      }
+      previousImageUrl = imageUrlInput.value.trim() || previousImageUrl;
+      releaseObjectUrl();
+      selectedFile = file;
+      objectUrl = URL.createObjectURL(file);
+      imageUrlInput.value = "";
+      showPreview(objectUrl);
+      clear.hidden = false;
+      setStatus(`${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB · tải lên khi lưu.`);
+    }
+
+    fileInput.addEventListener("change", () => chooseFile(fileInput.files[0]));
+    imageUrlInput.addEventListener("input", () => {
+      selectedFile = null;
+      releaseObjectUrl();
+      previousImageUrl = imageUrlInput.value.trim();
+      showPreview(imageUrlInput.value.trim());
+      clear.hidden = !imageUrlInput.value.trim();
+      setStatus(imageUrlInput.value.trim()
+        ? "Đường dẫn ảnh sẽ được lưu cùng sản phẩm."
+        : "Chưa chọn ảnh mới.");
+    });
+    dropzone.addEventListener("click", () => fileInput.click());
+    dropzone.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        fileInput.click();
+      }
+    });
+    dropzone.addEventListener("dragover", event => {
+      event.preventDefault();
+      dropzone.classList.add("dragging");
+    });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragging"));
+    dropzone.addEventListener("drop", event => {
+      event.preventDefault();
+      dropzone.classList.remove("dragging");
+      chooseFile(event.dataTransfer.files[0]);
+    });
+    preview.addEventListener("error", () => {
+      showPreview("");
+      setStatus("Không thể hiển thị ảnh. Kiểm tra đường dẫn hoặc chọn ảnh khác.", true);
+    });
+
+    showPreview(initialUrl || "");
+    return {
+      element: editor,
+      file: () => selectedFile,
+      imageUrl: imageUrlInput,
+      setUploadedUrl(url) {
+        selectedFile = null;
+        releaseObjectUrl();
+        imageUrlInput.value = url;
+        showPreview(url);
+        clear.hidden = false;
+        setStatus("Ảnh đã tải lên. Lưu sản phẩm để áp dụng ảnh mới.");
+      },
+      destroy: releaseObjectUrl
+    };
+  }
+
   async function editProduct(product, categories) {
     if (!categories.length) {
       setStatus("Không có danh mục để gán sản phẩm.", "error");
       return;
     }
     const form = element("form", undefined, "dash-form management-dialog-form");
-    form.append(categorySelect(categories, product && product.categoryId),
+    const imageEditor = productImageEditor(product ? product.imageUrl : "");
+    form.append(imageEditor.element, categorySelect(categories, product && product.categoryId),
       field("SKU", "sku", "text", true, product ? product.sku : ""),
       field("Tên sản phẩm", "name", "text", true, product ? product.name : ""),
       field("Slug", "slug", "text", true, product ? product.slug : ""),
@@ -761,8 +921,7 @@
     }
     form.elements.price.min = "0.0001";
     form.elements.price.step = "0.0001";
-    form.append(field("Ảnh HTTPS", "imageUrl", "url", false, product ? product.imageUrl : ""),
-      field("Mô tả", "description", "textarea", false, product ? product.description : ""));
+    form.append(field("Mô tả", "description", "textarea", false, product ? product.description : ""));
     if (!product && has("MANAGE_INVENTORY")) {
       form.append(field("Số lượng ban đầu", "quantity", "number", true, 0),
         field("Mức cảnh báo tồn kho", "reorderLevel", "number", true, 0));
@@ -773,10 +932,26 @@
     save.type = "submit";
     footer.append(cancel, save);
     form.append(footer);
+    const originalImageUrl = product ? product.imageUrl : "";
+    let pendingUploadedImageUrl = "";
+    let imageSaved = false;
     form.addEventListener("submit", async event => {
       event.preventDefault();
       save.disabled = true;
+      let uploadedImageUrl = "";
       try {
+        const file = imageEditor.file();
+        if (file) {
+          const uploadForm = new FormData();
+          uploadForm.append("file", file);
+          const uploaded = await request(
+            `/api/owner/stores/${context.selectedStoreId}/products/images`,
+            { method: "POST", body: uploadForm }
+          );
+          uploadedImageUrl = uploaded.imageUrl;
+          pendingUploadedImageUrl = uploadedImageUrl;
+          imageEditor.setUploadedUrl(uploadedImageUrl);
+        }
         const values = Object.fromEntries([...new FormData(form).entries()].filter(([, value]) => value !== ""));
         values.categoryId = Number(values.categoryId);
         values.currency = product ? product.currency : "VND";
@@ -787,15 +962,42 @@
           : `/api/owner/stores/${context.selectedStoreId}/products`, {
           method: product ? "PUT" : "POST", body: JSON.stringify(values)
         });
+        imageSaved = true;
         form.closest("dialog").close();
-        setStatus(product ? "Đã cập nhật sản phẩm." : "Đã thêm sản phẩm.", "success");
+        let message = product ? "Đã cập nhật sản phẩm." : "Đã thêm sản phẩm.";
+        let kind = "success";
+        if (originalImageUrl && originalImageUrl !== values.imageUrl) {
+          try {
+            const deleted = await request(
+              `/api/owner/stores/${context.selectedStoreId}/products/images`,
+              { method: "DELETE", body: JSON.stringify({ imageUrl: originalImageUrl }) }
+            );
+            if (!deleted) {
+              message += " Ảnh cũ đã được gỡ khỏi sản phẩm nhưng không thuộc kho ảnh này.";
+            }
+          } catch (cleanupError) {
+            message += ` Ảnh cũ chưa thể xóa khỏi kho: ${cleanupError.message}`;
+            kind = "error";
+          }
+        }
+        pendingUploadedImageUrl = "";
+        setStatus(message, kind);
         await renderProducts();
       } catch (error) {
         setStatus(error.message, "error");
         save.disabled = false;
       }
     });
-    openDialog(product ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm", form);
+    openDialog(product ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm", form,
+      "product-image-dialog", () => {
+        imageEditor.destroy();
+        if (pendingUploadedImageUrl && !imageSaved) {
+          request(`/api/owner/stores/${context.selectedStoreId}/products/images`, {
+            method: "DELETE",
+            body: JSON.stringify({ imageUrl: pendingUploadedImageUrl })
+          }).catch(error => setStatus(`Không thể dọn ảnh vừa tải lên: ${error.message}`, "error"));
+        }
+      });
   }
 
   function editInventory(product) {
