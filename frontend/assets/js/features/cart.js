@@ -56,11 +56,29 @@
       clearButton.hidden = !cart.items.length;
       cart.items.forEach(item => {
         const row = document.createElement("li");
+        row.className = "cart-item";
         const name = document.createElement("strong");
         name.textContent = item.name;
         const amount = document.createElement("span");
         amount.className = "dash-muted";
         amount.textContent = `${item.sku} · ${money(item.unitPrice, item.currency)}`;
+        const product = document.createElement("div");
+        product.className = "cart-item-product";
+        const image = document.createElement("img");
+        image.className = "cart-item-image";
+        image.alt = "";
+        image.loading = "lazy";
+        if (item.imageUrl) {
+          image.src = item.imageUrl;
+          image.referrerPolicy = "no-referrer";
+          image.addEventListener("error", () => image.remove(), { once: true });
+        } else {
+          image.hidden = true;
+        }
+        const details = document.createElement("div");
+        details.className = "cart-item-details";
+        details.append(name, amount);
+        product.append(image, details);
         const controls = document.createElement("div");
         controls.className = "dash-inline";
         const quantity = document.createElement("span");
@@ -108,11 +126,11 @@
           }
         });
         controls.append(minus, quantity, plus, remove);
-        row.append(name, amount, controls);
+        row.append(product, controls);
         itemsNode.append(row);
       });
       totals.textContent = money(cart.subtotal, cart.currency);
-      status.textContent = `${cart.items.length} sản phẩm trong giỏ. Giá được kiểm tra lại tại thời điểm đặt hàng.`;
+      status.textContent = `${cart.items.length} sản phẩm trong giỏ. Giá được giữ theo thời điểm thêm vào giỏ; tồn kho được kiểm tra khi đặt hàng.`;
     } catch (error) {
       showError(error);
     }

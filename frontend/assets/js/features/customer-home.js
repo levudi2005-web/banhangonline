@@ -6,6 +6,7 @@
   const list = document.querySelector("#product-list");
   const search = document.querySelector("#product-search");
   const categorySelect = document.querySelector("#category-filter");
+  const categoryNav = document.querySelector("#shop-category-nav");
   const sortSelect = document.querySelector("#product-sort");
   const productCount = document.querySelector("#product-count");
   let products = [];
@@ -29,13 +30,20 @@
     if (sortSelect.value === "name") visible.sort((a, b) => a.name.localeCompare(b.name, "vi"));
 
     list.replaceChildren();
+    list.setAttribute("aria-busy", "false");
     productCount.textContent = `${visible.length} / ${products.length} sản phẩm`;
+    categoryNav?.querySelectorAll("a").forEach(link => {
+      const selectedCategory = link.dataset.categoryId || "";
+      link.setAttribute("aria-current", selectedCategory === category ? "page" : "false");
+    });
     if (!visible.length) {
       const empty = document.createElement("div");
       empty.className = "dash-empty shop-empty";
-      empty.textContent = products.length
-        ? "Không tìm thấy sản phẩm phù hợp. Thử đổi từ khóa hoặc danh mục."
-        : "Cửa hàng chưa có sản phẩm còn hàng. Vui lòng quay lại sau.";
+      empty.textContent = !storeSelect.value
+        ? "Chọn cửa hàng nhận hàng để xem sản phẩm."
+        : products.length
+          ? "Không tìm thấy sản phẩm phù hợp. Thử đổi từ khóa hoặc danh mục."
+          : "Cửa hàng chưa có sản phẩm còn hàng. Vui lòng quay lại sau.";
       list.append(empty);
       return;
     }
@@ -95,8 +103,9 @@
       price.className = "shop-product-price";
       price.textContent = money(product.price, product.currency);
       const stock = document.createElement("span");
-      stock.className = "shop-stock";
-      stock.textContent = `Còn ${product.quantity}`;
+      const available = Number(product.quantity) || 0;
+      stock.className = `shop-stock${available > 0 ? " in-stock" : " out-of-stock"}`;
+      stock.textContent = available > 0 ? `Còn ${available}` : "Tạm hết hàng";
       content.append(category, name, description, sku);
 
       const footer = document.createElement("div");
@@ -106,7 +115,7 @@
       add.className = "dash-button";
       add.textContent = "Thêm vào giỏ";
       add.setAttribute("aria-label", `Thêm ${product.name} vào giỏ`);
-      add.disabled = Number(product.quantity) < 1;
+      add.disabled = available < 1;
       add.addEventListener("click", async () => {
         add.disabled = true;
         try {
@@ -152,15 +161,35 @@
   async function loadProducts(storeId) {
     list.replaceChildren();
     products = [];
-    renderProducts();
-    if (!storeId) return;
-    const response = await fetch(`${API}/api/catalog/stores/${encodeURIComponent(storeId)}/products`);
-    const result = await response.json().catch(() => null);
-    if (!response.ok || !result || !result.success) {
-      throw new Error(result && result.message || "Không thể tải sản phẩm.");
+    list.setAttribute("aria-busy", "true");
+    productCount.textContent = "";
+    if (!storeId) {
+      renderProducts();
+      return;
     }
-    products = result.data;
-    renderProducts();
+    for (let index = 0; index < 4; index++) {
+      const skeleton = document.createElement("div");
+      skeleton.className = "shop-product-skeleton";
+      skeleton.setAttribute("aria-hidden", "true");
+      list.append(skeleton);
+    }
+    try {
+      const response = await fetch(`${API}/api/catalog/stores/${encodeURIComponent(storeId)}/products`);
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result || !result.success) {
+        throw new Error(result && result.message || "Không thể tải sản phẩm.");
+      }
+      products = result.data;
+      renderProducts();
+    } catch (error) {
+      list.replaceChildren();
+      list.setAttribute("aria-busy", "false");
+      const errorState = document.createElement("div");
+      errorState.className = "dash-empty shop-empty shop-load-error";
+      errorState.textContent = error.message;
+      list.append(errorState);
+      throw error;
+    }
   }
 
   async function loadCategories() {
@@ -187,6 +216,27 @@
       : "";
     const pathCategory = result.data.find(category => category.slug === pathSlug);
     if (pathCategory) categorySelect.value = String(pathCategory.id);
+    if (categoryNav) {
+      categoryNav.replaceChildren();
+      const allLink = document.createElement("a");
+      allLink.href = storeSelect.value
+        ? AppRoutes.getRoute("customer.home", { store: storeSelect.value })
+        : AppRoutes.getRoute("customer.home");
+      allLink.textContent = "Tất cả sản phẩm";
+      allLink.dataset.categoryId = "";
+      allLink.setAttribute("aria-current", pathCategory ? "false" : "page");
+      categoryNav.append(allLink);
+      categories.forEach(category => {
+        const link = document.createElement("a");
+        link.href = AppRoutes.getRoute("customer.category", {
+          slug: category.slug,
+          store: storeSelect.value
+        });
+        link.textContent = category.name;
+        link.dataset.categoryId = String(category.id);
+        categoryNav.append(link);
+      });
+    }
     search.value = new URLSearchParams(location.search).get("q") || "";
   }
 

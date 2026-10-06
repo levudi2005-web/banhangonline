@@ -103,10 +103,15 @@ public class ResendEmailSender implements OtpSender {
 
     private Throwable deepestCause(Throwable error) {
         Throwable current = error;
-        while (current.getCause() != null && current.getCause() != current) {
-            current = current.getCause();
+        java.util.Set<Throwable> visited = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        while (current != null && visited.add(current)) {
+            Throwable next = current.getCause();
+            if (next == null || next == current) {
+                return current;
+            }
+            current = next;
         }
-        return current;
+        return current == null ? error : current;
     }
 
     private String redact(String message, String destination, String code) {

@@ -6,39 +6,57 @@
   <link rel="stylesheet" href="../../assets/css/dashboard.css">
   <title>Cửa hàng — BanHangOnline</title>
 </head>
-<body class="dashboard">
+<body class="dashboard storefront-page">
   <main class="dash-shell">
-    <header class="dash-top">
-      <a class="dash-brand" href="/pages/customer/index.html">BanHangOnline</a>
-      <nav class="dash-nav" aria-label="Điều hướng khách hàng">
-        <a href="/pages/customer/index.html" aria-current="page">Cửa hàng</a>
-        <a href="/tim-kiem">Tìm kiếm</a>
-        <a href="#category-filter">Danh mục</a>
-        <a href="/pages/customer/cart.html">Giỏ hàng</a>
-        <a href="/pages/customer/orders.html">Đơn hàng</a>
-        <a href="/pages/customer/notifications.html">Thông báo</a>
-        <a href="/pages/auth/session.html?area=customer">Tài khoản</a>
+    <div class="shop-service-strip" aria-label="Chính sách mua hàng">
+      <span>Đặt hàng trực tuyến</span><span>Nhận hàng tại cửa hàng</span><span>Thanh toán khi nhận hàng</span>
+    </div>
+    <header class="shop-header">
+      <a class="shop-brand" href="/pages/customer/index.html" aria-label="BanHangOnline — Trang chủ">
+        <span class="shop-brand-mark" aria-hidden="true">B</span>
+        <span>BanHangOnline<small>Công nghệ chính hãng</small></span>
+      </a>
+      <form id="shop-search-form" class="shop-search" action="/tim-kiem" method="get" role="search">
+        <label class="visually-hidden" for="product-search">Tìm sản phẩm</label>
+        <input id="product-search" name="q" type="search" placeholder="Bạn cần tìm sản phẩm gì?" autocomplete="off">
+        <button type="submit" aria-label="Tìm kiếm">Tìm kiếm</button>
+      </form>
+      <nav class="shop-quick-links" aria-label="Tài khoản và giỏ hàng">
+        <a href="/pages/auth/session.html?area=customer"><span aria-hidden="true">♙</span><span>Tài khoản</span></a>
+        <a href="/pages/customer/cart.html"><span aria-hidden="true">▣</span><span>Giỏ hàng</span></a>
       </nav>
     </header>
-    <h1 class="dash-title">Nhận hàng tại cửa hàng</h1>
-    <p class="dash-subtitle">Khám phá sản phẩm, chọn cửa hàng nhận hàng và đặt trực tuyến dễ dàng.</p>
-    <section class="dash-card">
+    <nav id="shop-category-nav" class="shop-category-nav" aria-label="Danh mục sản phẩm">
+      <a href="/pages/customer/index.html" aria-current="page">Tất cả sản phẩm</a>
+    </nav>
+    <section class="shop-hero" aria-labelledby="storefront-title">
+      <div class="shop-hero-copy">
+        <p class="shop-hero-eyebrow">MUA SẮM THUẬN TIỆN</p>
+        <h1 id="storefront-title">Chọn sản phẩm.<br><span>Nhận tại cửa hàng.</span></h1>
+        <p>Khám phá danh mục hàng đang bán và chọn cửa hàng nhận phù hợp với bạn.</p>
+        <a class="shop-hero-link" href="#products">Khám phá sản phẩm <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="shop-hero-art" aria-hidden="true">
+        <span class="shop-hero-orbit shop-hero-orbit-one"></span>
+        <span class="shop-hero-orbit shop-hero-orbit-two"></span>
+        <span class="shop-hero-mark">B</span>
+        <span class="shop-hero-accent"></span>
+      </div>
+    </section>
+    <section class="shop-catalog-section" aria-labelledby="catalog-heading">
       <div class="shop-heading" id="products">
         <div>
-          <h2>Chọn cửa hàng nhận hàng</h2>
-          <p class="dash-muted">Sản phẩm và tồn kho được cập nhật trực tiếp từ cửa hàng.</p>
+          <p class="shop-section-kicker">DANH MỤC HÀNG HÓA</p>
+          <h2 id="catalog-heading">Sản phẩm tại cửa hàng</h2>
+          <p class="dash-muted">Giá bán và tồn kho được tải từ cửa hàng đang chọn.</p>
         </div>
-        <a class="dash-button secondary" href="/pages/customer/cart.html">Mở giỏ hàng</a>
+      </div>
+      <div class="shop-store-row">
+        <div class="shop-store-copy"><span class="shop-store-icon" aria-hidden="true">⌖</span><span><strong>Địa điểm nhận hàng</strong><small>Chọn cửa hàng để xem sản phẩm còn bán</small></span></div>
+        <div class="dash-field"><label for="store-select">Cửa hàng nhận hàng</label><select id="store-select"></select></div>
       </div>
       <div id="store-status" class="dash-status" role="status" aria-live="polite">Đang tải cửa hàng…</div>
-      <div class="dash-field"><label for="store-select">Cửa hàng</label><select id="store-select"></select></div>
       <div class="shop-toolbar">
-        <div class="dash-field">
-          <label for="product-search">Tìm sản phẩm</label>
-          <form id="shop-search-form" action="/tim-kiem" method="get">
-            <input id="product-search" name="q" type="search" placeholder="Tên, mô tả hoặc mã hàng">
-          </form>
-        </div>
         <div class="dash-field">
           <label for="category-filter">Danh mục</label>
           <select id="category-filter"><option value="">Tất cả danh mục</option></select>
@@ -54,7 +72,7 @@
         </div>
         <span id="product-count" class="dash-muted" aria-live="polite"></span>
       </div>
-      <div id="product-list" class="shop-grid" aria-live="polite"></div>
+      <div id="product-list" class="shop-grid" aria-live="polite" aria-busy="true"></div>
     </section>
   </main>
   <script src="../../assets/js/core/routes.js"></script>

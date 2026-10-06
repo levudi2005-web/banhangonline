@@ -3,9 +3,9 @@
   isolation: isolate;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 12% 12%, rgba(212, 225, 245, .52), transparent 34%),
-    radial-gradient(ellipse at 90% 90%, rgba(226, 232, 240, .38), transparent 35%),
-    #f3f6fa;
+    radial-gradient(ellipse at 12% 12%, rgba(203, 28, 34, .06), transparent 34%),
+    radial-gradient(ellipse at 90% 90%, rgba(243, 111, 33, .04), transparent 35%),
+    #f5f6f7;
 }
 
 .auth:not(.auth-landing)::before,
@@ -23,7 +23,7 @@
 .auth:not(.auth-landing)::before {
   top: -12rem;
   right: -8rem;
-  background: radial-gradient(circle, rgba(66, 111, 187, .09), transparent 70%);
+  background: radial-gradient(circle, rgba(203, 28, 34, .08), transparent 70%);
 }
 
 .auth:not(.auth-landing)::after {
@@ -43,10 +43,10 @@
   min-height: 0;
   overflow: hidden;
   padding: clamp(24px, 3vw, 32px);
-  border: 1px solid #dce4ef;
+  border: 1px solid #e1e3e6;
   border-radius: 12px;
   background: #fff;
-  box-shadow: 0 12px 28px rgba(32, 51, 80, .07);
+  box-shadow: 0 12px 28px rgba(32, 35, 40, .07);
   transform: none;
 }
 
@@ -92,7 +92,7 @@
 
 .auth:not(.auth-landing) .auth-header .back:hover {
   transform: translateX(-2px);
-  background: #f1f5f9;
+  background: #f3f4f5;
   color: var(--ui-ink);
   text-decoration: none;
 }
@@ -157,7 +157,7 @@
   width: 100%;
   height: 42px;
   padding: 0 12px;
-  border: 1px solid #d5deea;
+  border: 1px solid #d7dade;
   border-radius: 7px;
   outline: none;
   background: #fff;
@@ -179,7 +179,7 @@
 
 .auth:not(.auth-landing) .auth-card .field input:not([type="checkbox"]):hover,
 .auth:not(.auth-landing) .auth-card .field select:hover {
-  border-color: #cbd5e1;
+  border-color: #b8bdc4;
   background: #fff;
 }
 
@@ -192,7 +192,7 @@
 
 .auth:not(.auth-landing) .auth-card .field.invalid input:not([type="checkbox"]),
 .auth:not(.auth-landing) .auth-card .field.invalid select {
-  border-color: #f87171;
+  border-color: var(--ui-danger);
   background: #fffafa;
   box-shadow: 0 0 0 4px rgba(220, 38, 38, .07);
 }
@@ -229,21 +229,21 @@
 
 .auth:not(.auth-landing) .auth-card .eye:hover {
   transform: scale(1.04);
-  background: #eef2f7;
+  background: #f1f2f3;
   color: var(--ui-ink);
 }
 
 .auth:not(.auth-landing) .auth-card fieldset.address-fields {
   margin: 12px 0 4px;
   padding: 18px;
-  border-color: #e2e8f0;
+  border-color: #e1e3e6;
   border-radius: 18px;
-  background: linear-gradient(145deg, #fbfcfe, #f7f9fc);
+  background: linear-gradient(145deg, #fff, #f7f8f9);
 }
 
 .auth:not(.auth-landing) .auth-card fieldset.address-fields legend {
   padding: 0 8px;
-  color: #4d4d4d;
+  color: var(--ui-ink);
   font-size: 13px;
   font-weight: 700;
 }
@@ -332,15 +332,15 @@
 }
 
 .auth:not(.auth-landing) .auth-card .switch {
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e1e3e6;
   border-radius: 8px;
-  background: #f8fafc;
+  background: #f8f8f9;
   transition: border-color .2s ease, background .2s ease, transform .2s ease;
 }
 
 .auth:not(.auth-landing) .auth-card .switch:hover {
-  border-color: #cbd5e1;
-  background: #f1f5f9;
+  border-color: #b8bdc4;
+  background: #f1f2f3;
 }
 
 .auth:not(.auth-landing) .logout-card {

@@ -4,6 +4,15 @@
   const list = document.querySelector("#customer-orders");
   const status = document.querySelector("#orders-status");
   const requestedOrderId = location.pathname.match(/^\/don-hang\/(\d+)$/)?.[1] || "";
+  const orderSteps = [
+    ["PENDING", "Chờ xác nhận"],
+    ["CONFIRMED", "Đã xác nhận"],
+    ["PREPARING", "Đang chuẩn bị"],
+    ["READY_FOR_PICKUP", "Sẵn sàng nhận"],
+    ["COMPLETED", "Đã nhận hàng"]
+  ];
+  const statusLabels = Object.fromEntries(orderSteps);
+  statusLabels.CANCELLED = "Đã hủy";
 
   async function load() {
     const user = await AppRoutes.requireAuth("CUSTOMER");
@@ -39,7 +48,9 @@
       title.append(orderLink);
       const state = document.createElement("span");
       state.className = "dash-badge";
-      state.textContent = order.status;
+      if (order.status === "CANCELLED") state.classList.add("disabled");
+      else if (order.status === "PENDING" || order.status === "READY_FOR_PICKUP") state.classList.add("pending");
+      state.textContent = statusLabels[order.status] || order.status;
       const date = document.createElement("p");
       date.className = "dash-muted";
       date.textContent = new Date(order.createdAt).toLocaleString("vi-VN");
@@ -48,6 +59,51 @@
       const total = document.createElement("p");
       total.textContent = `Tổng: ${Number(order.totalAmount).toLocaleString("vi-VN")} ${order.currency}`;
       item.append(title, state, date, rows, total);
+      const activeStep = orderSteps.findIndex(([key]) => key === order.status);
+      if (activeStep >= 0) {
+        const progress = document.createElement("ol");
+        progress.className = "order-progress";
+        progress.setAttribute("aria-label", "Tiến độ đơn hàng");
+        orderSteps.forEach(([key, label], index) => {
+          const step = document.createElement("li");
+          step.className = index < activeStep ? "complete" : index === activeStep ? "current" : "";
+          const marker = document.createElement("span");
+          marker.className = "order-progress-marker";
+          marker.setAttribute("aria-hidden", "true");
+          const text = document.createElement("span");
+          text.className = "order-progress-label";
+          text.textContent = label;
+          step.append(marker, text);
+          progress.append(step);
+        });
+        item.append(progress);
+      } else if (order.status === "CANCELLED") {
+        const cancelled = document.createElement("p");
+        cancelled.className = "order-cancelled-note";
+        cancelled.textContent = "Đơn hàng này đã kết thúc và không còn trong tiến trình nhận hàng.";
+        item.append(cancelled);
+      }
+      if (requestedOrderId && String(order.id) === requestedOrderId && order.history.length) {
+        const history = document.createElement("ol");
+        history.className = "order-history";
+        history.setAttribute("aria-label", "Lịch sử cập nhật đơn hàng");
+        order.history.forEach(entry => {
+          const event = document.createElement("li");
+          const eventTitle = document.createElement("strong");
+          eventTitle.textContent = statusLabels[entry.status] || entry.status;
+          const eventDate = document.createElement("time");
+          eventDate.dateTime = entry.createdAt;
+          eventDate.textContent = new Date(entry.createdAt).toLocaleString("vi-VN");
+          event.append(eventTitle, eventDate);
+          if (entry.note) {
+            const note = document.createElement("span");
+            note.textContent = entry.note;
+            event.append(note);
+          }
+          history.append(event);
+        });
+        item.append(history);
+      }
       if (requestedOrderId && String(order.id) === requestedOrderId) {
         requestAnimationFrame(() => item.scrollIntoView({ block: "center" }));
       }

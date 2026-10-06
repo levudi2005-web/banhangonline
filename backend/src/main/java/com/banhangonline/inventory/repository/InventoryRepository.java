@@ -36,5 +36,6 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Inventory> findByStoreIdAndProductId(Long storeId, Long productId);
+    boolean existsByProductIdAndStoreId(Long productId, Long storeId);
     boolean existsByProductIdAndStoreIdNot(Long productId, Long storeId);
 }

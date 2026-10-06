@@ -40,6 +40,7 @@ class E2eFixtureSeederTest {
             "cart_items",
             "carts",
             "inventory",
+            "product_images",
             "store_staff_permissions",
             "store_staff",
             "store_registration_requests",

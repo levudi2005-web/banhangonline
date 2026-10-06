@@ -23,11 +23,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     ResponseEntity<ApiResponse<Void>> handleApi(ApiException e) {
+        log.warn("Handled API exception status={} code={} message={}", e.getStatus(), e.getCode(), e.getMessage());
         return ResponseEntity.status(e.getStatus()).body(ApiResponse.error(e.getCode(), e.getMessage()));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     ResponseEntity<ApiResponse<Void>> handleDenied(AccessDeniedException e) {
+        log.warn("Access denied: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error("FORBIDDEN", "Bạn không có quyền thực hiện thao tác này"));
     }

@@ -43,7 +43,7 @@
     detail.hidden = true;
   }
 
-  function render(productData, store) {
+  function render(productData, store, images, galleryError) {
     product = productData;
     const categoryName = product.categoryName || "Sản phẩm";
     document.title = `${product.name} — BanHangOnline`;
@@ -69,10 +69,12 @@
     cartLink.href = AppRoutes.getRoute("customer.cart", { store: storeId });
 
     const media = document.querySelector("#product-media");
+    const thumbnails = document.querySelector("#product-thumbnails");
     media.replaceChildren();
-    if (product.imageUrl) {
+    const gallery = images.length ? images : product.imageUrl ? [{ imageUrl: product.imageUrl }] : [];
+    if (gallery.length) {
       const image = document.createElement("img");
-      image.src = product.imageUrl;
+      image.src = gallery[0].imageUrl;
       image.alt = product.name;
       image.loading = "eager";
       image.referrerPolicy = "no-referrer";
@@ -86,11 +88,40 @@
       media.classList.add("product-detail-fallback");
       media.textContent = categoryName;
     }
+    thumbnails.replaceChildren();
+    if (gallery.length > 1) {
+      gallery.forEach((item, index) => {
+        const thumbnail = document.createElement("button");
+        thumbnail.type = "button";
+        thumbnail.className = "product-gallery-thumbnail";
+        thumbnail.setAttribute("aria-label", `Xem ảnh ${index + 1} của ${gallery.length}`);
+        thumbnail.setAttribute("aria-pressed", String(index === 0));
+        const thumbnailImage = document.createElement("img");
+        thumbnailImage.src = item.imageUrl;
+        thumbnailImage.alt = "";
+        thumbnailImage.loading = "lazy";
+        thumbnailImage.addEventListener("error", () => {
+          thumbnail.disabled = true;
+          thumbnail.setAttribute("aria-label", `Không tải được ảnh ${index + 1}`);
+        }, { once: true });
+        thumbnail.addEventListener("click", () => {
+          const mainImage = media.querySelector("img");
+          if (!mainImage) return;
+          mainImage.src = item.imageUrl;
+          thumbnails.querySelectorAll("button").forEach(button =>
+            button.setAttribute("aria-pressed", String(button === thumbnail)));
+        });
+        thumbnail.append(thumbnailImage);
+        thumbnails.append(thumbnail);
+      });
+    }
 
     detail.hidden = false;
     detail.setAttribute("aria-busy", "false");
-    status.textContent = "Thông tin và giá được tải từ cửa hàng đã chọn.";
-    status.className = "dash-status";
+    status.textContent = galleryError
+      ? `Thông tin sản phẩm đã tải; không thể tải thư viện ảnh: ${galleryError}`
+      : "Thông tin, giá và ảnh được tải từ cửa hàng đã chọn.";
+    status.className = galleryError ? "dash-status error" : "dash-status";
   }
 
   document.querySelector("#product-cart-form").addEventListener("submit", async event => {
@@ -154,7 +185,18 @@
       }
       if (!store || !item) throw new Error("Không tìm thấy sản phẩm tại cửa hàng đang hoạt động.");
       localStorage.setItem("selectedStoreId", storeId);
-      render(item, store);
+      let images = item.imageUrl ? [{ imageUrl: item.imageUrl }] : [];
+      let galleryError = "";
+      try {
+        images = await getJson(
+          `/api/catalog/stores/${encodeURIComponent(storeId)}/products/${encodeURIComponent(item.id)}/images`
+        );
+      } catch (error) {
+        galleryError = error instanceof TypeError
+          ? "Không thể kết nối máy chủ."
+          : error.message;
+      }
+      render(item, store, images, galleryError);
     } catch (error) {
       showError(error);
     }

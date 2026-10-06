@@ -1,14 +1,15 @@
 # UI Vision Book — route and component mapping
 
 This mapping ties the 36 PDF labels to the existing frontend pages and shared
-feature code. The PDF is the visual source of truth: a pale blue-gray canvas,
-white rounded cards, fine borders, and blue primary accents (approximately
-`#426fbb`). Existing APIs and feature modules continue to own behavior. Shared
-styling is centralized in `frontend/assets/css/design-system.css`, with auth
-screens using `style.css` and `auth.css`, customer and management screens using
-`dashboard.css`, and owner/staff workflows rendered by `management-app.js`.
-The page paths in the table identify internal static targets; public navigation
-uses the clean URLs listed below.
+feature code. The current requested retail design direction uses primary red
+(`#CB1C22`), orange (`#F36F21`), a light-gray canvas, white rounded cards, fine
+borders, restrained shadows, and visible focus states. Existing APIs and
+feature modules continue to own behavior. Shared styling is centralized in
+`frontend/assets/css/design-system.css`, with auth screens using `style.css`
+and `auth.css`, customer and management screens using `dashboard.css`, and
+owner/staff workflows rendered by `management-app.js`. The page paths in the
+table identify internal static targets; public navigation uses the clean URLs
+listed below.
 
 **Status**
 
@@ -56,7 +57,7 @@ uses the clean URLs listed below.
 | UI-032 | Staff orders | `/pages/staff/orders.html` | `pages/staff/orders.html`; `features/management-app.js`, `features/store-orders.js`; `dashboard.css` | Refactored |
 | UI-033 | Staff notifications | `/pages/staff/notifications.html` | `pages/staff/notifications.html`; `features/management-app.js`; `dashboard.css` | Refactored |
 | UI-034 | Product create / edit dialog | `/pages/owner/products.html` and `/pages/staff/products.html` | `features/management-app.js`; shared product dialog in `dashboard.css` | Implemented / Refactored |
-| UI-035 | Product image empty, preview, upload, replace and error states | Same product management routes | `features/management-app.js`; S3-compatible image API; `dashboard.css` | Implemented / Refactored |
+| UI-035 | Product image empty, preview, upload, replace and error states | Same product management routes | `features/management-app.js`; S3-compatible image API; `dashboard.css` | Implemented / Refactored; multi-image gallery is incomplete |
 | UI-036 | Inventory adjustment dialog | `/pages/owner/inventory.html` and `/pages/staff/inventory.html` | `features/management-app.js`; shared inventory dialog in `dashboard.css` | Implemented / Refactored |
 
 ## Canonical public URLs
@@ -156,6 +157,16 @@ the existing order list.
   rerendered after the final CSS/JS edits; their earlier authenticated audit
   captures remain the available evidence. Persistent upload remains blocked
   without configured S3-compatible storage.
+- A later design pass replaced the shared blue accent with the requested red
+  and orange tokens and removed the layered page-background gradients. The
+  storefront was checked in the integrated browser at 360, 375, 390, 768,
+  1024, and 1440 CSS pixels; authenticated management pages were not rerun in
+  that pass.
+- UI-035 currently manages one product image through `products.image_url`.
+  An eight-image gallery with persistent metadata, ordering, and main-image
+  selection is not implemented. The current database schema has no
+  `product_images` table, and schema deployment remains a reviewed manual
+  operation.
 - Visual styling and UI rendering changes are in frontend CSS/JS/markup. Clean
   page URLs are forwarded by a GET-only Spring MVC controller and covered by
   `CleanUrlControllerTest`; `/api/**` mappings are not changed. Authentication,

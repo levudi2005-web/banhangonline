@@ -42,7 +42,7 @@ public class ClickCollectService {
         requireActiveStore(storeId);
         Long cartId = findActiveCart(userId, storeId);
         List<CartItemView> items = cartId == null ? List.of() : jdbc.query("""
-                SELECT ci.id AS cart_item_id, p.id AS product_id, p.name, p.sku,
+                SELECT ci.id AS cart_item_id, p.id AS product_id, p.name, p.sku, p.image_url,
                        ci.quantity, ci.unit_price, ci.currency
                 FROM cart_items ci
                 JOIN products p ON p.id = ci.product_id
@@ -512,7 +512,8 @@ public class ClickCollectService {
 
     private final RowMapper<CartItemView> cartItemMapper = (rs, row) -> new CartItemView(
             rs.getLong("cart_item_id"), rs.getLong("product_id"), rs.getString("name"), rs.getString("sku"),
-            rs.getInt("quantity"), rs.getBigDecimal("unit_price"), rs.getString("currency"));
+            rs.getString("image_url"), rs.getInt("quantity"), rs.getBigDecimal("unit_price"),
+            rs.getString("currency"));
     private final RowMapper<OrderRow> orderRowMapper = (rs, row) -> new OrderRow(
             rs.getLong("id"), rs.getString("order_code"), rs.getLong("user_id"),
             rs.getLong("store_id"), rs.getString("status"));

@@ -47,6 +47,7 @@ class ClickCollectServiceTest {
                 when(row.getLong("product_id")).thenReturn(9L);
                 when(row.getString("name")).thenReturn("Test product");
                 when(row.getString("sku")).thenReturn("TEST-9");
+                when(row.getString("image_url")).thenReturn("https://images.example.test/test-9.jpg");
                 when(row.getInt("quantity")).thenReturn(2);
                 when(row.getBigDecimal("unit_price")).thenReturn(new BigDecimal("100.00"));
                 when(row.getString("currency")).thenReturn("VND");
@@ -60,6 +61,7 @@ class ClickCollectServiceTest {
 
         assertThat(cart.items()).singleElement()
                 .satisfies(item -> {
+                    assertThat(item.imageUrl()).isEqualTo("https://images.example.test/test-9.jpg");
                     assertThat(item.quantity()).isEqualTo(2);
                     assertThat(item.unitPrice()).isEqualByComparingTo("100.00");
                 });

@@ -11,6 +11,8 @@ import com.banhangonline.role.repository.RoleRepository;
 import com.banhangonline.user.entity.User;
 import com.banhangonline.user.entity.UserStatus;
 import com.banhangonline.user.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.util.Optional;
 
 @Service
 public class AuthService {
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     private final UserRepository users;
     private final RoleRepository roles;
     private final UserAddressRepository addresses;
@@ -53,13 +56,19 @@ public class AuthService {
     public User authenticate(String account, String password) {
         Optional<User> found = findByAccount(account);
         boolean ok = encoder.matches(password, found.map(User::getPasswordHash).orElse(dummyHash));
-        if (found.isEmpty() || !ok)
+        if (found.isEmpty() || !ok) {
+            log.warn("Authentication failed: {}", found.isEmpty() ? "user_not_found" : "invalid_password");
             throw new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "Tài khoản hoặc mật khẩu không đúng");
+        }
         User u = found.get();
-        if (u.getStatus() == UserStatus.PENDING_VERIFICATION)
+        if (u.getStatus() == UserStatus.PENDING_VERIFICATION) {
+            log.warn("Authentication blocked for pending account userId={}", u.getId());
             throw new ApiException(HttpStatus.FORBIDDEN, "ACCOUNT_PENDING", "Tài khoản đang chờ xác minh");
-        if (u.getStatus() == UserStatus.DISABLED)
+        }
+        if (u.getStatus() == UserStatus.DISABLED) {
+            log.warn("Authentication blocked for disabled account userId={}", u.getId());
             throw new ApiException(HttpStatus.FORBIDDEN, "ACCOUNT_DISABLED", "Tài khoản đã bị khoá");
+        }
         return u;
     }
 
