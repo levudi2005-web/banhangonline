@@ -9,13 +9,13 @@
 <body class="customer" data-auth-mode="forbidden">
   <main class="auth">
     <section class="panel">
-      <div class="card auth-card error-card">
-        <span class="eyebrow">Lỗi 403</span>
-        <h1>Không có quyền truy cập</h1>
+      <div class="card auth-card error-card" aria-labelledby="forbidden-title">
+        <span class="error-code" aria-hidden="true">403</span>
+        <h1 id="forbidden-title">Không có quyền truy cập</h1>
         <p id="forbidden-status" class="sub" role="status">Đang kiểm tra phiên đăng nhập…</p>
         <div class="actions">
-          <a id="return-home" class="btn" href="/pages/auth/index.html">Về khu vực của tôi</a>
-          <a id="logout-link" class="btn ghost" href="/pages/staff/auth/logout.html">Đăng xuất</a>
+          <a id="return-home" class="btn" href="/">Về khu vực của tôi</a>
+          <a id="logout-link" class="btn ghost" href="/dang-xuat?area=customer">Đăng xuất</a>
         </div>
       </div>
     </section>

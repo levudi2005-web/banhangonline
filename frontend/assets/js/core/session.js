@@ -2,7 +2,8 @@
   "use strict";
   const API = (window.API_BASE || "").replace(/\/$/, "");
   const requestedArea = new URLSearchParams(location.search).get("area");
-  const pathArea = location.pathname.startsWith("/pages/staff/") ? "staff" : "customer";
+  const pathArea = location.pathname.startsWith("/quan-ly/")
+    || location.pathname.startsWith("/pages/staff/") ? "staff" : "customer";
   const area = ["customer", "staff", "owner"].includes(requestedArea)
     ? requestedArea
     : document.body.dataset.authArea || pathArea;

@@ -1,4 +1,29 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../../assets/css/style.css"><title>Đăng xuất — Cửa hàng</title></head>
-<body class="staff" data-auth-mode="logout" data-auth-area="staff"><main class="auth"><aside class="visual"><h2>Phiên đăng nhập được thu hồi trên máy chủ</h2></aside><section class="panel"><div class="card">
-<h1>Đăng xuất</h1><p id="session-state" class="form-msg show" role="status">Bạn có chắc chắn muốn đăng xuất?</p><p id="session-error" class="form-msg" role="alert" hidden></p>
-<button id="logout-submit" class="btn" type="button">Đăng xuất</button><a class="back" data-route="gateway" href="/pages/auth/index.html">Hủy và quay lại</a></div></section></main><script src="../../../assets/js/core/routes.js"></script><script src="../../../assets/js/core/session.js"></script></body></html>
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/css/style.css">
+  <link rel="stylesheet" href="../../../assets/css/auth.css">
+  <title>Đăng xuất — BanHangOnline</title>
+</head>
+<body class="staff" data-auth-mode="logout" data-auth-area="staff">
+  <main class="auth">
+    <section class="panel">
+      <div class="card auth-card logout-card">
+        <span class="eyebrow">Phiên đăng nhập</span>
+        <h1>Đăng xuất</h1>
+        <p class="sub">Bạn có chắc chắn muốn đăng xuất khỏi BanHangOnline?</p>
+        <p id="session-state" class="form-msg show" role="status">Phiên đăng nhập sẽ được thu hồi trên máy chủ sau khi bạn xác nhận.</p>
+        <p id="session-error" class="form-msg" role="alert" hidden></p>
+        <div class="actions auth-actions">
+          <button id="logout-submit" class="btn" type="button">Đăng xuất</button>
+          <a class="btn ghost" data-route="gateway" href="/">Hủy và quay lại</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="../../../assets/js/core/routes.js"></script>
+  <script src="../../../assets/js/core/session.js"></script>
+</body>
+</html>

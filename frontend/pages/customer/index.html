@@ -12,6 +12,7 @@
       <a class="dash-brand" href="/pages/customer/index.html">BanHangOnline</a>
       <nav class="dash-nav" aria-label="Điều hướng khách hàng">
         <a href="/pages/customer/index.html" aria-current="page">Cửa hàng</a>
+        <a href="/tim-kiem">Tìm kiếm</a>
         <a href="#category-filter">Danh mục</a>
         <a href="/pages/customer/cart.html">Giỏ hàng</a>
         <a href="/pages/customer/orders.html">Đơn hàng</a>
@@ -34,7 +35,9 @@
       <div class="shop-toolbar">
         <div class="dash-field">
           <label for="product-search">Tìm sản phẩm</label>
-          <input id="product-search" type="search" placeholder="Tên, mô tả hoặc mã hàng">
+          <form id="shop-search-form" action="/tim-kiem" method="get">
+            <input id="product-search" name="q" type="search" placeholder="Tên, mô tả hoặc mã hàng">
+          </form>
         </div>
         <div class="dash-field">
           <label for="category-filter">Danh mục</label>

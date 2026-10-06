@@ -1,0 +1,50 @@
+:root {
+  color-scheme: light;
+  --ui-canvas: #f1f4f9;
+  --ui-canvas-raised: #f7f9fc;
+  --ui-surface: rgba(255, 255, 255, .78);
+  --ui-surface-strong: rgba(255, 255, 255, .94);
+  --ui-surface-soft: rgba(246, 248, 252, .84);
+  --ui-ink: #1b1b1b;
+  --ui-muted: #6b6b6b;
+  --ui-border: rgba(31, 35, 40, .11);
+  --ui-border-strong: rgba(31, 35, 40, .18);
+  --ui-accent: #426fbb;
+  --ui-accent-hover: #315b9b;
+  --ui-accent-soft: rgba(66, 111, 187, .1);
+  --ui-focus: rgba(66, 111, 187, .22);
+  --ui-success-surface: #eaf5ef;
+  --ui-success-ink: #237a4b;
+  --ui-warning-surface: #fff4df;
+  --ui-warning-ink: #a8661a;
+  --ui-danger-surface: #fff1f1;
+  --ui-danger-ink: #a63232;
+  --ui-shadow-soft: 0 12px 34px rgba(24, 28, 34, .06);
+  --ui-shadow-card: 0 18px 46px rgba(24, 28, 34, .08);
+  --ui-shadow-dialog: 0 28px 90px rgba(20, 24, 30, .2);
+  --ui-card-radius: 20px;
+  --ui-control-radius: 11px;
+  --ui-transition: 180ms cubic-bezier(.2, .75, .25, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ui-focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

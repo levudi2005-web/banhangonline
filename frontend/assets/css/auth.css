@@ -3,9 +3,9 @@
   isolation: isolate;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 12% 12%, rgba(255, 255, 255, .98), transparent 37%),
-    radial-gradient(ellipse at 90% 90%, rgba(203, 213, 225, .32), transparent 35%),
-    linear-gradient(145deg, #f8fafc 0%, #eef2f6 100%);
+    radial-gradient(ellipse at 12% 12%, rgba(212, 225, 245, .52), transparent 34%),
+    radial-gradient(ellipse at 90% 90%, rgba(226, 232, 240, .38), transparent 35%),
+    #f3f6fa;
 }
 
 .auth:not(.auth-landing)::before,
@@ -17,21 +17,19 @@
   border-radius: 50%;
   content: "";
   pointer-events: none;
-  filter: blur(2px);
+  filter: blur(1px);
 }
 
 .auth:not(.auth-landing)::before {
   top: -12rem;
   right: -8rem;
-  background: radial-gradient(circle, rgba(219, 234, 254, .7), transparent 70%);
-  animation: auth-glow-drift 11s ease-in-out infinite alternate;
+  background: radial-gradient(circle, rgba(66, 111, 187, .09), transparent 70%);
 }
 
 .auth:not(.auth-landing)::after {
   bottom: -15rem;
   left: -10rem;
-  background: radial-gradient(circle, rgba(226, 232, 240, .78), transparent 70%);
-  animation: auth-glow-drift 13s ease-in-out infinite alternate-reverse;
+  background: radial-gradient(circle, rgba(226, 232, 240, .48), transparent 70%);
 }
 
 .auth:not(.auth-landing) .panel {
@@ -40,38 +38,44 @@
 
 .auth:not(.auth-landing) .auth-card {
   position: relative;
-  width: min(100%, 620px);
-  max-width: 620px;
+  width: min(100%, 760px);
+  max-width: 760px;
   min-height: 0;
   overflow: hidden;
-  padding: clamp(26px, 4vw, 42px);
-  border: 1px solid rgba(203, 213, 225, .72);
-  border-radius: 26px;
-  background: rgba(255, 255, 255, .94);
-  box-shadow:
-    0 28px 75px rgba(15, 23, 42, .09),
-    0 5px 16px rgba(15, 23, 42, .035),
-    inset 0 1px 0 rgba(255, 255, 255, .96);
-  backdrop-filter: blur(18px);
-  animation: auth-card-enter .55s cubic-bezier(.2, .8, .2, 1) both;
+  padding: clamp(24px, 3vw, 32px);
+  border: 1px solid #dce4ef;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(32, 51, 80, .07);
   transform: none;
 }
 
 .auth:not(.auth-landing) .auth-card::before {
   position: absolute;
   inset: 0 0 auto;
-  height: 3px;
-  background: linear-gradient(90deg, #2563eb, #93c5fd 58%, #e2e8f0);
+  height: 2px;
+  background: var(--ui-accent);
   content: "";
 }
 
+.auth:not(.auth-landing) .auth-card:has(form[data-endpoint="/api/auth/login"]) {
+  width: min(100%, 460px);
+  max-width: 460px;
+}
+
+.auth:not(.auth-landing) .auth-card:has(form[data-endpoint="/api/auth/forgot-password"]),
+.auth:not(.auth-landing) .auth-card:has(form[data-endpoint="/api/auth/reset-password"]) {
+  width: min(100%, 760px);
+  max-width: 760px;
+}
+
 .auth:not(.auth-landing) .auth-card:has(form[data-endpoint="/api/auth/register"]) {
-  width: min(100%, 1040px);
-  max-width: 1040px;
+  width: min(100%, 900px);
+  max-width: 900px;
 }
 
 .auth:not(.auth-landing) .auth-header {
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
 
 .auth:not(.auth-landing) .auth-header .back {
@@ -80,7 +84,7 @@
   gap: 8px;
   padding: 8px 11px;
   border-radius: 11px;
-  color: #64748b;
+  color: var(--ui-muted);
   font-size: 13px;
   font-weight: 650;
   transition: color .2s ease, background .2s ease, transform .2s ease;
@@ -89,78 +93,79 @@
 .auth:not(.auth-landing) .auth-header .back:hover {
   transform: translateX(-2px);
   background: #f1f5f9;
-  color: #1e293b;
+  color: var(--ui-ink);
   text-decoration: none;
 }
 
 .auth:not(.auth-landing) .auth-card h1 {
   margin: 0 0 8px;
-  color: #172033;
-  font-size: clamp(27px, 3vw, 34px);
-  font-weight: 760;
-  letter-spacing: -.04em;
-  line-height: 1.16;
+  color: var(--ui-ink);
+  font-size: clamp(22px, 2.4vw, 26px);
+  font-weight: 700;
+  letter-spacing: -.025em;
+  line-height: 1.25;
 }
 
 .auth:not(.auth-landing) .auth-card > .sub {
   max-width: 62ch;
-  margin: 0 0 25px;
-  color: #64748b;
-  font-size: 14px;
-  line-height: 1.65;
+  margin: 0 0 18px;
+  color: var(--ui-muted);
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .auth:not(.auth-landing) .auth-card form {
-  gap: 14px;
+  gap: 11px;
 }
 
 .auth:not(.auth-landing) .auth-card form .row {
-  gap: 14px 18px;
+  gap: 12px 16px;
 }
 
 .auth:not(.auth-landing) .auth-card form .row > .field + .field::before {
   display: none;
 }
 
+.auth-card form[data-endpoint="/api/auth/login"] .row {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
 .auth:not(.auth-landing) .auth-card .field {
   min-width: 0;
-  margin: 0 0 5px;
+  margin: 0 0 3px;
   padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
   transform-origin: center;
-  transition: transform .22s ease;
-}
-
-.auth:not(.auth-landing) .auth-card .field:focus-within {
-  animation: auth-field-tilt .48s cubic-bezier(.2, .8, .2, 1);
+  transition: none;
 }
 
 .auth:not(.auth-landing) .auth-card .field label {
   display: block;
-  margin: 0 0 8px 2px;
-  color: #334155;
-  font-size: 13px;
-  font-weight: 700;
+  margin: 0 0 6px 2px;
+  color: var(--ui-ink);
+  font-size: 12px;
+  font-weight: 650;
   line-height: 1.4;
 }
 
 .auth:not(.auth-landing) .auth-card .field input:not([type="checkbox"]),
 .auth:not(.auth-landing) .auth-card .field select {
   width: 100%;
-  height: 53px;
-  padding: 0 15px;
-  border: 1px solid #dbe2ea;
-  border-radius: 14px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d5deea;
+  border-radius: 7px;
   outline: none;
-  background: #fbfdff;
-  color: #172033;
+  background: #fff;
+  color: var(--ui-ink);
   font: inherit;
-  font-size: 14px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 1px 2px rgba(15, 23, 42, .025);
-  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease;
+  font-size: 13px;
+  box-shadow: none;
+  transition: border-color .16s ease, box-shadow .16s ease;
 }
 
 .auth:not(.auth-landing) .auth-card .field select {
@@ -168,7 +173,7 @@
 }
 
 .auth:not(.auth-landing) .auth-card .field input:not([type="checkbox"])::placeholder {
-  color: #94a3b8;
+  color: #929292;
   opacity: 1;
 }
 
@@ -180,9 +185,9 @@
 
 .auth:not(.auth-landing) .auth-card .field input:not([type="checkbox"]):focus,
 .auth:not(.auth-landing) .auth-card .field select:focus {
-  border-color: #60a5fa;
+  border-color: var(--ui-accent);
   background: #fff;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, .09), 0 6px 18px rgba(37, 99, 235, .05);
+  box-shadow: 0 0 0 3px var(--ui-focus);
 }
 
 .auth:not(.auth-landing) .auth-card .field.invalid input:not([type="checkbox"]),
@@ -194,13 +199,13 @@
 
 .auth:not(.auth-landing) .auth-card .required-hint {
   margin: 6px 0 0 2px;
-  color: #94a3b8;
+  color: #929292;
   font-size: 11.5px;
 }
 
 .auth:not(.auth-landing) .auth-card .err {
   min-height: 0;
-  margin: 5px 0 0 2px;
+  margin: 4px 0 0 2px;
   color: #dc2626;
   font-size: 12px;
 }
@@ -225,7 +230,7 @@
 .auth:not(.auth-landing) .auth-card .eye:hover {
   transform: scale(1.04);
   background: #eef2f7;
-  color: #334155;
+  color: var(--ui-ink);
 }
 
 .auth:not(.auth-landing) .auth-card fieldset.address-fields {
@@ -238,7 +243,7 @@
 
 .auth:not(.auth-landing) .auth-card fieldset.address-fields legend {
   padding: 0 8px;
-  color: #475569;
+  color: #4d4d4d;
   font-size: 13px;
   font-weight: 700;
 }
@@ -250,7 +255,7 @@
 
 .auth:not(.auth-landing) .auth-card .between a,
 .auth:not(.auth-landing) .auth-card .center a {
-  color: #2563eb;
+  color: var(--ui-accent);
   font-weight: 700;
   text-underline-offset: 3px;
 }
@@ -258,18 +263,18 @@
 .auth:not(.auth-landing) .auth-card .chk {
   border: 0;
   background: transparent;
-  color: #64748b;
+  color: var(--ui-muted);
 }
 
 .auth:not(.auth-landing) .auth-card .chk input {
-  accent-color: #2563eb;
+  accent-color: var(--ui-accent);
 }
 
 .auth:not(.auth-landing) .auth-card .form-msg {
   margin: 0;
   padding: 11px 13px;
   border: 1px solid #fecaca;
-  border-radius: 13px;
+  border-radius: 7px;
   background: #fff7f7;
   color: #b91c1c;
   font-size: 13px;
@@ -281,33 +286,39 @@
 }
 
 .auth:not(.auth-landing) .auth-card .form-msg.success {
-  border-color: #bbf7d0;
-  background: #f0fdf4;
-  color: #15803d;
+  border-color: var(--ui-border-strong);
+  background: var(--ui-success-surface);
+  color: var(--ui-success-ink);
 }
 
 .auth:not(.auth-landing) .auth-card .btn {
   position: relative;
   overflow: hidden;
-  height: 54px;
-  border: 1px solid #1d4ed8;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #3b82f6, #2563eb);
+  height: 42px;
+  border: 1px solid var(--ui-accent);
+  border-radius: 7px;
+  background: var(--ui-accent);
   color: #fff;
-  font-size: 14px;
-  font-weight: 750;
-  box-shadow: 0 10px 22px rgba(37, 99, 235, .18), inset 0 1px 0 rgba(255, 255, 255, .18);
-  transition: transform .18s ease, box-shadow .2s ease, filter .2s ease;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: none;
+  transition: background .16s ease;
 }
 
 .auth:not(.auth-landing) .auth-card .btn:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.03);
-  box-shadow: 0 15px 28px rgba(37, 99, 235, .23), inset 0 1px 0 rgba(255, 255, 255, .18);
+  background: var(--ui-accent-hover);
+  box-shadow: none;
 }
 
-.auth:not(.auth-landing) .auth-card .btn:active {
-  transform: translateY(0) scale(.99);
+.auth:not(.auth-landing) .auth-card .btn.ghost {
+  border-color: var(--ui-border-strong);
+  background: #fff;
+  color: var(--ui-ink);
+}
+
+.auth:not(.auth-landing) .auth-card .btn.ghost:hover {
+  background: var(--ui-accent-soft);
+  color: var(--ui-ink);
 }
 
 .auth:not(.auth-landing) .auth-card .btn[aria-busy="true"] {
@@ -316,21 +327,47 @@
 
 .auth:not(.auth-landing) .auth-card .center {
   margin-top: 18px;
-  color: #64748b;
+  color: var(--ui-muted);
   font-size: 13px;
 }
 
 .auth:not(.auth-landing) .auth-card .switch {
   border: 1px solid #e2e8f0;
-  border-radius: 15px;
+  border-radius: 8px;
   background: #f8fafc;
   transition: border-color .2s ease, background .2s ease, transform .2s ease;
 }
 
 .auth:not(.auth-landing) .auth-card .switch:hover {
-  transform: translateY(-2px);
   border-color: #cbd5e1;
   background: #f1f5f9;
+}
+
+.auth:not(.auth-landing) .logout-card {
+  width: min(100%, 640px);
+  max-width: 640px;
+  min-height: 560px;
+  padding: 48px;
+}
+
+.auth:not(.auth-landing) .logout-card .form-msg.show {
+  margin: 12px 0 18px;
+}
+
+.auth:not(.auth-landing) .logout-card #session-state.form-msg.show {
+  border-color: var(--ui-border);
+  background: var(--ui-accent-soft);
+  color: var(--ui-ink);
+}
+
+.auth:not(.auth-landing) .logout-card .auth-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.auth:not(.auth-landing) .logout-card .auth-actions .btn {
+  flex: 1;
+  min-width: 0;
 }
 
 .auth:not(.auth-landing) .email-composer {
@@ -346,31 +383,13 @@
 .auth:not(.auth-landing) .email-hint {
   display: block;
   margin: 7px 2px 0;
-  color: #64748b;
+  color: var(--ui-muted);
   font-size: 11.5px;
-}
-
-@keyframes auth-card-enter {
-  from { opacity: 0; transform: translateY(13px) scale(.988); filter: blur(4px); }
-  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-}
-
-@keyframes auth-field-tilt {
-  0%, 100% { transform: rotate(0); }
-  28% { transform: rotate(-.55deg) translateY(-1px); }
-  58% { transform: rotate(.45deg); }
-  80% { transform: rotate(-.2deg); }
-}
-
-@keyframes auth-glow-drift {
-  from { transform: translate3d(0, 0, 0) scale(.96); }
-  to { transform: translate3d(-12px, 14px, 0) scale(1.04); }
 }
 
 @media (max-width: 760px) {
   .auth:not(.auth-landing) .auth-card {
-    padding: 26px 22px;
-    border-radius: 23px;
+    padding: 24px 20px;
   }
 }
 
@@ -382,13 +401,18 @@
 
   .auth:not(.auth-landing) .auth-card {
     width: 100%;
-    padding: 23px 17px;
-    border-radius: 20px;
+    max-width: 100%;
+    padding: 22px 17px;
+  }
+
+  .auth:not(.auth-landing) .logout-card {
+    min-height: 0;
+    padding: 24px 20px;
   }
 
   .auth:not(.auth-landing) .auth-card form .row {
     grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
+    gap: 8px;
   }
 
   .auth:not(.auth-landing) .auth-card fieldset.address-fields {
@@ -403,13 +427,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .auth:not(.auth-landing)::before,
-  .auth:not(.auth-landing)::after,
-  .auth:not(.auth-landing) .auth-card,
-  .auth:not(.auth-landing) .auth-card .field:focus-within {
-    animation: none !important;
-  }
-
   .auth:not(.auth-landing) *,
   .auth:not(.auth-landing) *::before,
   .auth:not(.auth-landing) *::after {

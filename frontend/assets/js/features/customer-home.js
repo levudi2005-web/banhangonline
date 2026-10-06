@@ -9,6 +9,7 @@
   const sortSelect = document.querySelector("#product-sort");
   const productCount = document.querySelector("#product-count");
   let products = [];
+  let categories = [];
 
   function money(value, currency) {
     return `${Number(value).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} ${currency}`;
@@ -20,7 +21,8 @@
     const visible = products.filter(product => {
       const matchesText = `${product.name} ${product.description || ""} ${product.sku}`
         .toLocaleLowerCase("vi").includes(query);
-      return matchesText && (!category || String(product.categoryId) === category);
+      const matchesCategory = !category || String(product.categoryId) === category;
+      return matchesText && matchesCategory;
     });
     if (sortSelect.value === "price-asc") visible.sort((a, b) => Number(a.price) - Number(b.price));
     if (sortSelect.value === "price-desc") visible.sort((a, b) => Number(b.price) - Number(a.price));
@@ -43,7 +45,7 @@
       card.className = "shop-product-card";
       const productUrl = AppRoutes.getRoute("customer.product", {
         store: storeSelect.value,
-        product: product.id
+        slug: product.slug
       });
       const art = document.createElement("a");
       art.className = "shop-product-art";
@@ -68,8 +70,15 @@
 
       const content = document.createElement("div");
       content.className = "shop-product-content";
-      const category = document.createElement("span");
+      const categoryData = categories.find(item => String(item.id) === String(product.categoryId));
+      const category = document.createElement(categoryData ? "a" : "span");
       category.className = "dash-badge";
+      if (categoryData) {
+        category.href = AppRoutes.getRoute("customer.category", {
+          slug: categoryData.slug,
+          store: storeSelect.value
+        });
+      }
       category.textContent = product.categoryName || "Sản phẩm";
       const name = document.createElement("h3");
       const nameLink = document.createElement("a");
@@ -165,12 +174,20 @@
     all.value = "";
     all.textContent = "Tất cả danh mục";
     categorySelect.append(all);
-    result.data.forEach(category => {
+    categories = result.data;
+    categories.forEach(category => {
       const option = document.createElement("option");
       option.value = category.id;
       option.textContent = category.name;
+      option.dataset.slug = category.slug;
       categorySelect.append(option);
     });
+    const pathSlug = location.pathname.startsWith("/danh-muc/")
+      ? location.pathname.slice("/danh-muc/".length)
+      : "";
+    const pathCategory = result.data.find(category => category.slug === pathSlug);
+    if (pathCategory) categorySelect.value = String(pathCategory.id);
+    search.value = new URLSearchParams(location.search).get("q") || "";
   }
 
   async function load() {

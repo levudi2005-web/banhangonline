@@ -4,46 +4,52 @@
   const API = (window.API_BASE || "").replace(/\/$/, "");
   const ROUTES = Object.freeze({
     public: {
-      gateway: "/pages/auth/index.html",
-      forbidden: "/pages/auth/403.html",
-      notFound: "/error/404.html"
+      gateway: "/",
+      forbidden: "/403",
+      notFound: "/404"
     },
     customer: {
-      login: "/pages/customer/auth/login.html",
-      register: "/pages/customer/auth/register.html",
-      forgot: "/pages/customer/auth/forgot-password.html",
-      reset: "/pages/customer/auth/reset-password.html",
-      logout: "/pages/customer/auth/logout.html",
-      home: "/pages/customer/index.html",
-      product: "/pages/customer/product.html",
-      cart: "/pages/customer/cart.html",
-      orders: "/pages/customer/orders.html",
-      notifications: "/pages/customer/notifications.html",
-      addresses: "/pages/customer/addresses.html"
+      login: "/dang-nhap",
+      register: "/dang-ky",
+      forgot: "/quen-mat-khau",
+      reset: "/dat-lai-mat-khau",
+      logout: "/dang-xuat?area=customer",
+      home: "/cua-hang",
+      product: "/san-pham",
+      category: "/danh-muc",
+      search: "/tim-kiem",
+      cart: "/gio-hang",
+      checkout: "/thanh-toan",
+      orders: "/don-hang",
+      notifications: "/thong-bao",
+      addresses: "/tai-khoan/dia-chi",
+      account: "/tai-khoan"
     },
     staff: {
-      login: "/pages/staff/auth/login.html?area=staff",
-      forgot: "/pages/staff/auth/forgot-password.html",
-      reset: "/pages/staff/auth/reset-password.html",
-      logout: "/pages/staff/auth/logout.html",
-      home: "/pages/staff/dashboard.html",
-      products: "/pages/staff/products.html",
-      inventory: "/pages/staff/inventory.html",
-      orders: "/pages/staff/orders.html",
-      notifications: "/pages/staff/notifications.html"
+      login: "/quan-ly/dang-nhap?area=staff",
+      forgot: "/quan-ly/quen-mat-khau?area=staff",
+      reset: "/quan-ly/dat-lai-mat-khau?area=staff",
+      logout: "/quan-ly/dang-xuat?area=staff",
+      home: "/quan-ly/staff",
+      products: "/quan-ly/staff/san-pham",
+      inventory: "/quan-ly/staff/ton-kho",
+      orders: "/quan-ly/staff/don-hang",
+      notifications: "/quan-ly/staff/thong-bao"
     },
     owner: {
-      login: "/pages/staff/auth/login.html?area=owner",
-      logout: "/pages/staff/auth/logout.html",
-      home: "/pages/owner/dashboard.html",
-      store: "/pages/owner/store.html",
-      staff: "/pages/owner/staff.html",
-      permissions: "/pages/owner/permissions.html",
-      categories: "/pages/owner/categories.html",
-      products: "/pages/owner/products.html",
-      inventory: "/pages/owner/inventory.html",
-      orders: "/pages/owner/orders.html",
-      notifications: "/pages/owner/notifications.html"
+      login: "/quan-ly/dang-nhap?area=owner",
+      forgot: "/quan-ly/quen-mat-khau?area=owner",
+      reset: "/quan-ly/dat-lai-mat-khau?area=owner",
+      logout: "/quan-ly/dang-xuat?area=owner",
+      home: "/quan-ly/owner",
+      store: "/quan-ly/owner/cua-hang",
+      staff: "/quan-ly/owner/nhan-vien",
+      permissions: "/quan-ly/owner/phan-quyen",
+      categories: "/quan-ly/owner/danh-muc",
+      products: "/quan-ly/owner/san-pham",
+      inventory: "/quan-ly/owner/ton-kho",
+      orders: "/quan-ly/owner/don-hang",
+      notifications: "/quan-ly/owner/thong-bao"
     }
   });
 
@@ -58,8 +64,12 @@
     "customer.logout": ROUTES.customer.logout,
     "customer.home": ROUTES.customer.home,
     "customer.product": ROUTES.customer.product,
+    "customer.category": ROUTES.customer.category,
+    "customer.search": ROUTES.customer.search,
     "customer.cart": ROUTES.customer.cart,
+    "customer.checkout": ROUTES.customer.checkout,
     "customer.orders": ROUTES.customer.orders,
+    "customer.account": ROUTES.customer.account,
     "customer.notifications": ROUTES.customer.notifications,
     "customer.addresses": ROUTES.customer.addresses,
     "staff.login": ROUTES.staff.login,
@@ -72,6 +82,8 @@
     "staff.orders": ROUTES.staff.orders,
     "staff.notifications": ROUTES.staff.notifications,
     "owner.login": ROUTES.owner.login,
+    "owner.forgot": ROUTES.owner.forgot,
+    "owner.reset": ROUTES.owner.reset,
     "owner.logout": ROUTES.owner.logout,
     "owner.home": ROUTES.owner.home,
     "owner.store": ROUTES.owner.store,
@@ -85,10 +97,31 @@
   };
 
   function getRoute(routeKey, query = {}) {
-    const route = routeKeys[routeKey];
+    const loginArea = new URLSearchParams(location.search).get("area");
+    const route = loginArea === "owner" && routeKey === "staff.forgot"
+      ? ROUTES.owner.forgot
+      : loginArea === "owner" && routeKey === "staff.reset"
+        ? ROUTES.owner.reset
+        : routeKeys[routeKey];
     if (!route) return null;
     const url = new URL(route, location.origin);
-    Object.entries(query).forEach(([key, value]) => url.searchParams.set(key, value));
+    const values = { ...query };
+    if (routeKey === "customer.product" && values.slug) {
+      url.pathname = `${ROUTES.customer.product}/${encodeURIComponent(values.slug)}`;
+      delete values.slug;
+      delete values.product;
+    } else if (routeKey === "customer.category" && values.slug) {
+      url.pathname = `${ROUTES.customer.category}/${encodeURIComponent(values.slug)}`;
+      delete values.slug;
+    } else if (routeKey === "customer.orders" && values.orderId) {
+      url.pathname = `${ROUTES.customer.orders}/${encodeURIComponent(values.orderId)}`;
+      delete values.orderId;
+    }
+    Object.entries(values).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        url.searchParams.set(key, String(value));
+      }
+    });
     return `${url.pathname}${url.search}${url.hash}`;
   }
 
@@ -96,7 +129,16 @@
     if (!value) return null;
     try {
       const url = new URL(value, location.origin);
-      if (url.origin !== location.origin || !url.pathname.startsWith("/pages/customer/")) return null;
+      const isCustomerRoute = url.pathname === ROUTES.customer.home
+        || url.pathname === ROUTES.customer.product
+        || url.pathname.startsWith(`${ROUTES.customer.product}/`)
+        || url.pathname === ROUTES.customer.category
+        || url.pathname.startsWith(`${ROUTES.customer.category}/`)
+        || /^\/don-hang\/\d+$/.test(url.pathname)
+        || [ROUTES.customer.cart, ROUTES.customer.checkout, ROUTES.customer.orders,
+          ROUTES.customer.notifications, ROUTES.customer.addresses, ROUTES.customer.account]
+          .includes(url.pathname);
+      if (url.origin !== location.origin || !isCustomerRoute) return null;
       return `${url.pathname}${url.search}${url.hash}`;
     } catch {
       return null;
@@ -166,6 +208,69 @@
     return "customer";
   }
 
+  function canonicalLegacyRoute(url) {
+    const legacy = {
+      "/pages/auth/index.html": ROUTES.public.gateway,
+      "/pages/auth/403.html": ROUTES.public.forbidden,
+      "/error/404.html": ROUTES.public.notFound,
+      "/pages/customer/auth/login.html": ROUTES.customer.login,
+      "/pages/customer/auth/register.html": ROUTES.customer.register,
+      "/pages/customer/auth/forgot-password.html": ROUTES.customer.forgot,
+      "/pages/customer/auth/reset-password.html": ROUTES.customer.reset,
+      "/pages/customer/auth/logout.html": ROUTES.customer.logout,
+      "/pages/customer/index.html": ROUTES.customer.home,
+      "/pages/customer/product.html": ROUTES.customer.product,
+      "/pages/customer/cart.html": ROUTES.customer.cart,
+      "/pages/customer/orders.html": ROUTES.customer.orders,
+      "/pages/customer/notifications.html": ROUTES.customer.notifications,
+      "/pages/customer/addresses.html": ROUTES.customer.addresses,
+      "/pages/auth/session.html": ROUTES.customer.account,
+      "/pages/staff/auth/login.html": "/quan-ly/dang-nhap",
+      "/pages/staff/auth/forgot-password.html": "/quan-ly/quen-mat-khau",
+      "/pages/staff/auth/reset-password.html": "/quan-ly/dat-lai-mat-khau",
+      "/pages/staff/auth/logout.html": "/quan-ly/dang-xuat",
+      "/pages/owner/dashboard.html": ROUTES.owner.home,
+      "/pages/owner/store.html": ROUTES.owner.store,
+      "/pages/owner/staff.html": ROUTES.owner.staff,
+      "/pages/owner/permissions.html": ROUTES.owner.permissions,
+      "/pages/owner/categories.html": ROUTES.owner.categories,
+      "/pages/owner/products.html": ROUTES.owner.products,
+      "/pages/owner/inventory.html": ROUTES.owner.inventory,
+      "/pages/owner/orders.html": ROUTES.owner.orders,
+      "/pages/owner/notifications.html": ROUTES.owner.notifications,
+      "/pages/staff/dashboard.html": ROUTES.staff.home,
+      "/pages/staff/products.html": ROUTES.staff.products,
+      "/pages/staff/inventory.html": ROUTES.staff.inventory,
+      "/pages/staff/orders.html": ROUTES.staff.orders,
+      "/pages/staff/notifications.html": ROUTES.staff.notifications
+    };
+    const route = legacy[url.pathname];
+    if (!route) return null;
+    const target = new URL(route, location.origin);
+    const requestedArea = url.searchParams.get("area");
+    if (url.pathname === "/pages/staff/auth/login.html") {
+      target.searchParams.set("area", requestedArea === "owner" ? "owner" : "staff");
+    } else if (url.pathname === "/pages/staff/auth/logout.html"
+        || url.pathname === "/pages/staff/auth/forgot-password.html"
+        || url.pathname === "/pages/staff/auth/reset-password.html") {
+      target.searchParams.set("area", ["owner", "staff"].includes(requestedArea) ? requestedArea : "staff");
+    }
+    url.searchParams.forEach((value, key) => {
+      if (!target.searchParams.has(key)) target.searchParams.set(key, value);
+    });
+    return `${target.pathname}${target.search}${url.hash}`;
+  }
+
+  function canonicalizeLegacyLinks() {
+    document.querySelectorAll("a[href]").forEach(link => {
+      if (link.hasAttribute("data-route")) return;
+      const url = new URL(link.href, location.href);
+      if (url.origin !== location.origin) return;
+      const route = canonicalLegacyRoute(url);
+      if (route) link.href = route;
+    });
+  }
+
   async function setupForbiddenPage() {
     const homeLink = document.querySelector("#return-home");
     const logoutLink = document.querySelector("#logout-link");
@@ -188,7 +293,7 @@
       const role = ["OWNER", "STAFF", "CUSTOMER"].find(candidate => roles.includes(candidate));
       homeLink.href = getHomeRoute(role);
       if (logoutLink) {
-        logoutLink.href = `${ROUTES[areaForRole(role)].logout}?area=${areaForRole(role)}`;
+        logoutLink.href = getRoute(`${areaForRole(role)}.logout`);
       }
       status.textContent = "Tài khoản hiện tại không được phép truy cập trang này.";
     } catch (error) {
@@ -202,9 +307,10 @@
     const route = getRoute(link.dataset.route);
     if (route) link.href = route;
   });
+  canonicalizeLegacyLinks();
 
   const loginArea = new URLSearchParams(location.search).get("area");
-  if (location.pathname === "/pages/staff/auth/login.html") {
+  if (location.pathname === "/quan-ly/dang-nhap" || location.pathname === "/pages/staff/auth/login.html") {
     const title = document.querySelector("#management-login-title");
     const description = document.querySelector("#management-login-description");
     if (loginArea === "owner" && title && description) {
@@ -227,6 +333,7 @@
     requireRole,
     areaForRole,
     roleForArea,
+    canonicalLegacyRoute,
     validateReturnUrl
   });
 

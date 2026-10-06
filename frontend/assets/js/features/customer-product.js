@@ -3,8 +3,11 @@
 
   const API = (window.API_BASE || "").replace(/\/$/, "");
   const params = new URLSearchParams(location.search);
-  const storeId = params.get("store");
+  let storeId = params.get("store");
   const productId = params.get("product");
+  const productSlug = location.pathname.startsWith("/san-pham/")
+    ? location.pathname.slice("/san-pham/".length)
+    : "";
   const status = document.querySelector("#product-status");
   const detail = document.querySelector("#product-detail");
   const quantityInput = document.querySelector("#product-quantity");
@@ -127,17 +130,30 @@
   });
 
   async function load() {
-    if (!/^\d+$/.test(storeId || "") || !/^\d+$/.test(productId || "")) {
-      showError(new Error("Đường dẫn sản phẩm không hợp lệ. Hãy quay lại cửa hàng."));
-      return;
-    }
     try {
       const stores = await getJson("/api/stores");
-      const store = stores.find(item => String(item.id) === storeId);
-      if (!store) throw new Error("Cửa hàng này hiện không hoạt động.");
-      const item = await getJson(
-        `/api/catalog/stores/${encodeURIComponent(storeId)}/products/${encodeURIComponent(productId)}`
-      );
+      let store = stores.find(item => String(item.id) === storeId);
+      let item;
+      if (productSlug) {
+        const candidates = store ? [store] : stores;
+        for (const candidate of candidates) {
+          const catalog = await getJson(
+            `/api/catalog/stores/${encodeURIComponent(candidate.id)}/products`
+          );
+          item = catalog.find(product => product.slug === productSlug);
+          if (item) {
+            store = candidate;
+            storeId = String(candidate.id);
+            break;
+          }
+        }
+      } else if (/^\d+$/.test(storeId || "") && /^\d+$/.test(productId || "")) {
+        item = await getJson(
+          `/api/catalog/stores/${encodeURIComponent(storeId)}/products/${encodeURIComponent(productId)}`
+        );
+      }
+      if (!store || !item) throw new Error("Không tìm thấy sản phẩm tại cửa hàng đang hoạt động.");
+      localStorage.setItem("selectedStoreId", storeId);
       render(item, store);
     } catch (error) {
       showError(error);

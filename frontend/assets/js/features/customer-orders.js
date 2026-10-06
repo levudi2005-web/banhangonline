@@ -3,6 +3,7 @@
   const API = (window.API_BASE || "").replace(/\/$/, "");
   const list = document.querySelector("#customer-orders");
   const status = document.querySelector("#orders-status");
+  const requestedOrderId = location.pathname.match(/^\/don-hang\/(\d+)$/)?.[1] || "";
 
   async function load() {
     const user = await AppRoutes.requireAuth("CUSTOMER");
@@ -26,8 +27,16 @@
     }
     result.data.forEach(order => {
       const item = document.createElement("li");
+      item.id = `customer-order-${order.id}`;
+      item.dataset.orderId = String(order.id);
+      if (requestedOrderId && String(order.id) === requestedOrderId) {
+        item.classList.add("customer-order-selected");
+      }
       const title = document.createElement("strong");
-      title.textContent = `${order.orderCode} · ${order.storeName}`;
+      const orderLink = document.createElement("a");
+      orderLink.href = AppRoutes.getRoute("customer.orders", { orderId: order.id });
+      orderLink.textContent = `${order.orderCode} · ${order.storeName}`;
+      title.append(orderLink);
       const state = document.createElement("span");
       state.className = "dash-badge";
       state.textContent = order.status;
@@ -39,6 +48,9 @@
       const total = document.createElement("p");
       total.textContent = `Tổng: ${Number(order.totalAmount).toLocaleString("vi-VN")} ${order.currency}`;
       item.append(title, state, date, rows, total);
+      if (requestedOrderId && String(order.id) === requestedOrderId) {
+        requestAnimationFrame(() => item.scrollIntoView({ block: "center" }));
+      }
       if (order.status === "PENDING") {
         const cancel = document.createElement("button");
         cancel.className = "dash-button secondary danger";
