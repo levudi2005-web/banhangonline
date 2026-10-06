@@ -442,7 +442,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--ui-focus); outl
     align-items: center;
     gap: clamp(18px, 3vw, 42px);
     padding: 16px max(24px, calc((100vw - 1380px) / 2));
-    background: var(--ui-accent);
+    background: linear-gradient(105deg, #a8171c 0%, #cb1c22 54%, #e83b25 100%);
     color: #fff;
   }
 

@@ -69,6 +69,19 @@ class ProductImageStorageServiceTest {
     }
 
     @Test
+    void reportsUnavailableStorageWithoutPretendingTheUploadSucceeded() {
+        properties.setEnabled(false);
+        var file = new MockMultipartFile("file", "photo.png", "image/png",
+                new byte[]{(byte) 0x89, 'P', 'N', 'G', 0x0d, 0x0a, 0x1a, 0x0a, 1});
+
+        assertThatThrownBy(() -> service.upload(12L, file))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("chưa được cấu hình");
+
+        verifyNoInteractions(client);
+    }
+
+    @Test
     void onlyDeletesImageUrlsInTheRequestedStorePrefix() {
         boolean deleted = service.deleteIfManaged(12L,
                 "https://images.example.test/stores/13/products/123e4567-e89b-12d3-a456-426614174000.png");

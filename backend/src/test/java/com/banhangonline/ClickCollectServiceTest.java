@@ -1,17 +1,21 @@
 package com.banhangonline;
 
 import com.banhangonline.order.dto.CartItemRequest;
+import com.banhangonline.order.dto.CheckoutRequest;
 import com.banhangonline.order.service.ClickCollectService;
 import com.banhangonline.store.service.StorePermissionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -69,5 +73,15 @@ class ClickCollectServiceTest {
         verify(jdbc).update(
                 org.mockito.ArgumentMatchers.startsWith("UPDATE cart_items SET quantity=?"),
                 eq(2), eq(new BigDecimal("100.00")), eq("VND"), eq(11L), eq(9L));
+    }
+
+    @Test
+    void checkoutRejectsNonCustomerBeforeAccessingDatabase() {
+        assertThatThrownBy(() ->
+                service.checkout(5L, Set.of("STAFF"), new CheckoutRequest(7L, null)))
+                .isInstanceOf(com.banhangonline.common.exception.ApiException.class)
+                .extracting("status").isEqualTo(HttpStatus.FORBIDDEN);
+
+        org.mockito.Mockito.verifyNoInteractions(jdbc);
     }
 }

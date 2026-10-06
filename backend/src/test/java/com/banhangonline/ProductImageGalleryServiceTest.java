@@ -9,6 +9,7 @@ import com.banhangonline.product.repository.ProductImageRepository;
 import com.banhangonline.product.repository.ProductRepository;
 import com.banhangonline.product.service.ProductImageGalleryService;
 import com.banhangonline.store.service.StorePermissionService;
+import org.springframework.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -72,6 +73,62 @@ class ProductImageGalleryServiceTest {
                 .hasMessageContaining("bị trùng");
 
         verifyNoInteractions(images);
+    }
+
+    @Test
+    void replaceRejectsNonHttpImageUrlsBeforeLoadingProduct() {
+        assertThatThrownBy(() -> service.replace(7L, 22L, 12L, Set.of("OWNER"),
+                List.of("file:///tmp/image.jpg")))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("HTTP hoặc HTTPS");
+
+        verifyNoInteractions(images);
+        verify(inventory, never()).findByStoreIdAndProductId(anyLong(), anyLong());
+    }
+
+    @Test
+    void replaceRejectsSharedProductWithoutChangingItsPrimaryImage() {
+        Product product = new Product();
+        product.setImageUrl("https://images.example.test/current.jpg");
+        Inventory stock = new Inventory();
+        stock.setProduct(product);
+        when(inventory.findByStoreIdAndProductId(7L, 22L)).thenReturn(Optional.of(stock));
+        when(inventory.existsByProductIdAndStoreIdNot(22L, 7L)).thenReturn(true);
+
+        assertThatThrownBy(() -> service.replace(7L, 22L, 12L, Set.of("OWNER"),
+                List.of("https://images.example.test/new.jpg")))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("cửa hàng khác");
+
+        assertThat(product.getImageUrl()).isEqualTo("https://images.example.test/current.jpg");
+        verifyNoInteractions(images);
+    }
+
+    @Test
+    void replaceWithEmptyGalleryClearsLegacyPrimaryImage() {
+        Product product = new Product();
+        product.setImageUrl("https://images.example.test/current.jpg");
+        Inventory stock = new Inventory();
+        stock.setProduct(product);
+        when(inventory.findByStoreIdAndProductId(7L, 22L)).thenReturn(Optional.of(stock));
+        when(inventory.existsByProductIdAndStoreIdNot(22L, 7L)).thenReturn(false);
+
+        assertThat(service.replace(7L, 22L, 12L, Set.of("OWNER"), List.of())).isEmpty();
+
+        assertThat(product.getImageUrl()).isNull();
+        verify(images).replace(22L, List.of());
+    }
+
+    @Test
+    void replaceRequiresManagementPermissionBeforeWriting() {
+        ApiException forbidden = new ApiException(HttpStatus.FORBIDDEN, "FORBIDDEN", "Không có quyền");
+        doThrow(forbidden).when(permissions).require(7L, 12L, Set.of("STAFF"), "MANAGE_PRODUCTS");
+
+        assertThatThrownBy(() -> service.replace(7L, 22L, 12L, Set.of("STAFF"),
+                List.of("https://images.example.test/new.jpg")))
+                .isSameAs(forbidden);
+
+        verifyNoInteractions(images, inventory);
     }
 
     @Test
