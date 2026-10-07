@@ -2,100 +2,1146 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link rel="stylesheet" href="../../../assets/css/style.css">
   <link rel="stylesheet" href="../../../assets/css/auth.css">
+
   <title>Đăng nhập — Cửa hàng</title>
+
+  <style>
+    /* =========================================================
+       BANHANGONLINE — CUSTOMER LOGIN
+       Clean / Professional / White Gray
+       ========================================================= */
+
+    :root {
+      --bg: #f5f6f8;
+      --surface: #ffffff;
+      --surface-soft: #f8f9fb;
+
+      --text: #17191d;
+      --text-soft: #626975;
+      --text-muted: #9299a3;
+
+      --border: #e5e7eb;
+      --border-hover: #d4d8de;
+
+      --primary: #e31e2f;
+      --primary-hover: #c91828;
+      --primary-soft: #fff1f2;
+
+      --success: #168a52;
+
+      --shadow-sm:
+        0 2px 8px rgba(20, 25, 35, 0.04);
+
+      --shadow:
+        0 18px 50px rgba(20, 25, 35, 0.08);
+
+      --shadow-hover:
+        0 24px 65px rgba(20, 25, 35, 0.12);
+
+      --radius: 22px;
+      --radius-sm: 13px;
+
+      --transition:
+        180ms cubic-bezier(.2,.8,.2,1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+    }
+
+    body.customer {
+      margin: 0;
+      min-height: 100vh;
+
+      background:
+        radial-gradient(
+          circle at 8% 15%,
+          rgba(227, 30, 47, 0.055),
+          transparent 28%
+        ),
+        radial-gradient(
+          circle at 92% 85%,
+          rgba(30, 41, 59, 0.045),
+          transparent 30%
+        ),
+        var(--bg);
+
+      color: var(--text);
+
+      font-family:
+        Inter,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* =========================================================
+       PAGE
+       ========================================================= */
+
+    .auth {
+      min-height: 100vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 48px 20px;
+
+      position: relative;
+      overflow: hidden;
+    }
+
+    /*
+      Những vòng sáng nền rất nhẹ.
+      Không dùng animation nặng.
+    */
+
+    .auth::before,
+    .auth::after {
+      content: "";
+      position: absolute;
+
+      width: 420px;
+      height: 420px;
+
+      border-radius: 50%;
+
+      pointer-events: none;
+
+      filter: blur(1px);
+
+      opacity: .65;
+    }
+
+    .auth::before {
+      top: -260px;
+      left: -180px;
+
+      background:
+        radial-gradient(
+          circle,
+          rgba(227, 30, 47, .08),
+          rgba(227, 30, 47, 0) 70%
+        );
+
+      animation: floatSoft 9s ease-in-out infinite;
+    }
+
+    .auth::after {
+      right: -220px;
+      bottom: -270px;
+
+      background:
+        radial-gradient(
+          circle,
+          rgba(80, 90, 105, .07),
+          rgba(80, 90, 105, 0) 70%
+        );
+
+      animation: floatSoft 11s ease-in-out infinite reverse;
+    }
+
+    @keyframes floatSoft {
+      0%, 100% {
+        transform: translate3d(0, 0, 0);
+      }
+
+      50% {
+        transform: translate3d(12px, -10px, 0);
+      }
+    }
+
+    .panel {
+      width: 100%;
+      max-width: 510px;
+
+      position: relative;
+      z-index: 2;
+    }
+
+    /* =========================================================
+       CARD
+       ========================================================= */
+
+    .auth-card {
+      width: 100%;
+
+      padding: 38px 40px 34px;
+
+      background:
+        rgba(255, 255, 255, .94);
+
+      border: 1px solid rgba(255, 255, 255, .85);
+
+      border-radius: var(--radius);
+
+      box-shadow: var(--shadow);
+
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+
+      animation: cardEnter .55s cubic-bezier(.2,.8,.2,1) both;
+
+      transition:
+        box-shadow .3s ease,
+        transform .3s ease;
+    }
+
+    .auth-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    @keyframes cardEnter {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(.985);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* =========================================================
+       HEADER / BRAND
+       ========================================================= */
+
+    .auth-header {
+      margin-bottom: 32px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+
+      color: var(--text);
+
+      text-decoration: none;
+
+      font-size: 19px;
+      font-weight: 750;
+      letter-spacing: -.025em;
+
+      transition:
+        color var(--transition),
+        transform var(--transition);
+    }
+
+    .brand:hover {
+      color: var(--primary);
+      transform: translateX(2px);
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 13px;
+
+      background: var(--primary);
+
+      color: white;
+
+      box-shadow:
+        0 8px 18px rgba(227, 30, 47, .18);
+
+      transition:
+        transform var(--transition),
+        box-shadow var(--transition);
+    }
+
+    .brand:hover .logo {
+      transform: translateY(-2px) rotate(-2deg);
+
+      box-shadow:
+        0 11px 23px rgba(227, 30, 47, .24);
+    }
+
+    .logo i {
+      width: 21px;
+      height: 21px;
+    }
+
+    /* =========================================================
+       TITLE
+       ========================================================= */
+
+    .auth-card h1 {
+      margin: 0;
+
+      font-size: clamp(28px, 4vw, 34px);
+      line-height: 1.15;
+
+      letter-spacing: -.035em;
+
+      font-weight: 780;
+
+      color: var(--text);
+    }
+
+    .sub {
+      margin: 11px 0 30px;
+
+      color: var(--text-soft);
+
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* =========================================================
+       FORM
+       ========================================================= */
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .row {
+      display: flex;
+      flex-direction: column;
+      gap: 21px;
+    }
+
+    .field {
+      position: relative;
+    }
+
+    .field label {
+      display: block;
+
+      margin: 0 0 8px;
+
+      color: #30343b;
+
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .field input {
+      width: 100%;
+      height: 52px;
+
+      padding: 0 15px;
+
+      border: 1px solid var(--border);
+
+      border-radius: var(--radius-sm);
+
+      outline: none;
+
+      background: #fff;
+
+      color: var(--text);
+
+      font: inherit;
+      font-size: 15px;
+
+      box-shadow:
+        inset 0 1px 2px rgba(20, 25, 35, .02);
+
+      transition:
+        border-color var(--transition),
+        box-shadow var(--transition),
+        background var(--transition),
+        transform var(--transition);
+    }
+
+    .field input::placeholder {
+      color: #a0a6af;
+    }
+
+    .field input:hover {
+      border-color: var(--border-hover);
+    }
+
+    .field input:focus {
+      border-color: rgba(227, 30, 47, .55);
+
+      background: #fff;
+
+      box-shadow:
+        0 0 0 4px rgba(227, 30, 47, .075);
+    }
+
+    .field input:focus::placeholder {
+      color: #b7bcc4;
+    }
+
+    /* =========================================================
+       PASSWORD
+       ========================================================= */
+
+    .pw {
+      position: relative;
+    }
+
+    .pw input {
+      padding-right: 52px;
+    }
+
+    .eye {
+      position: absolute;
+
+      top: 50%;
+      right: 8px;
+
+      width: 38px;
+      height: 38px;
+
+      transform: translateY(-50%);
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 0;
+      border-radius: 10px;
+
+      background: transparent;
+
+      color: #7c838d;
+
+      cursor: pointer;
+
+      transition:
+        background var(--transition),
+        color var(--transition),
+        transform var(--transition);
+    }
+
+    .eye:hover {
+      background: #f2f3f5;
+      color: var(--text);
+
+      transform: translateY(-50%) scale(1.03);
+    }
+
+    .eye:active {
+      transform: translateY(-50%) scale(.95);
+    }
+
+    .eye i {
+      width: 19px;
+      height: 19px;
+    }
+
+    /* =========================================================
+       REQUIRED HINT
+       ========================================================= */
+
+    .required-hint {
+      display: block;
+
+      margin-top: 7px;
+
+      color: #9a6a6e;
+
+      font-size: 11px;
+      line-height: 1.4;
+
+      transition:
+        color var(--transition),
+        opacity var(--transition);
+    }
+
+    .field:focus-within .required-hint {
+      color: #b04c55;
+    }
+
+    /* =========================================================
+       ERROR
+       ========================================================= */
+
+    .err {
+      margin: 5px 0 0;
+
+      color: #d61f32;
+
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    /* =========================================================
+       REMEMBER / FORGOT
+       ========================================================= */
+
+    .between {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 15px;
+
+      margin: 22px 0 18px;
+    }
+
+    .chk {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+
+      color: #606771;
+
+      font-size: 13px;
+
+      cursor: pointer;
+
+      user-select: none;
+    }
+
+    .chk input {
+      appearance: none;
+
+      width: 18px;
+      height: 18px;
+
+      margin: 0;
+
+      border: 1px solid #cdd2d8;
+
+      border-radius: 5px;
+
+      background: white;
+
+      cursor: pointer;
+
+      display: grid;
+      place-items: center;
+
+      transition:
+        background var(--transition),
+        border-color var(--transition),
+        transform var(--transition);
+    }
+
+    .chk input::after {
+      content: "";
+
+      width: 7px;
+      height: 4px;
+
+      border-left: 2px solid white;
+      border-bottom: 2px solid white;
+
+      transform:
+        rotate(-45deg)
+        scale(0);
+
+      transition: transform var(--transition);
+    }
+
+    .chk input:checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .chk input:checked::after {
+      transform:
+        rotate(-45deg)
+        scale(1);
+    }
+
+    .chk input:active {
+      transform: scale(.9);
+    }
+
+    .between > a {
+      color: var(--primary);
+
+      font-size: 13px;
+      font-weight: 650;
+
+      text-decoration: none;
+
+      transition:
+        color var(--transition),
+        transform var(--transition);
+    }
+
+    .between > a:hover {
+      color: var(--primary-hover);
+      text-decoration: underline;
+    }
+
+    /* =========================================================
+       FORM MESSAGE
+       ========================================================= */
+
+    .form-msg {
+      min-height: 18px;
+
+      margin: 0 0 12px;
+
+      color: #c51d2f;
+
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    /* =========================================================
+       LOGIN BUTTON
+       ========================================================= */
+
+    .btn {
+      position: relative;
+      overflow: hidden;
+
+      width: 100%;
+      min-height: 52px;
+
+      border: 0;
+      border-radius: 13px;
+
+      background: var(--primary);
+
+      color: white;
+
+      font: inherit;
+      font-size: 15px;
+      font-weight: 720;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 8px 18px rgba(227, 30, 47, .17);
+
+      transition:
+        background var(--transition),
+        box-shadow var(--transition),
+        transform var(--transition);
+    }
+
+    /*
+      Ánh sáng chạy nhẹ trên nút.
+    */
+
+    .btn::before {
+      content: "";
+
+      position: absolute;
+
+      top: 0;
+      left: -80%;
+
+      width: 55%;
+      height: 100%;
+
+      background:
+        linear-gradient(
+          90deg,
+          transparent,
+          rgba(255,255,255,.22),
+          transparent
+        );
+
+      transform: skewX(-18deg);
+
+      transition: left .6s ease;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+
+      box-shadow:
+        0 12px 25px rgba(227, 30, 47, .23);
+
+      transform: translateY(-1px);
+    }
+
+    .btn:hover::before {
+      left: 135%;
+    }
+
+    .btn:active {
+      transform: translateY(1px) scale(.99);
+
+      box-shadow:
+        0 5px 12px rgba(227, 30, 47, .15);
+    }
+
+    .btn:focus-visible {
+      outline: none;
+
+      box-shadow:
+        0 0 0 4px rgba(227, 30, 47, .12),
+        0 8px 18px rgba(227, 30, 47, .17);
+    }
+
+    /* =========================================================
+       REGISTER
+       ========================================================= */
+
+    .center {
+      margin: 22px 0 24px;
+
+      color: var(--text-soft);
+
+      text-align: center;
+
+      font-size: 13px;
+    }
+
+    .center a {
+      color: var(--primary);
+
+      text-decoration: none;
+    }
+
+    .center a:hover {
+      text-decoration: underline;
+    }
+
+    .center b {
+      font-weight: 700;
+    }
+
+    /* =========================================================
+       ADMIN SWITCH
+       ========================================================= */
+
+    .switch {
+      width: 100%;
+
+      display: flex;
+      align-items: center;
+
+      gap: 13px;
+
+      padding: 14px 15px;
+
+      border: 1px solid var(--border);
+
+      border-radius: 15px;
+
+      background: var(--surface-soft);
+
+      color: var(--text);
+
+      text-decoration: none;
+
+      transition:
+        background var(--transition),
+        border-color var(--transition),
+        transform var(--transition),
+        box-shadow var(--transition);
+    }
+
+    .switch:hover {
+      background: #fff;
+
+      border-color: #d9dde3;
+
+      transform: translateY(-1px);
+
+      box-shadow: var(--shadow-sm);
+    }
+
+    .switch:active {
+      transform: translateY(0) scale(.995);
+    }
+
+    .switch .ic {
+      flex: 0 0 auto;
+
+      width: 40px;
+      height: 40px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 12px;
+
+      background: #eceff3;
+
+      color: #515963;
+
+      transition:
+        background var(--transition),
+        color var(--transition),
+        transform var(--transition);
+    }
+
+    .switch:hover .ic {
+      background: var(--primary-soft);
+      color: var(--primary);
+
+      transform: scale(1.04);
+    }
+
+    .switch .ic i {
+      width: 19px;
+      height: 19px;
+    }
+
+    .switch > span:nth-child(2) {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .switch b {
+      display: block;
+
+      margin-bottom: 3px;
+
+      color: #333840;
+
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .switch small {
+      display: block;
+
+      color: var(--text-muted);
+
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .switch > i:last-child {
+      flex: 0 0 auto;
+
+      width: 17px;
+      height: 17px;
+
+      color: #89909a;
+
+      transition:
+        color var(--transition),
+        transform var(--transition);
+    }
+
+    .switch:hover > i:last-child {
+      color: var(--primary);
+
+      transform: translateX(3px);
+    }
+
+    /* =========================================================
+       ACCESSIBILITY
+       ========================================================= */
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+      outline: 2px solid rgba(227, 30, 47, .5);
+      outline-offset: 2px;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @media (max-width: 600px) {
+      .auth {
+        padding: 22px 14px;
+      }
+
+      .panel {
+        max-width: 100%;
+      }
+
+      .auth-card {
+        padding: 28px 22px 24px;
+
+        border-radius: 19px;
+      }
+
+      .auth-header {
+        margin-bottom: 27px;
+      }
+
+      .auth-card h1 {
+        font-size: 27px;
+      }
+
+      .sub {
+        margin-bottom: 25px;
+      }
+
+      .between {
+        align-items: flex-start;
+      }
+
+      .switch {
+        padding: 13px;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .auth {
+        padding: 12px;
+      }
+
+      .auth-card {
+        padding: 24px 18px 20px;
+      }
+
+      .between {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .btn {
+        min-height: 50px;
+      }
+    }
+
+    /* =========================================================
+       REDUCE MOTION
+       ========================================================= */
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
 </head>
 
 <body class="customer">
+
   <main class="auth">
 
-    <!-- ===== Form đăng nhập ===== -->
     <section class="panel">
+
       <div class="card auth-card">
 
+        <!-- ================= BRAND ================= -->
+
         <div class="auth-header">
-          <a class="brand" data-route="gateway" href="/pages/auth/index.html">
-            <span class="logo"><i data-i="bag"></i></span>
-            Cửa hàng
+
+          <a
+            class="brand"
+            data-route="gateway"
+            href="/pages/auth/index.html"
+            aria-label="BanHangOnline"
+          >
+            <span class="logo">
+              <i data-i="bag"></i>
+            </span>
+
+            <span>Cửa hàng</span>
           </a>
+
         </div>
 
+
+        <!-- ================= TITLE ================= -->
+
         <h1>Chào mừng trở lại</h1>
-        <p class="sub">Đăng nhập để tiếp tục mua sắm</p>
 
-        <form data-endpoint="/api/auth/login"
-              data-login-role="CUSTOMER"
-              novalidate>
-
-          <div class="row">
-            <!-- Tài khoản -->
-            <div class="field">
-              <label for="account">Tài khoản</label>
-              <input id="account"
-                     name="account"
-                     autocomplete="username"
-                     placeholder="Email / Số điện thoại / Tên đăng nhập"
-                     data-v="required"
-                     data-required-message="Vui lòng nhập tài khoản.">
-              <small class="required-hint">Thông tin bắt buộc</small>
-              <p class="err"></p>
-            </div>
-
-            <!-- Mật khẩu -->
-            <div class="field">
-              <label for="password">Mật khẩu</label>
-              <div class="pw">
-                <input id="password"
-                       name="password"
-                       type="password"
-                       autocomplete="current-password"
-                       placeholder="Nhập mật khẩu"
-                       data-v="required"
-                       data-required-message="Vui lòng nhập mật khẩu.">
-                <button type="button" class="eye" aria-label="Hiện mật khẩu">
-                  <i data-i="eye"></i>
-                </button>
-              </div>
-              <small class="required-hint">Thông tin bắt buộc</small>
-              <p class="err"></p>
-            </div>
-          </div>
-
-          <!-- Ghi nhớ + Quên mật khẩu -->
-          <div class="between">
-            <label class="chk">
-              <input type="checkbox" name="remember"> Ghi nhớ đăng nhập
-            </label>
-            <a data-route="customer.forgot" href="forgot-password.html">Quên mật khẩu?</a>
-          </div>
-
-          <p class="form-msg" role="alert"></p>
-
-          <button class="btn" type="submit">Đăng nhập</button>
-        </form>
-
-        <p class="center">
-          Chưa có tài khoản? <a data-route="customer.register" href="register.html"><b>Đăng ký ngay</b></a>
+        <p class="sub">
+          Đăng nhập để tiếp tục mua sắm
         </p>
 
-        <!-- Chuyển sang đăng nhập quản trị -->
-        <a class="switch" data-route="gateway" href="/pages/auth/index.html">
-          <span class="ic"><i data-i="shield"></i></span>
-          <span>
-            <b>Bạn là chủ cửa hàng hoặc nhân viên?</b>
-            <small>Chọn đúng khu vực đăng nhập</small>
+
+        <!-- ================= LOGIN FORM ================= -->
+
+        <form
+          data-endpoint="/api/auth/login"
+          data-login-role="CUSTOMER"
+          novalidate
+        >
+
+          <div class="row">
+
+            <!-- TÀI KHOẢN -->
+
+            <div class="field">
+
+              <label for="account">
+                Tài khoản
+              </label>
+
+              <input
+                id="account"
+                name="account"
+                autocomplete="username"
+                placeholder="Email / Số điện thoại / Tên đăng nhập"
+                data-v="required"
+                data-required-message="Vui lòng nhập tài khoản."
+              >
+
+              <small class="required-hint">
+                Thông tin bắt buộc
+              </small>
+
+              <p class="err"></p>
+
+            </div>
+
+
+            <!-- MẬT KHẨU -->
+
+            <div class="field">
+
+              <label for="password">
+                Mật khẩu
+              </label>
+
+              <div class="pw">
+
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  placeholder="Nhập mật khẩu"
+                  data-v="required"
+                  data-required-message="Vui lòng nhập mật khẩu."
+                >
+
+                <button
+                  type="button"
+                  class="eye"
+                  aria-label="Hiện mật khẩu"
+                >
+                  <i data-i="eye"></i>
+                </button>
+
+              </div>
+
+              <small class="required-hint">
+                Thông tin bắt buộc
+              </small>
+
+              <p class="err"></p>
+
+            </div>
+
+          </div>
+
+
+          <!-- ================= OPTIONS ================= -->
+
+          <div class="between">
+
+            <label class="chk">
+
+              <input
+                type="checkbox"
+                name="remember"
+              >
+
+              <span>Ghi nhớ đăng nhập</span>
+
+            </label>
+
+
+            <a
+              data-route="customer.forgot"
+              href="forgot-password.html"
+            >
+              Quên mật khẩu?
+            </a>
+
+          </div>
+
+
+          <!-- ================= MESSAGE ================= -->
+
+          <p
+            class="form-msg"
+            role="alert"
+          ></p>
+
+
+          <!-- ================= SUBMIT ================= -->
+
+          <button
+            class="btn"
+            type="submit"
+          >
+            Đăng nhập
+          </button>
+
+        </form>
+
+
+        <!-- ================= REGISTER ================= -->
+
+        <p class="center">
+
+          Chưa có tài khoản?
+
+          <a
+            data-route="customer.register"
+            href="register.html"
+          >
+            <b>Đăng ký ngay</b>
+          </a>
+
+        </p>
+
+
+        <!-- ================= STAFF / OWNER ================= -->
+
+        <a
+          class="switch"
+          data-route="gateway"
+          href="/pages/auth/index.html"
+        >
+
+          <span class="ic">
+            <i data-i="shield"></i>
           </span>
+
+          <span>
+
+            <b>
+              Bạn là chủ cửa hàng hoặc nhân viên?
+            </b>
+
+            <small>
+              Chọn đúng khu vực đăng nhập
+            </small>
+
+          </span>
+
           <i data-i="right"></i>
+
         </a>
 
       </div>
+
     </section>
 
   </main>
 
+
+  <!-- ================= EXISTING APP ================= -->
+
   <script src="../../../assets/js/core/routes.js"></script>
   <script src="../../../assets/js/core/app.js"></script>
+
 </body>
 </html>

@@ -2,6 +2,19 @@
 // Configure window.API_BASE at deployment only when the frontend and API use different origins.
 const API=(window.API_BASE||"").replace(/\/$/,"");
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const registrationForm=$('form[data-endpoint="/api/auth/register"]');
+if(registrationForm&&window.LocationPicker){
+ window.LocationPicker.mount($("#registration-location-picker"),{
+  latitudeInput:registrationForm.querySelector('[name="address.latitude"]'),
+  longitudeInput:registrationForm.querySelector('[name="address.longitude"]'),
+  addressFields:{
+   province:registrationForm.querySelector('[name="address.province"]'),
+   district:registrationForm.querySelector('[name="address.district"]'),
+   ward:registrationForm.querySelector('[name="address.ward"]'),
+   addressLine:registrationForm.querySelector('[name="address.addressLine"]')
+  }
+ })
+}
 const P={eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',off:'<path d="M3 3l18 18M10.6 6.1A10 10 0 0 1 12 6c6.5 0 10 6 10 6a17 17 0 0 1-3.2 3.9M6.5 7A16.6 16.6 0 0 0 2 12s3.5 6 10 6c1.5 0 2.8-.3 4-.8"/>',lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',left:'<path d="M19 12H5M11 6l-6 6 6 6"/>',right:'<path d="M5 12h14M13 6l6 6-6 6"/>',bag:'<path d="M6 8h12l1 12H5z"/><path d="M9 8a3 3 0 0 1 6 0"/>',store:'<path d="M4 9v11h16V9M3 9l1.5-5h15L21 9c0 1.7-1.3 3-3 3s-3-1.3-3-3c0 1.7-1.3 3-3 3S9 10.7 9 9c0 1.7-1.3 3-3 3S3 10.7 3 9zM10 20v-5h4v5"/>',pin:'<path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',up:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>'};
 const svg=n=>`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
 $$("[data-i]").forEach(e=>e.innerHTML=svg(e.dataset.i));
@@ -37,7 +50,7 @@ document.addEventListener("click",e=>{
 
 const collect=f=>{const o={};$$("[name]",f).forEach(el=>{
  if(el.type==="file"||el.dataset.skip!==undefined)return;
- const v=el.type==="checkbox"?el.checked:el.type==="password"?el.value:el.dataset.emailDomain?emailValue(el):el.value.trim();
+ const v=el.type==="checkbox"?el.checked:el.type==="password"?el.value:el.dataset.coordinate!==undefined&&el.value!==""?Number(el.value):el.dataset.emailDomain?emailValue(el):el.value.trim();
  if(v===""&&!(el.dataset.v||"").includes("required"))return;
  el.name.split(".").reduce((a,k,i,r)=>i===r.length-1?(a[k]=v):(a[k]=a[k]||{}),o)});return o};
 const wiz=$("form[data-wizard]");

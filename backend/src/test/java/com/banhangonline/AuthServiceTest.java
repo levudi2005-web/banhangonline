@@ -15,6 +15,7 @@ import com.banhangonline.user.entity.UserStatus;
 import com.banhangonline.user.repository.UserRepository;
 import com.banhangonline.address.dto.AddressRequest;
 import java.util.Optional;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -76,6 +77,20 @@ class AuthServiceTest {
     }
 
     @Test
+    void customerRegistrationPersistsAddressCoordinates() {
+        RegisterRequest request = new RegisterRequest(
+                "Buyer Name", "buyer25", "buyer@example.com", "0912345678", PASSWORD, PASSWORD,
+                new AddressRequest("Buyer Name", "0912345678", "Ha Noi", "Ba Dinh", "Phuc Xa",
+                        "1 Test Street", new BigDecimal("21.0345000"), new BigDecimal("105.8123000")));
+
+        auth.registerCustomer(request);
+
+        verify(addresses).save(argThat(address ->
+                address.getLatitude().compareTo(new BigDecimal("21.0345000")) == 0
+                        && address.getLongitude().compareTo(new BigDecimal("105.8123000")) == 0));
+    }
+
+    @Test
     void loginAuthenticatesPasswordWithoutOtpDependency() {
         User user = new User();
         user.setEmail("buyer@example.com");
@@ -91,6 +106,7 @@ class AuthServiceTest {
     private RegisterRequest registration(String email, String username, String phone) {
         return new RegisterRequest(
                 "Buyer Name", username, email, phone, PASSWORD, PASSWORD,
-                new AddressRequest("Buyer Name", phone, "Ha Noi", "Ba Dinh", "Phuc Xa", "1 Test Street"));
+                new AddressRequest("Buyer Name", phone, "Ha Noi", "Ba Dinh", "Phuc Xa", "1 Test Street",
+                        null, null));
     }
 }

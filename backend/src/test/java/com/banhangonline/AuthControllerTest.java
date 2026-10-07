@@ -32,7 +32,8 @@ class AuthControllerTest {
     void customerRegistrationDoesNotInvokeOtpServiceOrEmailSender() {
         RegisterRequest request = new RegisterRequest("Buyer Name", "buyer25", "buyer@example.com",
                 "0912345678", "Test-password-25", "Test-password-25",
-                new AddressRequest("Buyer Name", "0912345678", "Ha Noi", "Ba Dinh", "Phuc Xa", "1 Test Street"));
+                new AddressRequest("Buyer Name", "0912345678", "Ha Noi", "Ba Dinh", "Phuc Xa", "1 Test Street",
+                        null, null));
         User user = new User();
         user.setId(1L);
         user.setFullName("Buyer Name");

@@ -13,6 +13,9 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -21,12 +24,21 @@ public class ProductImageStorageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductImageStorageService.class);
     private static final long MAX_IMAGE_SIZE = 5L * 1024 * 1024;
     private final S3StorageProperties properties;
+    private final LocalImageStorageProperties localProperties;
     private final S3Client client;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public ProductImageStorageService(S3StorageProperties properties,
+                                      LocalImageStorageProperties localProperties,
+                                      org.springframework.beans.factory.ObjectProvider<S3Client> clients) {
+        this.properties = properties;
+        this.localProperties = localProperties;
+        this.client = clients.getIfAvailable();
+    }
 
     public ProductImageStorageService(S3StorageProperties properties,
                                       org.springframework.beans.factory.ObjectProvider<S3Client> clients) {
-        this.properties = properties;
-        this.client = clients.getIfAvailable();
+        this(properties, new LocalImageStorageProperties(), clients);
     }
 
     public String upload(Long storeId, MultipartFile file) {
@@ -47,6 +59,9 @@ public class ProductImageStorageService {
         ImageFormat format = ImageFormat.from(bytes);
         if (format == null) {
             throw ApiException.validation("Chỉ hỗ trợ ảnh PNG, JPG hoặc WEBP hợp lệ.");
+        }
+        if (localProperties.isEnabled() && !properties.isEnabled()) {
+            return uploadLocal(storeId, bytes, format);
         }
         S3Client s3 = requireClient();
         String key = "stores/" + storeId + "/products/" + UUID.randomUUID() + "." + format.extension;
@@ -70,6 +85,9 @@ public class ProductImageStorageService {
         if (imageUrl == null) {
             return false;
         }
+        if (localProperties.isEnabled() && !properties.isEnabled()) {
+            return deleteLocal(storeId, imageUrl);
+        }
         String key = managedObjectKey(storeId, imageUrl);
         if (key == null) {
             return false;
@@ -88,12 +106,81 @@ public class ProductImageStorageService {
         }
     }
 
+    public boolean isManagedImageUrl(Long storeId, String imageUrl) {
+        if (imageUrl == null) {
+            return false;
+        }
+        if (localProperties.isEnabled() && !properties.isEnabled()) {
+            String prefix = "/uploads/stores/" + storeId + "/products/";
+            if (!imageUrl.startsWith(prefix)) {
+                return false;
+            }
+            String fileName = imageUrl.substring(prefix.length());
+            if (!fileName.matches("[0-9a-fA-F-]{36}\\.(png|jpg|webp)")) {
+                return false;
+            }
+            Path root = localRoot();
+            Path target = root.resolve("stores").resolve(storeId.toString()).resolve("products")
+                    .resolve(fileName).normalize();
+            return target.startsWith(root) && Files.isRegularFile(target);
+        }
+        return managedObjectKey(storeId, imageUrl) != null;
+    }
+
     private S3Client requireClient() {
         if (!properties.isEnabled() || client == null) {
             throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "IMAGE_STORAGE_UNAVAILABLE",
                     "Tính năng tải ảnh chưa được cấu hình.");
         }
         return client;
+    }
+
+    private String uploadLocal(Long storeId, byte[] bytes, ImageFormat format) {
+        Path root = localRoot();
+        String fileName = UUID.randomUUID() + "." + format.extension;
+        Path directory = root.resolve("stores").resolve(storeId.toString()).resolve("products").normalize();
+        Path target = directory.resolve(fileName).normalize();
+        if (!directory.startsWith(root) || !target.startsWith(root)) {
+            throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "IMAGE_STORAGE_FAILED",
+                    "Không thể lưu ảnh vào kho lưu trữ.");
+        }
+        try {
+            Files.createDirectories(directory);
+            Files.write(target, bytes, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+        } catch (IOException error) {
+            LOGGER.warn("Local product image upload failed for store {}: {}", storeId, error.getMessage());
+            throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "IMAGE_STORAGE_FAILED",
+                    "Không thể lưu ảnh vào kho lưu trữ.");
+        }
+        return "/uploads/stores/" + storeId + "/products/" + fileName;
+    }
+
+    private boolean deleteLocal(Long storeId, String imageUrl) {
+        final String prefix = "/uploads/stores/" + storeId + "/products/";
+        if (!imageUrl.startsWith(prefix)) {
+            return false;
+        }
+        String fileName = imageUrl.substring(prefix.length());
+        if (!fileName.matches("[0-9a-fA-F-]{36}\\.(png|jpg|webp)")) {
+            return false;
+        }
+        Path root = localRoot();
+        Path target = root.resolve("stores").resolve(storeId.toString()).resolve("products")
+                .resolve(fileName).normalize();
+        if (!target.startsWith(root)) {
+            return false;
+        }
+        try {
+            return Files.deleteIfExists(target);
+        } catch (IOException error) {
+            LOGGER.warn("Local product image deletion failed for store {}: {}", storeId, error.getMessage());
+            throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "IMAGE_DELETE_FAILED",
+                    "Ảnh đã được gỡ khỏi sản phẩm nhưng chưa thể xóa khỏi kho lưu trữ.");
+        }
+    }
+
+    private Path localRoot() {
+        return Path.of(localProperties.getDirectory()).toAbsolutePath().normalize();
     }
 
     private String publicUrl(String key) {

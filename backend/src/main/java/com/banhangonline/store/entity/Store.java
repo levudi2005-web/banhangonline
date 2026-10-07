@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
@@ -42,6 +43,12 @@ public class Store {
 
     @Column(name = "address_detail", nullable = false, length = 255)
     private String addressDetail;
+
+    @Column(precision = 10, scale = 7)
+    private BigDecimal latitude;
+
+    @Column(precision = 10, scale = 7)
+    private BigDecimal longitude;
 
     @Column(name = "postal_code", length = 20)
     private String postalCode;

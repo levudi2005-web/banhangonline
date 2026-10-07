@@ -576,6 +576,9 @@
               const control = form.elements[name];
               if (control) control.value = store[name] || "";
             });
+            latitude.value = store.latitude ?? "";
+            longitude.value = store.longitude ?? "";
+            locationPicker.setPosition(store.latitude, store.longitude);
             document.querySelector("#store-submit").textContent = "Cập nhật bản nháp";
             form.scrollIntoView({ behavior: "smooth", block: "center" });
           }));
@@ -592,6 +595,30 @@
       if (name === "description") wrapper.classList.add("full");
       form.append(wrapper);
     });
+    const latitude = document.createElement("input");
+    latitude.type = "hidden";
+    latitude.name = "latitude";
+    const longitude = document.createElement("input");
+    longitude.type = "hidden";
+    longitude.name = "longitude";
+    form.append(latitude, longitude);
+    const locationSection = element("div", undefined, "location-picker-section full");
+    locationSection.append(element("h3", "Vị trí cửa hàng"),
+      element("p", "Chọn điểm trên bản đồ hoặc tìm địa chỉ. OpenStreetMap chỉ nhận yêu cầu khi bạn chủ động tìm/chọn vị trí."));
+    const locationNode = element("div");
+    locationNode.id = "store-location-picker";
+    locationSection.append(locationNode);
+    form.append(locationSection);
+    const locationPicker = LocationPicker.mount(locationNode, {
+      latitudeInput: latitude,
+      longitudeInput: longitude,
+      addressFields: {
+        province: form.elements.province,
+        district: form.elements.district,
+        ward: form.elements.ward,
+        addressLine: form.elements.addressDetail
+      }
+    });
     const save = element("button", "Lưu bản nháp", "dash-button");
     save.type = "submit";
     save.id = "store-submit";
@@ -604,7 +631,11 @@
         const storeId = form.dataset.storeId;
         await request(storeId ? `/api/owner/stores/${storeId}` : "/api/owner/stores", {
           method: storeId ? "PUT" : "POST",
-          body: JSON.stringify(values)
+          body: JSON.stringify({
+            ...values,
+            ...(values.latitude === undefined ? {} : { latitude: Number(values.latitude) }),
+            ...(values.longitude === undefined ? {} : { longitude: Number(values.longitude) })
+          })
         });
         setStatus("Đã lưu thông tin cửa hàng.", "success");
         location.reload();
@@ -1020,10 +1051,6 @@
     const clear = button("Gỡ tất cả ảnh", "secondary", clearImages);
     const actions = element("div", undefined, "management-image-actions");
     actions.append(choose, clear);
-    const imageUrlField = field("Thêm ảnh bằng đường dẫn HTTPS", "galleryImageUrl", "url", false);
-    imageUrlField.classList.add("management-image-url");
-    const imageUrlInput = imageUrlField.querySelector("input");
-    const addUrl = button("Thêm đường dẫn", "secondary", addImageUrl);
     const status = element("p", "Chưa chọn ảnh mới.", "management-image-status dash-muted");
     status.id = "management-image-status";
     status.setAttribute("role", "status");
@@ -1034,7 +1061,7 @@
     progress.value = 0;
     progress.hidden = true;
     progress.setAttribute("aria-label", "Tiến độ tải ảnh");
-    controls.append(fileInput, actions, imageUrlField, addUrl, status, progress);
+    controls.append(fileInput, actions, status, progress);
     const gallery = element("div", undefined, "management-image-gallery");
     gallery.setAttribute("aria-label", "Thư viện ảnh, ảnh đầu tiên là ảnh chính");
     editor.append(dropzone, controls, gallery);
@@ -1052,7 +1079,6 @@
       editor.setAttribute("aria-busy", String(isBusy));
       editor.querySelectorAll("button").forEach(control => { control.disabled = isBusy; });
       fileInput.disabled = isBusy;
-      imageUrlInput.disabled = isBusy;
       if (message) setStatus(message);
     }
 
@@ -1093,7 +1119,7 @@
         image.addEventListener("error", () => {
           card.classList.add("management-image-card-error");
           image.alt = `Không thể tải ảnh ${index + 1}`;
-          setStatus(`Không thể xem trước ảnh ${index + 1}; hãy kiểm tra URL hoặc chọn ảnh khác.`, true);
+          setStatus(`Không thể hiển thị ảnh ${index + 1}; hãy tải ảnh khác lên.`, true);
         }, { once: true });
         const main = button(index === 0 ? "Ảnh chính" : "Đặt làm ảnh chính",
           index === 0 ? "primary" : "secondary", () => moveEntry(index, -index));
@@ -1127,9 +1153,7 @@
       clear.hidden = entries.length === 0;
       choose.disabled = busy || entries.length >= 8;
       clear.disabled = busy || entries.length === 0;
-      addUrl.disabled = busy || entries.length >= 8;
       fileInput.disabled = busy;
-      imageUrlInput.disabled = busy;
       setStatus(`${entries.length} / 8 ảnh${entries.length ? " · ảnh đầu tiên là ảnh chính" : ""}`);
     }
 
@@ -1137,7 +1161,6 @@
       if (busy) return;
       entries.forEach(releaseEntry);
       entries.splice(0);
-      imageUrlInput.value = "";
       fileInput.value = "";
       render();
       setStatus("Toàn bộ ảnh sẽ được gỡ khi lưu sản phẩm.");
@@ -1200,40 +1223,9 @@
         selectionError = rejected.join(" ");
       }
       fileInput.value = "";
-      imageUrlInput.value = "";
       render();
       setStatus(selectionError || "Ảnh đã được chọn. Nội dung tải lên khi lưu sản phẩm.",
         Boolean(selectionError));
-    }
-
-    function addImageUrl() {
-      if (busy) return;
-      const value = imageUrlInput.value.trim();
-      if (!value) {
-        setStatus("Nhập URL ảnh trước khi thêm.", true);
-        return;
-      }
-      try {
-        const url = new URL(value);
-        if (!["http:", "https:"].includes(url.protocol) || !url.hostname) {
-          throw new Error("scheme");
-        }
-      } catch {
-        setStatus("Đường dẫn ảnh phải là URL HTTP hoặc HTTPS hợp lệ.", true);
-        return;
-      }
-      if (entries.length >= 8) {
-        setStatus("Mỗi sản phẩm chỉ được có tối đa 8 ảnh.", true);
-        return;
-      }
-      if (entries.some(entry => entry.url === value)) {
-        setStatus("Ảnh này đã có trong danh sách.", true);
-        return;
-      }
-      entries.push({ url: value, file: null, objectUrl: null });
-      imageUrlInput.value = "";
-      render();
-      setStatus("Đã thêm URL ảnh. Thay đổi có hiệu lực khi lưu sản phẩm.");
     }
 
     fileInput.addEventListener("change", () => chooseFiles(fileInput.files));
@@ -1259,7 +1251,7 @@
     });
     preview.addEventListener("error", () => {
       preview.hidden = true;
-      setStatus("Không thể hiển thị ảnh chính. Kiểm tra đường dẫn hoặc chọn ảnh khác.", true);
+      setStatus("Không thể hiển thị ảnh chính. Hãy tải ảnh khác lên.", true);
     });
 
     render();
@@ -1343,7 +1335,6 @@
     let pendingUploadedImageUrls = [];
     let imageSaved = false;
     let productPersisted = false;
-    let persistedPrimaryImageUrl = "";
     const isNewProduct = !product;
     form.addEventListener("submit", async event => {
       event.preventDefault();
@@ -1363,12 +1354,9 @@
           imageEditor.setUploadedUrl(index, uploaded.imageUrl);
         }
         const values = Object.fromEntries([...new FormData(form).entries()].filter(([, value]) => value !== ""));
-        delete values.galleryImageUrl;
         values.categoryId = Number(values.categoryId);
         values.currency = product ? product.currency : "VND";
         const imageUrls = imageEditor.urls();
-        values.imageUrl = imageUrls[0] || "";
-        persistedPrimaryImageUrl = values.imageUrl;
         if (values.quantity !== undefined) values.quantity = Number(values.quantity);
         if (values.reorderLevel !== undefined) values.reorderLevel = Number(values.reorderLevel);
         const savedProduct = await request(product
@@ -1429,9 +1417,7 @@
       "product-image-dialog", () => {
         imageEditor.destroy();
         if (!imageSaved && pendingUploadedImageUrls.length) {
-          const referencedUrl = productPersisted ? persistedPrimaryImageUrl : null;
           pendingUploadedImageUrls
-            .filter(imageUrl => imageUrl !== referencedUrl)
             .forEach(imageUrl => {
               request(`/api/owner/stores/${context.selectedStoreId}/products/images`, {
                 method: "DELETE",

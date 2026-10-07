@@ -7,12 +7,12 @@ import com.banhangonline.product.dto.ProductImageView;
 import com.banhangonline.product.entity.Product;
 import com.banhangonline.product.repository.ProductImageRepository;
 import com.banhangonline.product.repository.ProductRepository;
+import com.banhangonline.product.storage.ProductImageStorageService;
 import com.banhangonline.store.service.StorePermissionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,13 +25,16 @@ public class ProductImageGalleryService {
     private final InventoryRepository inventory;
     private final ProductRepository products;
     private final StorePermissionService storePermissions;
+    private final ProductImageStorageService storage;
 
     public ProductImageGalleryService(ProductImageRepository images, InventoryRepository inventory,
-                                      ProductRepository products, StorePermissionService storePermissions) {
+                                      ProductRepository products, StorePermissionService storePermissions,
+                                      ProductImageStorageService storage) {
         this.images = images;
         this.inventory = inventory;
         this.products = products;
         this.storePermissions = storePermissions;
+        this.storage = storage;
     }
 
     @Transactional(readOnly = true)
@@ -61,7 +64,7 @@ public class ProductImageGalleryService {
         if (imageUrls == null || imageUrls.size() > MAX_IMAGES) {
             throw ApiException.validation("Mỗi sản phẩm có thể có tối đa 8 ảnh.");
         }
-        validateUrls(imageUrls);
+        validateUrls(storeId, imageUrls);
 
         Inventory stock = inventory.findByStoreIdAndProductId(storeId, productId).orElseThrow(() ->
                 new ApiException(HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND",
@@ -69,6 +72,17 @@ public class ProductImageGalleryService {
         if (inventory.existsByProductIdAndStoreIdNot(productId, storeId)) {
             throw new ApiException(HttpStatus.CONFLICT, "SHARED_PRODUCT",
                     "Không thể thay đổi ảnh của sản phẩm đang được dùng ở cửa hàng khác");
+        }
+
+        Set<String> currentUrls = new HashSet<>(images.findByProductId(productId).stream()
+                .map(ProductImageView::imageUrl).toList());
+        if (stock.getProduct().getImageUrl() != null) {
+            currentUrls.add(stock.getProduct().getImageUrl());
+        }
+        for (String imageUrl : imageUrls) {
+            if (!currentUrls.contains(imageUrl) && !storage.isManagedImageUrl(storeId, imageUrl)) {
+                throw ApiException.validation("Ảnh mới phải được tải lên kho ảnh của cửa hàng này.");
+            }
         }
 
         images.replace(productId, imageUrls);
@@ -90,19 +104,17 @@ public class ProductImageGalleryService {
                 .toList();
     }
 
-    private void validateUrls(List<String> imageUrls) {
+    private void validateUrls(Long storeId, List<String> imageUrls) {
         Set<String> unique = new HashSet<>();
         for (String imageUrl : imageUrls) {
             if (imageUrl == null || imageUrl.isBlank() || imageUrl.length() > 500 || !unique.add(imageUrl)) {
                 throw ApiException.validation("Danh sách ảnh không hợp lệ hoặc có ảnh bị trùng.");
             }
-            try {
-                URI uri = URI.create(imageUrl);
-                if (!("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme()))
-                        || uri.getHost() == null) {
-                    throw ApiException.validation("Đường dẫn ảnh phải là URL HTTP hoặc HTTPS hợp lệ.");
-                }
-            } catch (IllegalArgumentException error) {
+            if (imageUrl.matches("^/uploads/stores/" + storeId
+                    + "/products/[0-9a-fA-F-]{36}\\.(png|jpg|webp)$")) {
+                continue;
+            }
+            if (!imageUrl.startsWith("/") && !imageUrl.matches("^https?://[^/].*$")) {
                 throw ApiException.validation("Đường dẫn ảnh phải là URL HTTP hoặc HTTPS hợp lệ.");
             }
         }

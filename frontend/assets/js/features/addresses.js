@@ -4,6 +4,16 @@
   const list = document.querySelector("#address-list");
   const status = document.querySelector("#address-status");
   const form = document.querySelector("#address-form");
+  const locationPicker = LocationPicker.mount(document.querySelector("#address-location-picker"), {
+    latitudeInput: form.elements.latitude,
+    longitudeInput: form.elements.longitude,
+    addressFields: {
+      province: form.elements.province,
+      district: form.elements.district,
+      ward: form.elements.ward,
+      addressLine: form.elements.addressLine
+    }
+  });
   let editingId = null;
 
   async function request(path, options = {}) {
@@ -73,6 +83,7 @@
         Object.entries(address).forEach(([key, value]) => {
           if (form.elements[key]) form.elements[key].value = value ?? "";
         });
+        locationPicker.setPosition(address.latitude, address.longitude);
         form.querySelector("button[type=submit]").textContent = "Lưu địa chỉ";
         document.querySelector("#address-recipient").focus();
       });
@@ -104,6 +115,10 @@
     button.disabled = true;
     try {
       const body = Object.fromEntries(new FormData(form).entries());
+      ["latitude", "longitude"].forEach(key => {
+        if (body[key] === "") delete body[key];
+        else body[key] = Number(body[key]);
+      });
       const method = editingId ? "PUT" : "POST";
       const path = editingId ? `/api/users/addresses/${editingId}` : "/api/users/addresses";
       await request(path, { method, body: JSON.stringify(body) });
@@ -123,6 +138,7 @@
   document.querySelector("#address-reset").addEventListener("click", () => {
     editingId = null;
     form.reset();
+    locationPicker.setPosition(null, null);
     form.querySelector("button[type=submit]").textContent = "Thêm địa chỉ";
   });
   AppRoutes.requireAuth("CUSTOMER").then(user => {

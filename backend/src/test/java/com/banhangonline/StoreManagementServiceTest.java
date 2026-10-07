@@ -9,6 +9,7 @@ import com.banhangonline.user.entity.User;
 import com.banhangonline.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,10 +30,11 @@ class StoreManagementServiceTest {
         when(stores.save(any(Store.class))).thenAnswer(call -> call.getArgument(0));
 
         var response = service.create(9L, new CreateStoreRequest(" Cửa hàng A ", "+84912345678",
-                null, " Hà Nội ", " Ba Đình ", " Phúc Xá ", " 1 Phố Mẫu ", null, null));
+                null, " Hà Nội ", " Ba Đình ", " Phúc Xá ", " 1 Phố Mẫu ", null, null, null, null));
 
         assertThat(response.phone()).isEqualTo("0912345678");
         assertThat(response.status()).isEqualTo("DRAFT");
+        assertThat(response.latitude()).isNull();
         verify(stores).save(argThat(store -> store.getOwner() == owner
                 && store.getName().equals("Cửa hàng A")
                 && store.getAddressDetail().equals("1 Phố Mẫu")));
@@ -46,10 +48,31 @@ class StoreManagementServiceTest {
         when(users.findById(3L)).thenReturn(Optional.of(customer));
 
         assertThatThrownBy(() -> service.create(3L, new CreateStoreRequest("A", "0912345678",
-                null, "P", "D", "W", "Address", null, null)))
+                null, "P", "D", "W", "Address", null, null, null, null)))
                 .isInstanceOf(ApiException.class)
                 .extracting("code").isEqualTo("OWNER_REQUIRED");
         verify(stores, never()).save(any());
+    }
+
+    @Test
+    void ownerCanSaveCoordinatesAndCannotSaveOnlyOneCoordinate() {
+        User owner = new User();
+        owner.setId(9L);
+        owner.getRoles().add(role("OWNER"));
+        when(users.findById(9L)).thenReturn(Optional.of(owner));
+        when(stores.save(any(Store.class))).thenAnswer(call -> call.getArgument(0));
+
+        var response = service.create(9L, new CreateStoreRequest("Cửa hàng A", "0912345678",
+                null, "Hà Nội", "Ba Đình", "Phúc Xá", "1 Phố Mẫu", null, null,
+                new BigDecimal("21.0345000"), new BigDecimal("105.8123000")));
+
+        assertThat(response.latitude()).isEqualByComparingTo("21.0345000");
+        assertThat(response.longitude()).isEqualByComparingTo("105.8123000");
+        assertThatThrownBy(() -> service.create(9L, new CreateStoreRequest("Cửa hàng B", "0912345678",
+                null, "Hà Nội", "Ba Đình", "Phúc Xá", "2 Phố Mẫu", null, null,
+                new BigDecimal("21.0345000"), null)))
+                .isInstanceOf(ApiException.class)
+                .extracting("code").isEqualTo("VALIDATION_ERROR");
     }
 
     @Test
@@ -63,7 +86,7 @@ class StoreManagementServiceTest {
         store.setStatus("DRAFT");
         when(stores.findByIdAndOwnerId(17L, 9L)).thenReturn(Optional.of(store));
         CreateStoreRequest request = new CreateStoreRequest("Cửa hàng mới", "0912345678",
-                null, "Hà Nội", "Ba Đình", "Phúc Xá", "1 Phố Mẫu", null, null);
+                null, "Hà Nội", "Ba Đình", "Phúc Xá", "1 Phố Mẫu", null, null, null, null);
 
         var updated = service.updateDraft(17L, 9L, request);
         var submitted = service.submitForReview(17L, 9L);
@@ -83,7 +106,7 @@ class StoreManagementServiceTest {
         store.setStatus("PENDING_REVIEW");
         when(stores.findByIdAndOwnerId(17L, 9L)).thenReturn(Optional.of(store));
         CreateStoreRequest request = new CreateStoreRequest("Cửa hàng mới", "0912345678",
-                null, "Hà Nội", "Ba Đình", "Phúc Xá", "1 Phố Mẫu", null, null);
+                null, "Hà Nội", "Ba Đình", "Phúc Xá", "1 Phố Mẫu", null, null, null, null);
 
         assertThatThrownBy(() -> service.updateDraft(17L, 9L, request))
                 .isInstanceOf(ApiException.class)

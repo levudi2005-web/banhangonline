@@ -3,64 +3,817 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="../../assets/css/style.css">
+
   <title>BanHangOnline — Chọn khu vực</title>
+
+  <style>
+    /* =========================================================
+       BANHANGONLINE — WHITE / GRAY PREMIUM LANDING
+       UI ONLY — routes & JS logic preserved
+       ========================================================= */
+
+    :root {
+      --white: #ffffff;
+      --bg: #f4f5f7;
+      --surface: #ffffff;
+      --surface-soft: #f8f9fa;
+
+      --gray-50: #fafafa;
+      --gray-100: #f1f2f4;
+      --gray-200: #e4e6e9;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+
+      --text: #16181d;
+      --text-soft: #68707d;
+
+      --border: rgba(17, 24, 39, 0.08);
+      --border-strong: rgba(17, 24, 39, 0.13);
+
+      --shadow-sm:
+        0 1px 2px rgba(16, 24, 40, 0.04),
+        0 4px 12px rgba(16, 24, 40, 0.035);
+
+      --shadow-md:
+        0 10px 30px rgba(16, 24, 40, 0.07),
+        0 2px 8px rgba(16, 24, 40, 0.035);
+
+      --shadow-lg:
+        0 24px 60px rgba(16, 24, 40, 0.10),
+        0 8px 24px rgba(16, 24, 40, 0.045);
+
+      --radius-sm: 12px;
+      --radius-md: 18px;
+      --radius-lg: 26px;
+      --radius-xl: 34px;
+
+      --ease:
+        cubic-bezier(.22, .8, .24, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+    }
+
+    body.customer {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(
+          circle at 50% -15%,
+          rgba(255, 255, 255, 0.98) 0,
+          rgba(255, 255, 255, 0.70) 28%,
+          transparent 60%
+        ),
+        linear-gradient(
+          180deg,
+          #f8f9fa 0%,
+          #f3f4f6 48%,
+          #eef0f3 100%
+        );
+      font-family:
+        Inter,
+        ui-sans-serif,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* ---------- Main shell ---------- */
+
+    .auth.auth-landing {
+      width: 100%;
+      min-height: 100vh;
+      padding: 42px 24px 50px;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .panel.panel-landing {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+    }
+
+    .launcher-card {
+      position: relative;
+      overflow: hidden;
+
+      width: 100%;
+      padding: 34px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255,255,255,.98),
+          rgba(250,250,251,.98)
+        );
+
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      border-radius: var(--radius-xl);
+
+      box-shadow: var(--shadow-lg);
+
+      isolation: isolate;
+    }
+
+    /* subtle background decoration */
+
+    .launcher-card::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+
+      width: 460px;
+      height: 460px;
+
+      top: -280px;
+      right: -150px;
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle,
+          rgba(255,255,255,.95) 0%,
+          rgba(240,242,245,.55) 42%,
+          transparent 72%
+        );
+    }
+
+    .launcher-card::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+
+      width: 360px;
+      height: 360px;
+
+      bottom: -270px;
+      left: -160px;
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle,
+          rgba(255,255,255,.85) 0%,
+          rgba(235,237,240,.45) 45%,
+          transparent 72%
+        );
+    }
+
+    /* ---------- Header ---------- */
+
+    .launcher-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      margin-bottom: 68px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 13px;
+
+      color: var(--gray-900);
+      text-decoration: none;
+
+      font-size: 18px;
+      font-weight: 750;
+      letter-spacing: -0.025em;
+
+      transition:
+        transform .22s var(--ease),
+        opacity .22s var(--ease);
+    }
+
+    .brand:hover {
+      transform: translateY(-1px);
+      opacity: .82;
+    }
+
+    .brand .logo {
+      width: 42px;
+      height: 42px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      color: #111827;
+
+      background:
+        linear-gradient(
+          145deg,
+          #ffffff,
+          #eceef1
+        );
+
+      border: 1px solid var(--border-strong);
+      border-radius: 13px;
+
+      box-shadow:
+        0 3px 8px rgba(17,24,39,.06),
+        inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .brand .logo i {
+      width: 21px;
+      height: 21px;
+    }
+
+    /* ---------- Intro ---------- */
+
+    .launcher-intro {
+      max-width: 700px;
+      margin: 0 auto 42px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+
+      min-height: 28px;
+      padding: 5px 11px;
+
+      color: var(--gray-600);
+
+      background: rgba(243,244,246,.9);
+      border: 1px solid var(--border);
+
+      border-radius: 999px;
+
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .launcher-intro h1 {
+      margin: 18px 0 12px;
+
+      color: var(--gray-900);
+
+      font-size: clamp(34px, 5vw, 52px);
+      line-height: 1.04;
+      font-weight: 800;
+      letter-spacing: -0.045em;
+    }
+
+    .launcher-intro .sub {
+      max-width: 520px;
+      margin: 0 auto;
+
+      color: var(--text-soft);
+
+      font-size: 15px;
+      line-height: 1.7;
+      font-weight: 450;
+    }
+
+    /* ---------- Role grid ---------- */
+
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .role-card {
+      position: relative;
+
+      min-height: 285px;
+      padding: 24px;
+
+      display: flex;
+      flex-direction: column;
+
+      background:
+        linear-gradient(
+          150deg,
+          #ffffff 0%,
+          #fafbfc 100%
+        );
+
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+
+      box-shadow: var(--shadow-sm);
+
+      transition:
+        transform .28s var(--ease),
+        box-shadow .28s var(--ease),
+        border-color .28s var(--ease);
+    }
+
+    .role-card:hover {
+      transform: translateY(-5px);
+
+      border-color: rgba(17,24,39,.14);
+
+      box-shadow:
+        0 18px 40px rgba(17,24,39,.085),
+        0 4px 12px rgba(17,24,39,.035);
+    }
+
+    .role-card:active {
+      transform: translateY(-2px) scale(.995);
+    }
+
+    /* ---------- Role icons ---------- */
+
+    .role-icon {
+      width: 52px;
+      height: 52px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      margin-bottom: 24px;
+
+      color: var(--gray-800);
+
+      background:
+        linear-gradient(
+          145deg,
+          #ffffff,
+          #eceef1
+        );
+
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+
+      box-shadow:
+        0 5px 14px rgba(17,24,39,.06),
+        inset 0 1px 0 rgba(255,255,255,.95);
+
+      transition:
+        transform .28s var(--ease),
+        background .28s var(--ease);
+    }
+
+    .role-card:hover .role-icon {
+      transform: translateY(-2px) scale(1.035);
+      background:
+        linear-gradient(
+          145deg,
+          #ffffff,
+          #e7e9ed
+        );
+    }
+
+    .role-icon i {
+      width: 23px;
+      height: 23px;
+    }
+
+    /* ---------- Text ---------- */
+
+    .role-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      margin-bottom: auto;
+    }
+
+    .role-meta strong {
+      color: var(--gray-900);
+
+      font-size: 18px;
+      line-height: 1.25;
+      font-weight: 750;
+      letter-spacing: -0.025em;
+    }
+
+    .role-meta small {
+      max-width: 270px;
+
+      color: var(--gray-500);
+
+      font-size: 13px;
+      line-height: 1.6;
+      font-weight: 450;
+    }
+
+    /* ---------- Buttons ---------- */
+
+    .role-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+
+      margin-top: 25px;
+    }
+
+    .role-action {
+      min-height: 46px;
+      padding: 0 15px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+
+      color: #ffffff;
+      background: var(--gray-900);
+
+      border: 1px solid var(--gray-900);
+      border-radius: 13px;
+
+      text-decoration: none;
+
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.005em;
+
+      box-shadow:
+        0 4px 10px rgba(17,24,39,.12);
+
+      transition:
+        transform .2s var(--ease),
+        background .2s var(--ease),
+        box-shadow .2s var(--ease);
+    }
+
+    .role-action:hover {
+      color: #ffffff;
+      background: #242832;
+
+      transform: translateY(-2px);
+
+      box-shadow:
+        0 8px 18px rgba(17,24,39,.15);
+    }
+
+    .role-action:active {
+      transform: translateY(0) scale(.985);
+    }
+
+    .role-action i {
+      width: 16px;
+      height: 16px;
+
+      flex: 0 0 auto;
+
+      opacity: .8;
+
+      transition:
+        transform .2s var(--ease),
+        opacity .2s var(--ease);
+    }
+
+    .role-action:hover i {
+      opacity: 1;
+      transform: translateX(3px);
+    }
+
+    .role-action.secondary {
+      color: var(--gray-700);
+
+      background: #ffffff;
+      border-color: var(--border-strong);
+
+      box-shadow:
+        0 2px 6px rgba(17,24,39,.035);
+    }
+
+    .role-action.secondary:hover {
+      color: var(--gray-900);
+      background: var(--gray-50);
+    }
+
+    /* ---------- Footer note ---------- */
+
+    .gateway-note {
+      max-width: 650px;
+
+      margin: 27px auto 0;
+      padding-top: 24px;
+
+      color: var(--gray-500);
+
+      border-top: 1px solid var(--border);
+
+      text-align: center;
+
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    /* ---------- Focus accessibility ---------- */
+
+    .brand:focus-visible,
+    .role-action:focus-visible {
+      outline: 3px solid rgba(17,24,39,.16);
+      outline-offset: 3px;
+    }
+
+    /* ---------- Responsive ---------- */
+
+    @media (max-width: 900px) {
+      .auth.auth-landing {
+        padding: 28px 18px 36px;
+        align-items: flex-start;
+      }
+
+      .launcher-card {
+        padding: 27px;
+      }
+
+      .launcher-header {
+        margin-bottom: 52px;
+      }
+
+      .role-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .role-card {
+        min-height: 0;
+      }
+
+      .role-meta small {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .auth.auth-landing {
+        padding: 14px 12px 24px;
+      }
+
+      .launcher-card {
+        padding: 21px 17px 20px;
+        border-radius: 24px;
+      }
+
+      .launcher-header {
+        margin-bottom: 42px;
+      }
+
+      .brand {
+        font-size: 16px;
+      }
+
+      .brand .logo {
+        width: 38px;
+        height: 38px;
+      }
+
+      .launcher-intro {
+        margin-bottom: 31px;
+      }
+
+      .launcher-intro h1 {
+        font-size: 34px;
+      }
+
+      .launcher-intro .sub {
+        font-size: 14px;
+      }
+
+      .role-card {
+        padding: 21px;
+        border-radius: 21px;
+      }
+
+      .role-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 20px;
+      }
+
+      .role-meta strong {
+        font-size: 17px;
+      }
+
+      .role-action {
+        min-height: 44px;
+      }
+
+      .gateway-note {
+        font-size: 11px;
+      }
+    }
+
+    /* ---------- Reduced motion ---------- */
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
 </head>
+
 <body class="customer">
+
   <main class="auth auth-landing">
+
     <section class="panel panel-landing">
+
       <div class="card launcher-card">
+
+        <!-- Brand -->
         <div class="auth-header launcher-header">
-          <a class="brand" data-route="gateway" href="/pages/auth/index.html">
-            <span class="logo"><i data-i="bag"></i></span>
-            BanHangOnline
+
+          <a
+            class="brand"
+            data-route="gateway"
+            href="/pages/auth/index.html"
+            aria-label="BanHangOnline"
+          >
+            <span class="logo">
+              <i data-i="bag"></i>
+            </span>
+
+            <span>BanHangOnline</span>
           </a>
+
         </div>
 
+
+        <!-- Intro -->
         <div class="launcher-intro">
-          <span class="eyebrow">BanHangOnline</span>
-          <h1>Chào mừng bạn</h1>
-          <p class="sub">Chọn khu vực phù hợp để tiếp tục.</p>
+
+          <span class="eyebrow">
+            BanHangOnline
+          </span>
+
+          <h1>
+            Chào mừng bạn
+          </h1>
+
+          <p class="sub">
+            Chọn khu vực phù hợp để tiếp tục sử dụng
+            BanHangOnline.
+          </p>
+
         </div>
 
+
+        <!-- Roles -->
         <div class="role-grid">
+
+          <!-- Customer -->
           <section class="role-card">
-            <span class="role-icon customer"><i data-i="bag"></i></span>
-            <span class="role-meta">
-              <strong>Khách hàng</strong>
-              <small>Đăng nhập tài khoản khách hàng.</small>
+
+            <span class="role-icon customer">
+              <i data-i="bag"></i>
             </span>
+
+            <span class="role-meta">
+
+              <strong>
+                Khách hàng
+              </strong>
+
+              <small>
+                Đăng nhập tài khoản để mua sắm,
+                quản lý đơn hàng và thông tin cá nhân.
+              </small>
+
+            </span>
+
             <div class="role-actions">
-              <a class="role-action" data-route="customer.login" href="/pages/customer/auth/login.html">Đăng nhập <i data-i="right"></i></a>
-              <a class="role-action secondary" data-route="customer.register" href="/pages/customer/auth/register.html">Tạo tài khoản khách hàng <i data-i="right"></i></a>
+
+              <a
+                class="role-action"
+                data-route="customer.login"
+                href="/pages/customer/auth/login.html"
+              >
+                <span>Đăng nhập</span>
+                <i data-i="right"></i>
+              </a>
+
+              <a
+                class="role-action secondary"
+                data-route="customer.register"
+                href="/pages/customer/auth/register.html"
+              >
+                <span>Tạo tài khoản</span>
+                <i data-i="right"></i>
+              </a>
+
             </div>
+
           </section>
 
+
+          <!-- Staff -->
           <section class="role-card">
-            <span class="role-icon staff"><i data-i="shield"></i></span>
-            <span class="role-meta">
-              <strong>Nhân viên</strong>
-              <small>Dành cho nhân viên đã được cấp tài khoản.</small>
+
+            <span class="role-icon staff">
+              <i data-i="shield"></i>
             </span>
-            <a class="role-action" data-route="staff.login" href="/pages/staff/auth/login.html?area=staff">Đăng nhập <i data-i="right"></i></a>
+
+            <span class="role-meta">
+
+              <strong>
+                Nhân viên
+              </strong>
+
+              <small>
+                Khu vực dành cho nhân viên đã được
+                cấp tài khoản bởi hệ thống.
+              </small>
+
+            </span>
+
+            <a
+              class="role-action"
+              data-route="staff.login"
+              href="/pages/staff/auth/login.html?area=staff"
+            >
+              <span>Đăng nhập</span>
+              <i data-i="right"></i>
+            </a>
+
           </section>
 
+
+          <!-- Owner -->
           <section class="role-card">
-            <span class="role-icon owner"><i data-i="store"></i></span>
-            <span class="role-meta">
-              <strong>Chủ cửa hàng</strong>
-              <small>Dành cho chủ cửa hàng đã được cấp tài khoản.</small>
+
+            <span class="role-icon owner">
+              <i data-i="store"></i>
             </span>
-            <a class="role-action" data-route="owner.login" href="/pages/staff/auth/login.html?area=owner">Đăng nhập <i data-i="right"></i></a>
+
+            <span class="role-meta">
+
+              <strong>
+                Chủ cửa hàng
+              </strong>
+
+              <small>
+                Quản lý cửa hàng, sản phẩm, kho,
+                đơn hàng và nhân viên.
+              </small>
+
+            </span>
+
+            <a
+              class="role-action"
+              data-route="owner.login"
+              href="/pages/staff/auth/login.html?area=owner"
+            >
+              <span>Đăng nhập</span>
+              <i data-i="right"></i>
+            </a>
+
           </section>
+
         </div>
-        <p class="gateway-note">Tài khoản chủ cửa hàng và nhân viên được cấp hoặc duyệt theo quy trình quản trị.</p>
+
+
+        <!-- Footer -->
+        <p class="gateway-note">
+          Tài khoản chủ cửa hàng và nhân viên được cấp
+          hoặc duyệt theo quy trình quản trị của hệ thống.
+        </p>
+
       </div>
+
     </section>
+
   </main>
 
+
+  <!-- Existing application logic — preserved -->
   <script src="../../assets/js/core/routes.js"></script>
   <script src="../../assets/js/core/app.js"></script>
+
 </body>
 </html>

@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../../assets/css/location-picker.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <title>Địa chỉ — BanHangOnline</title>
 </head>
 <body class="dashboard">
@@ -33,12 +35,21 @@
           <div class="dash-field"><label for="address-district">Quận / huyện</label><input id="address-district" name="district" maxlength="100" required></div>
           <div class="dash-field"><label for="address-ward">Phường / xã</label><input id="address-ward" name="ward" maxlength="100" required></div>
           <div class="dash-field full"><label for="address-line">Địa chỉ chi tiết</label><input id="address-line" name="addressLine" maxlength="255" required></div>
+          <input id="address-latitude" name="latitude" type="hidden">
+          <input id="address-longitude" name="longitude" type="hidden">
+          <div class="location-picker-section full">
+            <h3>Vị trí trên bản đồ</h3>
+            <p>Chọn điểm nhận hàng hoặc dùng vị trí hiện tại. Tìm kiếm vị trí chỉ gửi yêu cầu khi bạn bấm nút.</p>
+            <div id="address-location-picker"></div>
+          </div>
           <div class="full dash-inline"><button class="dash-button" type="submit">Thêm địa chỉ</button><button id="address-reset" class="dash-button secondary" type="button">Làm mới</button></div>
         </form>
       </section>
     </div>
   </main>
   <script src="../../assets/js/core/routes.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="../../assets/js/core/location-picker.js"></script>
   <script src="../../assets/js/features/addresses.js"></script>
 </body>
 </html>

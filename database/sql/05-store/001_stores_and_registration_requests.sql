@@ -13,6 +13,8 @@ CREATE TABLE `stores` (
   `district` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `ward` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `address_detail` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
   `postal_code` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `description` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PENDING',

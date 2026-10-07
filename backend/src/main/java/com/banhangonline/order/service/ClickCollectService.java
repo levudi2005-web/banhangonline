@@ -214,6 +214,12 @@ public class ClickCollectService {
             throw ApiException.conflict("CART_CHANGED_DURING_CHECKOUT",
                     "Giỏ hàng đã thay đổi trong lúc đặt hàng. Vui lòng kiểm tra lại.");
         }
+        int closed = jdbc.update("UPDATE carts SET status='CHECKED_OUT', updated_at=NOW(6) WHERE id=? AND status='ACTIVE'",
+                cartId);
+        if (closed != 1) {
+            throw ApiException.conflict("CART_ALREADY_CHECKED_OUT",
+                    "Giỏ hàng đã được đặt hàng");
+        }
         notifyUser(userId, "ORDER_CREATED", "Đặt hàng thành công",
                 "Đơn hàng " + code + " đã được tiếp nhận.", "ORDER", orderId);
         return new CheckoutResponse(order(orderId), pickupCode);

@@ -12,6 +12,8 @@ CREATE TABLE `user_addresses` (
   `district` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `ward` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `address_line` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
   `is_default` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `updated_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),

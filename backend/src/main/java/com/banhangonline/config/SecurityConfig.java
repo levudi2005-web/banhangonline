@@ -53,7 +53,7 @@ public class SecurityConfig {
             .logout(l -> l.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .headers(h -> h.contentSecurityPolicy(c -> c.policyDirectives(
-                    "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-ancestors 'none'")))
+                    "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https:; connect-src 'self' https://nominatim.openstreetmap.org; frame-ancestors 'none'")))
             .authorizeHttpRequests(a -> a
                 .requestMatchers("/api/auth/me").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()

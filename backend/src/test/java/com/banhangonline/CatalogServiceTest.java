@@ -145,7 +145,7 @@ class CatalogServiceTest {
 
     private static ProductRequest request(Integer quantity, Integer reorderLevel, String price) {
         return new ProductRequest(5L, "TEA-22", "Trà xanh", "tra-xanh", "Trà xanh tự nhiên",
-                new BigDecimal(price), "VND", null, quantity, reorderLevel);
+                new BigDecimal(price), "VND", quantity, reorderLevel);
     }
 
     private static Category category() {

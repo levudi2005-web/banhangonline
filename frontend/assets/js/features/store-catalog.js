@@ -116,9 +116,8 @@
           currencyField.querySelector("input").maxLength = 3;
           currencyField.querySelector("input").pattern = "[A-Z]{3}";
           const descriptionField = field("Mô tả", "description", "textarea", false, product.description || "");
-          const imageField = field("Ảnh HTTPS", "imageUrl", "url", false, product.imageUrl || "");
           editForm.append(categoryField, skuField, nameField, slugField, priceField,
-            currencyField, imageField, descriptionField);
+            currencyField, descriptionField);
           const saveProduct = element("button", "Lưu thông tin sản phẩm", "dash-button");
           saveProduct.type = "submit";
           editForm.append(saveProduct);
@@ -265,7 +264,6 @@
             field("Tên sản phẩm", "name", "text", true),
             field("Slug", "slug", "text", true),
             field("Giá (VND)", "price", "number", true),
-            field("Đường dẫn ảnh HTTPS", "imageUrl", "url"),
             field("Mô tả", "description", "textarea"));
           if (has("MANAGE_INVENTORY")) {
             form.append(field("Số lượng ban đầu", "quantity", "number", true, "0"),

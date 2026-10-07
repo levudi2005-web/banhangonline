@@ -219,16 +219,17 @@
 }
 
 .auth:not(.auth-landing) .auth-card .eye {
-  top: 5px;
+  top: 50%;
   right: 5px;
   width: 43px;
   height: 43px;
+  transform: translateY(-50%);
   border-radius: 11px;
   transition: color .18s ease, background .18s ease, transform .18s ease;
 }
 
 .auth:not(.auth-landing) .auth-card .eye:hover {
-  transform: scale(1.04);
+  transform: translateY(-50%) scale(1.04);
   background: #f1f2f3;
   color: var(--ui-ink);
 }

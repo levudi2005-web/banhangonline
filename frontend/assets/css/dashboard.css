@@ -340,7 +340,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--ui-focus); outl
 .management-image-placeholder span { color: var(--dash-muted); font-size: 11px; }
 .management-image-controls { display: grid; align-content: start; gap: 11px; min-width: 0; }
 .management-image-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.management-image-url { margin-top: 2px; }
 .management-image-status { min-height: 20px; margin: 0; overflow-wrap: anywhere; }
 .management-image-status.error { color: var(--dash-danger); }
 .management-file-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); }
@@ -1544,5 +1543,61 @@ body.dashboard {
   .management-sidebar {
     animation: none;
     transition: none;
+  }
+}
+
+.shop-nearby-button {
+  align-self: end;
+  white-space: nowrap;
+}
+
+.shop-nearby-list {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.shop-nearby-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid #e3e6ea;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.shop-nearby-item > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.shop-nearby-item .dash-muted {
+  overflow-wrap: anywhere;
+}
+
+.shop-nearby-distance {
+  color: #242a32;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 680px) {
+  .shop-nearby-button {
+    width: 100%;
+  }
+
+  .shop-nearby-item {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .shop-nearby-item .dash-button {
+    grid-column: 1 / -1;
   }
 }

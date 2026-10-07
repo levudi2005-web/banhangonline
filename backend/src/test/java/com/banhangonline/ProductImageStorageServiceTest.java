@@ -1,16 +1,21 @@
 package com.banhangonline;
 
 import com.banhangonline.common.exception.ApiException;
+import com.banhangonline.product.storage.LocalImageStorageProperties;
 import com.banhangonline.product.storage.ProductImageStorageService;
 import com.banhangonline.product.storage.S3StorageProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.mock.web.MockMultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,6 +25,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 class ProductImageStorageServiceTest {
+    @TempDir
+    Path tempDirectory;
+
     private final S3Client client = mock(S3Client.class);
     private S3StorageProperties properties;
     private ProductImageStorageService service;
@@ -98,5 +106,28 @@ class ProductImageStorageServiceTest {
         assertThat(service.deleteIfManaged(12L, imageUrl)).isTrue();
 
         verify(client).deleteObject(any(DeleteObjectRequest.class));
+    }
+
+    @Test
+    void localStorageUploadsServesAndDeletesImagesWithinTheStoreDirectory() throws Exception {
+        properties.setEnabled(false);
+        LocalImageStorageProperties local = new LocalImageStorageProperties();
+        local.setEnabled(true);
+        local.setDirectory(tempDirectory.toString());
+        service = new ProductImageStorageService(properties, local,
+                new StaticListableBeanFactory().getBeanProvider(S3Client.class));
+        var file = new MockMultipartFile("file", "photo.png", "image/png",
+                new byte[]{(byte) 0x89, 'P', 'N', 'G', 0x0d, 0x0a, 0x1a, 0x0a, 1});
+
+        String imageUrl = service.upload(12L, file);
+
+        assertThat(imageUrl).matches("/uploads/stores/12/products/[0-9a-f-]{36}\\.png");
+        Path stored = tempDirectory.resolve(imageUrl.substring("/uploads/".length()));
+        assertThat(Files.readAllBytes(stored)).containsExactly(file.getBytes());
+        assertThat(service.isManagedImageUrl(12L, imageUrl)).isTrue();
+        assertThat(service.isManagedImageUrl(13L, imageUrl)).isFalse();
+        assertThat(service.deleteIfManaged(13L, imageUrl)).isFalse();
+        assertThat(service.deleteIfManaged(12L, imageUrl)).isTrue();
+        assertThat(Files.exists(stored)).isFalse();
     }
 }

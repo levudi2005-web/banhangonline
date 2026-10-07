@@ -91,6 +91,9 @@ public class StoreManagementService {
     }
 
     private void apply(Store store, CreateStoreRequest request) {
+        if ((request.latitude() == null) != (request.longitude() == null)) {
+            throw ApiException.validation("Vui lòng chọn cả vĩ độ và kinh độ của cửa hàng");
+        }
         store.setName(request.name().trim());
         store.setPhone(Rules.phone(request.phone()));
         store.setEmail(request.email() == null || request.email().isBlank() ? null : Rules.email(request.email()));
@@ -100,5 +103,7 @@ public class StoreManagementService {
         store.setAddressDetail(request.addressDetail().trim());
         store.setPostalCode(clean(request.postalCode()));
         store.setDescription(clean(request.description()));
+        store.setLatitude(request.latitude());
+        store.setLongitude(request.longitude());
     }
 }

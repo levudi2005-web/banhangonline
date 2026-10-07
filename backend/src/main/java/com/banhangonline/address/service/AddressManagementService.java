@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.math.BigDecimal;
 
 @Service
 public class AddressManagementService {
@@ -73,11 +74,20 @@ public class AddressManagementService {
     }
 
     private void apply(UserAddress address, AddressRequest request) {
+        validateCoordinates(request.latitude(), request.longitude());
         address.setRecipientName(request.recipientName().trim());
         address.setPhone(Rules.phone(request.phone()));
         address.setProvince(request.province().trim());
         address.setDistrict(request.district().trim());
         address.setWard(request.ward().trim());
         address.setAddressLine(request.addressLine().trim());
+        address.setLatitude(request.latitude());
+        address.setLongitude(request.longitude());
+    }
+
+    private void validateCoordinates(BigDecimal latitude, BigDecimal longitude) {
+        if ((latitude == null) != (longitude == null)) {
+            throw ApiException.validation("Vui lòng chọn cả vĩ độ và kinh độ của địa chỉ");
+        }
     }
 }

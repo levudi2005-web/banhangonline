@@ -198,8 +198,6 @@ public class CatalogService {
         product.setPrice(request.price());
         product.setCurrency(request.currency() == null || request.currency().isBlank()
                 ? "VND" : request.currency().trim().toUpperCase(Locale.ROOT));
-        product.setImageUrl(request.imageUrl() == null || request.imageUrl().isBlank()
-                ? null : request.imageUrl().trim());
         product.setStatus("ACTIVE");
     }
 

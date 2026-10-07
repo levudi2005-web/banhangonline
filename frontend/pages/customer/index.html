@@ -62,7 +62,10 @@
       <div class="shop-store-row">
         <div class="shop-store-copy"><span class="shop-store-icon" aria-hidden="true">⌖</span><span><strong>Địa điểm nhận hàng</strong><small>Chọn cửa hàng để xem sản phẩm còn bán</small></span></div>
         <div class="dash-field"><label for="store-select">Cửa hàng nhận hàng</label><select id="store-select"></select></div>
+        <button id="find-nearby-stores" class="dash-button secondary shop-nearby-button" type="button">Tìm cửa hàng gần tôi</button>
       </div>
+      <div id="nearby-store-status" class="dash-status" role="status" aria-live="polite"></div>
+      <ul id="nearby-store-list" class="shop-nearby-list" aria-label="Cửa hàng gần bạn" hidden></ul>
       <div id="store-status" class="dash-status" role="status" aria-live="polite">Đang tải cửa hàng…</div>
       <div class="shop-toolbar">
         <div class="dash-field">

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="../../../assets/css/style.css">
   <link rel="stylesheet" href="../../../assets/css/auth.css">
+  <link rel="stylesheet" href="../../../assets/css/location-picker.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <title>Đăng ký — Cửa hàng</title>
 </head>
 <body class="customer">
@@ -148,6 +150,13 @@
                 <p class="err"></p>
               </div>
             </div>
+            <input name="address.latitude" type="hidden" data-coordinate>
+            <input name="address.longitude" type="hidden" data-coordinate>
+            <div class="location-picker-section">
+              <h3>Chọn vị trí địa chỉ</h3>
+              <p>Vị trí hiện tại chỉ được dùng khi bạn bấm nút. Tìm địa chỉ sẽ gửi yêu cầu đến OpenStreetMap.</p>
+              <div id="registration-location-picker"></div>
+            </div>
           </fieldset>
 
           <p class="form-msg" role="alert" aria-live="polite"></p>
@@ -161,6 +170,8 @@
     </section>
   </main>
   <script src="../../../assets/js/core/routes.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="../../../assets/js/core/location-picker.js"></script>
   <script src="../../../assets/js/core/app.js"></script>
 </body>
 </html>

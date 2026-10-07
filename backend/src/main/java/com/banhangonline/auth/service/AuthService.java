@@ -101,6 +101,8 @@ public class AuthService {
         a.setDistrict(ad.district().trim());
         a.setWard(ad.ward().trim());
         a.setAddressLine(ad.addressLine().trim());
+        a.setLatitude(ad.latitude());
+        a.setLongitude(ad.longitude());
         a.setDefaultAddress(true);
         addresses.save(a);
         return u;
