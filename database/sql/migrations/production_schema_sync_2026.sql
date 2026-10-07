@@ -4,3 +4,8 @@
 ALTER TABLE `stores`
   MODIFY COLUMN `latitude` DECIMAL(10,7) NULL,
   MODIFY COLUMN `longitude` DECIMAL(10,7) NULL;
+
+-- UserAddress also maps nullable coordinates; production does not have these columns.
+ALTER TABLE `user_addresses`
+  ADD COLUMN IF NOT EXISTS `latitude` DECIMAL(10,7) NULL,
+  ADD COLUMN IF NOT EXISTS `longitude` DECIMAL(10,7) NULL;
