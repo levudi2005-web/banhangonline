@@ -193,6 +193,7 @@ CREATE TABLE `stores` (
   `district` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `ward` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `address_detail` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  -- Keep coordinates DECIMAL(10,7) to match Store's BigDecimal mappings.
   `latitude` decimal(10,7) DEFAULT NULL,
   `longitude` decimal(10,7) DEFAULT NULL,
   `postal_code` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
