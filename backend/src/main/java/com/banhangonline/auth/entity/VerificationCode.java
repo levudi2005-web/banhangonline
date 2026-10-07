@@ -39,11 +39,11 @@ public class VerificationCode {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 20)
     private OtpChannel channel;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 40)
     private OtpPurpose purpose;
 
     @Column(name = "destination_hash", nullable = false, length = 64)
