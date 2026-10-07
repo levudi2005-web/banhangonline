@@ -20,11 +20,11 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "verification_codes", indexes = {
+        @Index(name = "idx_verification_codes_lookup",
+                columnList = "user_id,channel,purpose,destination_hash,created_at"),
         @Index(name = "idx_verification_destination_purpose_created",
                 columnList = "destination_hash,purpose,created_at"),
-        @Index(name = "idx_verification_ip_created", columnList = "ip_address,created_at"),
-        @Index(name = "idx_verification_user_channel_purpose",
-                columnList = "user_id,channel,purpose,created_at")
+        @Index(name = "idx_verification_ip_created", columnList = "ip_address,created_at")
 })
 @Getter
 @Setter

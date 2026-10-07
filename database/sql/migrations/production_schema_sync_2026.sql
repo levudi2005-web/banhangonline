@@ -9,3 +9,9 @@ ALTER TABLE `stores`
 ALTER TABLE `user_addresses`
   ADD COLUMN IF NOT EXISTS `latitude` DECIMAL(10,7) NULL,
   ADD COLUMN IF NOT EXISTS `longitude` DECIMAL(10,7) NULL;
+
+-- These indexes support OTP quota queries by destination and source IP.
+CREATE INDEX IF NOT EXISTS `idx_verification_destination_purpose_created`
+  ON `verification_codes` (`destination_hash`,`purpose`,`created_at`);
+CREATE INDEX IF NOT EXISTS `idx_verification_ip_created`
+  ON `verification_codes` (`ip_address`,`created_at`);

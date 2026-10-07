@@ -109,6 +109,8 @@ CREATE TABLE `verification_codes` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) ,
   KEY `idx_verification_codes_lookup` (`user_id`,`channel`,`purpose`,`destination_hash`,`created_at`),
+  KEY `idx_verification_destination_purpose_created` (`destination_hash`,`purpose`,`created_at`),
+  KEY `idx_verification_ip_created` (`ip_address`,`created_at`),
   CONSTRAINT `fk_verification_codes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
