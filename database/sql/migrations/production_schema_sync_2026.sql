@@ -15,3 +15,10 @@ CREATE INDEX IF NOT EXISTS `idx_verification_destination_purpose_created`
   ON `verification_codes` (`destination_hash`,`purpose`,`created_at`);
 CREATE INDEX IF NOT EXISTS `idx_verification_ip_created`
   ON `verification_codes` (`ip_address`,`created_at`);
+
+-- Preserve microsecond precision used by the Instant-mapped entity fields.
+ALTER TABLE `verification_codes`
+  MODIFY COLUMN `expires_at` DATETIME(6) NOT NULL,
+  MODIFY COLUMN `used_at` DATETIME(6) NULL,
+  MODIFY COLUMN `invalidated_at` DATETIME(6) NULL,
+  MODIFY COLUMN `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6);
