@@ -43,7 +43,7 @@
   min-height: 0;
   overflow: hidden;
   padding: clamp(24px, 3vw, 32px);
-  border: 1px solid #e1e3e6;
+  border: 2px solid var(--ui-border-strong);
   border-radius: var(--ui-card-radius);
   background: #fff;
   box-shadow: var(--ui-shadow-card);
@@ -83,7 +83,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 11px;
-  border-radius: 11px;
+  border-radius: var(--ui-control-radius);
   color: var(--ui-muted);
   font-size: 13px;
   font-weight: 650;
@@ -157,14 +157,14 @@
   width: 100%;
   height: 42px;
   padding: 0 12px;
-  border: 1px solid #d7dade;
-  border-radius: 7px;
-  outline: none;
-  background: #fff;
+  border: 2px solid var(--ui-border);
+  border-radius: var(--ui-control-radius);
+  outline: 0;
+  background: var(--ui-surface);
   color: var(--ui-ink);
   font: inherit;
   font-size: 13px;
-  box-shadow: none;
+  box-shadow: 2px 2px 0 rgba(38, 53, 42, .08);
   transition: border-color .16s ease, box-shadow .16s ease;
 }
 
@@ -186,13 +186,15 @@
 .auth:not(.auth-landing) .auth-card .field input:not([type="checkbox"]):focus,
 .auth:not(.auth-landing) .auth-card .field select:focus {
   border-color: var(--ui-accent);
-  background: #fff;
-  box-shadow: 0 0 0 3px var(--ui-focus);
+  background: var(--ui-surface);
+  outline: 3px solid var(--ui-focus);
+  outline-offset: 2px;
+  box-shadow: 2px 2px 0 rgba(38, 53, 42, .12);
 }
 
 .auth:not(.auth-landing) .auth-card .field.invalid input:not([type="checkbox"]),
 .auth:not(.auth-landing) .auth-card .field.invalid select {
-  border-color: var(--ui-danger);
+  border-color: var(--ui-danger-ink);
   background: #fffafa;
   box-shadow: 0 0 0 4px rgba(220, 38, 38, .07);
 }
@@ -224,7 +226,7 @@
   width: 43px;
   height: 43px;
   transform: translateY(-50%);
-  border-radius: 11px;
+  border-radius: var(--ui-control-radius);
   transition: color .18s ease, background .18s ease, transform .18s ease;
 }
 
@@ -238,7 +240,7 @@
   margin: 12px 0 4px;
   padding: 18px;
   border-color: #e1e3e6;
-  border-radius: 18px;
+  border-radius: var(--ui-control-radius);
   background: linear-gradient(145deg, #fff, #f7f8f9);
 }
 
@@ -275,7 +277,7 @@
   margin: 0;
   padding: 11px 13px;
   border: 1px solid #fecaca;
-  border-radius: 7px;
+  border-radius: var(--ui-control-radius);
   background: #fff7f7;
   color: #b91c1c;
   font-size: 13px;
@@ -296,19 +298,20 @@
   position: relative;
   overflow: hidden;
   height: 42px;
-  border: 1px solid var(--ui-accent);
-  border-radius: 7px;
+  border: 2px solid var(--ui-accent);
+  border-radius: var(--ui-control-radius);
   background: var(--ui-accent);
   color: #fff;
   font-size: 13px;
   font-weight: 700;
-  box-shadow: none;
+  box-shadow: 3px 3px 0 rgba(38, 53, 42, .2);
   transition: background .16s ease;
 }
 
 .auth:not(.auth-landing) .auth-card .btn:hover {
   background: var(--ui-accent-hover);
-  box-shadow: none;
+  box-shadow: 1px 1px 0 rgba(38, 53, 42, .2);
+  transform: translate(2px, 2px);
 }
 
 .auth:not(.auth-landing) .auth-card .btn.ghost {
@@ -334,7 +337,7 @@
 
 .auth:not(.auth-landing) .auth-card .switch {
   border: 1px solid #e1e3e6;
-  border-radius: 8px;
+  border-radius: var(--ui-control-radius);
   background: #f8f8f9;
   transition: border-color .2s ease, background .2s ease, transform .2s ease;
 }
@@ -433,5 +436,406 @@
   .auth:not(.auth-landing) *::after {
     scroll-behavior: auto !important;
     transition-duration: .01ms !important;
+  }
+}
+
+/* Pixel theme overrides for auth pages and the inline-styled role launcher. */
+body.customer {
+  color: var(--ink);
+  font-family: "Pixelify Sans", "VT323", "Be Vietnam Pro", "Segoe UI", Arial, sans-serif;
+  background-color: var(--b1);
+  background-image:
+    conic-gradient(var(--b6) 25%, transparent 0 50%, var(--b6) 0 75%, transparent 0),
+    conic-gradient(var(--b5) 25%, transparent 0 50%, var(--b5) 0 75%, transparent 0),
+    conic-gradient(var(--b4) 25%, transparent 0 50%, var(--b4) 0 75%, transparent 0),
+    conic-gradient(var(--b3) 25%, transparent 0 50%, var(--b3) 0 75%, transparent 0),
+    conic-gradient(var(--b2) 25%, transparent 0 50%, var(--b2) 0 75%, transparent 0),
+    linear-gradient(rgba(28, 27, 58, .06) 1px, transparent 0),
+    linear-gradient(90deg, rgba(28, 27, 58, .06) 1px, transparent 0),
+    linear-gradient(180deg, var(--b1) 0 20%, var(--b2) 20% 36%, var(--b3) 36% 52%, var(--b4) 52% 68%, var(--b5) 68% 84%, var(--b6) 84%);
+  background-size: 16px 16px, 16px 16px, 16px 16px, 16px 16px, 16px 16px, 4px 4px, 4px 4px, 100% 100%;
+  background-position: 0 calc(84vh - 16px), 0 calc(68vh - 16px), 0 calc(52vh - 16px), 0 calc(36vh - 16px), 0 calc(20vh - 16px), 0 0, 0 0, 0 0;
+  background-repeat: repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat, repeat, no-repeat;
+  background-attachment: fixed, fixed, fixed, fixed, fixed, scroll, scroll, fixed;
+}
+
+body.customer * {
+  border-radius: 0;
+}
+
+.auth:not(.auth-landing) {
+  overflow: visible;
+  color: var(--ink);
+  background: transparent;
+}
+
+.auth:not(.auth-landing)::before,
+.auth:not(.auth-landing)::after {
+  display: none;
+}
+
+.auth:not(.auth-landing) .auth-card {
+  overflow: visible;
+  color: var(--ink);
+  border: 0;
+  border-radius: 0;
+  background: var(--cream);
+  box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r4), 12px 12px 0 rgba(28, 27, 58, .35);
+}
+
+.auth:not(.auth-landing) .auth-card::before {
+  inset: auto;
+  top: -10px;
+  left: 26px;
+  width: 12px;
+  height: 12px;
+  background: var(--coral);
+  box-shadow:
+    24px 0 0 var(--yellow), 48px 0 0 var(--mint), 72px 0 0 var(--blue),
+    0 0 0 3px var(--ink), 24px 0 0 3px var(--ink), 48px 0 0 3px var(--ink), 72px 0 0 3px var(--ink);
+}
+
+.auth:not(.auth-landing) .auth-card h1 {
+  color: var(--ink);
+  font-family: inherit;
+  letter-spacing: 0;
+  text-shadow: 3px 3px 0 var(--yellow);
+}
+
+.auth:not(.auth-landing) .auth-card > .sub,
+.auth:not(.auth-landing) .auth-card .center {
+  color: var(--mut);
+  font-family: inherit;
+}
+
+.auth:not(.auth-landing) .auth-header .back,
+.auth:not(.auth-landing) .auth-header .back:hover {
+  border-radius: 0;
+  color: var(--mut);
+  background: transparent;
+}
+
+.auth:not(.auth-landing) .auth-card .field label {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.auth:not(.auth-landing) .auth-card .field input:not([type="checkbox"]),
+.auth:not(.auth-landing) .auth-card .field select,
+.auth:not(.auth-landing) .auth-card .field textarea {
+  height: 50px;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: inset 4px 4px 0 var(--g3), var(--r3g);
+  font: inherit;
+}
+
+.auth:not(.auth-landing) .auth-card .field textarea {
+  height: 104px;
+  padding: 12px 14px;
+}
+
+.auth:not(.auth-landing) .auth-card .field input:not([type="checkbox"]):hover,
+.auth:not(.auth-landing) .auth-card .field select:hover,
+.auth:not(.auth-landing) .auth-card .field textarea:hover {
+  background: #f0f8ff;
+  box-shadow: inset 4px 4px 0 #d9eeff, var(--r3b);
+}
+
+.auth:not(.auth-landing) .auth-card .field input:not([type="checkbox"]):focus,
+.auth:not(.auth-landing) .auth-card .field select:focus,
+.auth:not(.auth-landing) .auth-card .field textarea:focus {
+  outline: 0;
+  background: #fff;
+  box-shadow: inset 4px 4px 0 #ffe6dc, var(--r3c), 6px 6px 0 var(--yellow);
+}
+
+.auth:not(.auth-landing) .auth-card .field.invalid input:not([type="checkbox"]),
+.auth:not(.auth-landing) .auth-card .field.invalid select,
+.auth:not(.auth-landing) .auth-card .field.invalid textarea {
+  border: 0;
+  background: #fff0f2;
+  box-shadow: inset 4px 4px 0 #ffd0d6, var(--r3e), 6px 6px 0 #ffb3bd;
+}
+
+.auth:not(.auth-landing) .auth-card .field input::placeholder,
+.auth:not(.auth-landing) .auth-card .field textarea::placeholder {
+  color: #8d8bb8;
+  opacity: 1;
+}
+
+.auth:not(.auth-landing) .auth-card .required-hint,
+.auth:not(.auth-landing) .auth-card .err {
+  color: var(--mut);
+  font-family: inherit;
+}
+
+.auth:not(.auth-landing) .auth-card .err {
+  color: var(--err);
+  font-weight: 700;
+}
+
+.auth:not(.auth-landing) .auth-card .eye {
+  top: 6px;
+  right: 6px;
+  width: 38px;
+  height: 38px;
+  transform: none;
+  border: 0;
+  border-radius: 0;
+  background: var(--blue-l);
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .7), inset -3px -3px 0 var(--blue), var(--r3);
+}
+
+.auth:not(.auth-landing) .auth-card .eye:hover {
+  transform: none;
+  background: var(--yellow-l);
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .7), inset -3px -3px 0 var(--yellow-d), var(--r3);
+}
+
+.auth:not(.auth-landing) .auth-card fieldset.address-fields {
+  border: 0;
+  border-radius: 0;
+  background: #eef9ff;
+  box-shadow: var(--r3g);
+}
+
+.auth:not(.auth-landing) .auth-card fieldset.address-fields legend {
+  color: var(--ink);
+}
+
+.auth:not(.auth-landing) .auth-card .between a,
+.auth:not(.auth-landing) .auth-card .center a {
+  color: var(--coral-d);
+}
+
+.auth:not(.auth-landing) .auth-card .chk {
+  color: var(--ink);
+}
+
+.auth:not(.auth-landing) .auth-card .chk input {
+  accent-color: var(--mint);
+}
+
+.auth:not(.auth-landing) .auth-card .form-msg {
+  border: 0;
+  border-radius: 0;
+  background: var(--red);
+  color: #fff;
+  box-shadow: var(--r3), 5px 5px 0 #ffb3bd;
+}
+
+.auth:not(.auth-landing) .auth-card .form-msg.success,
+.auth:not(.auth-landing) .logout-card #session-state.form-msg.show {
+  border: 0;
+  background: var(--mint);
+  color: var(--ink);
+  box-shadow: var(--r3), 5px 5px 0 var(--mint-d);
+}
+
+.auth:not(.auth-landing) .auth-card .btn {
+  height: auto;
+  min-height: 54px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: var(--coral);
+  color: #fff;
+  box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .5), inset -4px -4px 0 var(--coral-d), var(--r4), 0 8px 0 var(--ink);
+  font-family: inherit;
+  font-size: 18px;
+  letter-spacing: .5px;
+  text-shadow: 2px 2px 0 var(--coral-d);
+  transition: transform .1s steps(2, end), box-shadow .1s steps(2, end), background .1s steps(2, end);
+}
+
+.auth:not(.auth-landing) .auth-card .btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: var(--coral-l);
+  box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .6), inset -4px -4px 0 var(--coral-d), var(--r4), 0 10px 0 var(--ink);
+}
+
+.auth:not(.auth-landing) .auth-card .btn:active:not(:disabled) {
+  transform: translateY(6px);
+  box-shadow: inset 4px 4px 0 var(--coral-d), inset -4px -4px 0 rgba(255, 255, 255, .3), var(--r4), 0 2px 0 var(--ink);
+}
+
+.auth:not(.auth-landing) .auth-card .btn.ghost {
+  background: #fff;
+  color: var(--ink);
+  text-shadow: none;
+  box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g4), var(--r4), 0 8px 0 var(--ink);
+}
+
+.auth:not(.auth-landing) .auth-card .btn.ghost:hover:not(:disabled) {
+  background: var(--yellow-l);
+  color: var(--ink);
+  box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .7), inset -4px -4px 0 var(--yellow-d), var(--r4), 0 10px 0 var(--ink);
+}
+
+.auth:not(.auth-landing) .auth-card .switch {
+  border: 0;
+  border-radius: 0;
+  background: var(--yellow-l);
+  box-shadow: inset 4px 4px 0 #fff3b8, inset -4px -4px 0 var(--yellow-d), var(--r3), 5px 5px 0 var(--ink);
+}
+
+.auth:not(.auth-landing) .auth-card .switch:hover {
+  background: var(--mint-l);
+}
+
+.auth:not(.auth-landing) .auth-card .email-composer select {
+  padding-right: 30px;
+}
+
+body.customer .auth.auth-landing {
+  color: var(--ink);
+}
+
+.auth.auth-landing .launcher-card {
+  color: var(--ink);
+  border: 0;
+  border-radius: 0;
+  background: var(--cream);
+  box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r4), 12px 12px 0 rgba(28, 27, 58, .35);
+}
+
+.auth.auth-landing .launcher-card::before {
+  border-radius: 0;
+  background: var(--coral);
+  box-shadow: 24px 0 0 var(--yellow), 48px 0 0 var(--mint), 72px 0 0 var(--blue), 0 0 0 3px var(--ink), 24px 0 0 3px var(--ink), 48px 0 0 3px var(--ink), 72px 0 0 3px var(--ink);
+}
+
+.auth.auth-landing .launcher-card::after {
+  border-radius: 0;
+}
+
+.auth.auth-landing .brand,
+.auth.auth-landing .brand:hover {
+  color: var(--ink);
+  font-family: inherit;
+}
+
+.auth.auth-landing .brand .logo {
+  border-radius: 0;
+  background: var(--coral);
+  box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .5), inset -4px -4px 0 var(--coral-d), var(--r4), 5px 5px 0 var(--yellow);
+}
+
+.auth.auth-landing .launcher-intro h1 {
+  color: var(--ink);
+  font-family: inherit;
+  letter-spacing: 0;
+  text-shadow: 3px 3px 0 var(--yellow);
+}
+
+.auth.auth-landing .launcher-intro .sub,
+.auth.auth-landing .gateway-note {
+  color: var(--mut);
+}
+
+.auth.auth-landing .eyebrow {
+  color: var(--coral-d);
+}
+
+.auth.auth-landing .role-card {
+  border: 0;
+  border-radius: 0;
+  background: var(--cream);
+  color: var(--ink);
+  box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r3), 6px 6px 0 var(--ink);
+  transition: transform .12s steps(2, end), box-shadow .12s steps(2, end), background .12s steps(2, end);
+}
+
+.auth.auth-landing .role-card:hover {
+  transform: translate(-3px, -3px);
+  background: var(--cream);
+  box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r3), 9px 9px 0 var(--coral);
+}
+
+.auth.auth-landing .role-card:active {
+  transform: translate(2px, 2px);
+}
+
+.auth.auth-landing .role-icon {
+  border: 0;
+  border-radius: 0;
+  background: var(--yellow);
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .6), inset -3px -3px 0 var(--yellow-d), var(--r3);
+}
+
+.auth.auth-landing .role-icon.staff {
+  background: var(--blue);
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .6), inset -3px -3px 0 var(--blue-d), var(--r3);
+}
+
+.auth.auth-landing .role-icon.owner {
+  background: var(--mint);
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .6), inset -3px -3px 0 var(--mint-d), var(--r3);
+}
+
+.auth.auth-landing .role-meta strong {
+  color: var(--ink);
+}
+
+.auth.auth-landing .role-meta small {
+  color: var(--mut);
+}
+
+.auth.auth-landing .role-action {
+  border: 0;
+  border-radius: 0;
+  background: var(--coral);
+  color: #fff;
+  box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .5), inset -4px -4px 0 var(--coral-d), var(--r3), 0 6px 0 var(--ink);
+  font-family: inherit;
+  text-shadow: 2px 2px 0 var(--coral-d);
+  transition: transform .1s steps(2, end), box-shadow .1s steps(2, end), background .1s steps(2, end);
+}
+
+.auth.auth-landing .role-action:hover {
+  transform: translateY(-2px);
+  background: var(--coral-l);
+  color: #fff;
+  box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .6), inset -4px -4px 0 var(--coral-d), var(--r3), 0 8px 0 var(--ink);
+}
+
+.auth.auth-landing .role-action:active {
+  transform: translateY(4px);
+  box-shadow: inset 4px 4px 0 var(--coral-d), var(--r3), 0 2px 0 var(--ink);
+}
+
+.auth.auth-landing .role-action.secondary {
+  background: #fff;
+  color: var(--ink);
+  text-shadow: none;
+  box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g4), var(--r3), 0 6px 0 var(--ink);
+}
+
+.auth.auth-landing .role-action.secondary:hover {
+  background: var(--yellow-l);
+  color: var(--ink);
+}
+
+.auth.auth-landing :focus-visible {
+  outline: 4px dashed var(--coral);
+  outline-offset: 6px;
+}
+
+@media (max-width: 600px) {
+  .auth:not(.auth-landing) .auth-card {
+    box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r4), 8px 8px 0 rgba(28, 27, 58, .35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth.auth-landing *,
+  .auth.auth-landing *::before,
+  .auth.auth-landing *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

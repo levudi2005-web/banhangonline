@@ -1,32 +1,4 @@
-:root {
-  color-scheme: light;
-  --ui-canvas: #f4f5f7;
-  --ui-canvas-raised: #fafafa;
-  --ui-surface: #ffffff;
-  --ui-surface-strong: #ffffff;
-  --ui-surface-soft: #f8f8f8;
-  --ui-ink: #242424;
-  --ui-muted: #6b7280;
-  --ui-border: rgba(31, 35, 40, .1);
-  --ui-border-strong: rgba(31, 35, 40, .18);
-  --ui-accent: #cb1c22;
-  --ui-accent-hover: #a9151a;
-  --ui-accent-soft: rgba(203, 28, 34, .08);
-  --ui-orange: #f36f21;
-  --ui-focus: rgba(203, 28, 34, .2);
-  --ui-success-surface: #eaf5ef;
-  --ui-success-ink: #237a4b;
-  --ui-warning-surface: #fff4df;
-  --ui-warning-ink: #a8661a;
-  --ui-danger-surface: #fff1f1;
-  --ui-danger-ink: #a63232;
-  --ui-shadow-soft: 0 8px 24px rgba(24, 28, 34, .055);
-  --ui-shadow-card: 0 12px 32px rgba(24, 28, 34, .075);
-  --ui-shadow-dialog: 0 28px 90px rgba(20, 24, 30, .2);
-  --ui-card-radius: 16px;
-  --ui-control-radius: 10px;
-  --ui-transition: 180ms cubic-bezier(.2, .75, .25, 1);
-}
+@import url("./style.css");
 
 *,
 *::before,
@@ -35,8 +7,31 @@
 }
 
 :focus-visible {
-  outline: 3px solid var(--ui-focus);
-  outline-offset: 3px;
+  outline: 4px dashed var(--coral);
+  outline-offset: 6px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--ui-font-body);
+  color: var(--ink);
+}
+
+button,
+input,
+select,
+textarea {
+  border-radius: 0;
+}
+
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  touch-action: manipulation;
 }
 
 @media (prefers-reduced-motion: reduce) {

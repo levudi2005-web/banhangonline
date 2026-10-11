@@ -105,3 +105,47 @@
     height: 260px;
   }
 }
+
+.location-picker-section {
+  border: 0;
+  border-radius: 0;
+  background: var(--cream);
+  box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r3), 6px 6px 0 var(--ink);
+  color: var(--ink);
+}
+
+.location-picker-section h3,
+.location-picker-section > p,
+.location-picker-status,
+.location-picker-attribution {
+  color: var(--ink);
+  font-family: var(--ui-font-body);
+}
+
+.location-picker-search {
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: inset 4px 4px 0 var(--g3), var(--r3g);
+}
+
+.location-picker-search:focus-visible {
+  outline: 0;
+  border-color: transparent;
+  box-shadow: inset 4px 4px 0 #ffe6dc, var(--r3c), 6px 6px 0 var(--yellow);
+}
+
+.location-picker-map {
+  border: 3px solid var(--ink);
+  border-radius: 0;
+  box-shadow: 6px 6px 0 var(--blue);
+}
+
+.location-picker-error {
+  border: 0;
+  border-radius: 0;
+  color: var(--red);
+  background: #fff0f2;
+  box-shadow: var(--r3e), 5px 5px 0 #ffb3bd;
+}
