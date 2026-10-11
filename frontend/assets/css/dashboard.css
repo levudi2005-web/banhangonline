@@ -775,6 +775,36 @@ body.dashboard {
   font-weight: 800;
 }
 
+.shop-admin-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shop-admin-quick-actions[hidden] {
+  display: none;
+}
+
+.shop-admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .02em;
+  text-decoration: none;
+  transition: background .18s ease, transform .18s ease;
+}
+
+.shop-admin-link:hover {
+  background: rgba(255, 255, 255, .2);
+  transform: translateY(-1px);
+}
+
 .shop-header {
   position: relative;
   background: linear-gradient(105deg, #a8171c 0%, #cb1c22 54%, #e83b25 100%);

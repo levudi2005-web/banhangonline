@@ -234,7 +234,7 @@
     const shopLink = document.createElement("a");
     shopLink.href = AppRoutes.getRoute("customer.home");
     shopLink.className = "management-storefront-link";
-    shopLink.append(element("span", "↗"), element("span", "Mở trang mua sắm"));
+    shopLink.append(element("span", "↗"), element("span", "Xem cửa hàng"));
     const logoutLink = document.createElement("a");
     logoutLink.href = AppRoutes.ROUTES[area].logout;
     logoutLink.className = "management-logout-link";
@@ -276,6 +276,11 @@
       else openSidebar();
     });
     const topTitle = element("span", labels[page] || "Quản lý", "management-top-title");
+    const storefrontLink = document.createElement("a");
+    storefrontLink.href = AppRoutes.getRoute("customer.home");
+    storefrontLink.className = "dash-button secondary management-storefront-button";
+    storefrontLink.textContent = "Xem cửa hàng";
+    storefrontLink.setAttribute("aria-label", "Xem giao diện cửa hàng cho khách");
     const storeGroup = element("div", undefined, "management-store-picker");
     if (context.activeStores.length) {
       const storeLabel = element("label", "Cửa hàng", "management-store-label");
@@ -310,7 +315,7 @@
     profile.setAttribute("aria-label", "Thông tin tài khoản");
     profile.textContent = "›";
     userMenu.append(identity, profile);
-    topbar.append(menuButton, topTitle, storeGroup, userMenu);
+    topbar.append(menuButton, topTitle, storefrontLink, storeGroup, userMenu);
 
     const pageContent = element("section", undefined, "management-page-content");
     const heading = element("div", undefined, "management-page-heading");

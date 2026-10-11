@@ -18,6 +18,56 @@
   let stores = [];
   let customerLocation = null;
 
+  function renderPublicAdminActions(user) {
+    const adminContainer = document.querySelector("#public-admin-quick-actions");
+    if (!adminContainer) return;
+    adminContainer.replaceChildren();
+    if (!user || !user.roles || !Array.isArray(user.roles)) {
+      adminContainer.hidden = true;
+      return;
+    }
+    const roles = new Set(user.roles);
+    const canManageStore = roles.has("OWNER") || roles.has("STAFF");
+    if (!canManageStore) {
+      adminContainer.hidden = true;
+      return;
+    }
+
+    const dashboardLink = document.createElement("a");
+    const dashboardRoute = roles.has("OWNER") ? AppRoutes.getRoute("owner.home") : AppRoutes.getRoute("staff.home");
+    dashboardLink.href = dashboardRoute || AppRoutes.getRoute("customer.home");
+    dashboardLink.className = "shop-admin-link";
+    dashboardLink.innerHTML = '<span aria-hidden="true">⌂</span><span>Quản trị cửa hàng</span>';
+
+    const storefrontLink = document.createElement("a");
+    storefrontLink.href = AppRoutes.getRoute("customer.home");
+    storefrontLink.className = "shop-admin-link";
+    storefrontLink.innerHTML = '<span aria-hidden="true">◫</span><span>Xem cửa hàng</span>';
+
+    adminContainer.append(dashboardLink, storefrontLink);
+    adminContainer.hidden = false;
+  }
+
+  async function syncPublicAdminActions() {
+    const adminContainer = document.querySelector("#public-admin-quick-actions");
+    if (!adminContainer) return;
+    try {
+      const response = await fetch(`${API}/api/auth/me`, { credentials: "include" });
+      if (response.status === 401) {
+        renderPublicAdminActions(null);
+        return;
+      }
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result || !result.success || !result.data) {
+        renderPublicAdminActions(null);
+        return;
+      }
+      renderPublicAdminActions(result.data);
+    } catch {
+      renderPublicAdminActions(null);
+    }
+  }
+
   function setStoreHotline(store) {
     if (!hotline) return;
     const phone = (store && store.phone || "").trim();
@@ -436,5 +486,6 @@
   categorySelect.addEventListener("change", renderProducts);
   sortSelect.addEventListener("change", renderProducts);
 
+  syncPublicAdminActions();
   load();
 })();
