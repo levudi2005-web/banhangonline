@@ -55,6 +55,21 @@ class StoreManagementServiceTest {
     }
 
     @Test
+    void ownerCannotCreateAnotherStoreWhenOneAlreadyExists() {
+        User owner = new User();
+        owner.setId(9L);
+        owner.getRoles().add(role("OWNER"));
+        when(users.findById(9L)).thenReturn(Optional.of(owner));
+        when(stores.count()).thenReturn(1L);
+
+        assertThatThrownBy(() -> service.create(9L, new CreateStoreRequest("Cửa hàng B", "0912345678",
+                null, "Hà Nội", "Ba Đình", "Phúc Xá", "2 Phố Mẫu", null, null, null, null)))
+                .isInstanceOf(ApiException.class)
+                .extracting("code").isEqualTo("STORE_ALREADY_EXISTS");
+        verify(stores, never()).save(any());
+    }
+
+    @Test
     void ownerCanSaveCoordinatesAndCannotSaveOnlyOneCoordinate() {
         User owner = new User();
         owner.setId(9L);

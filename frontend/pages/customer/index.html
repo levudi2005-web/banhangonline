@@ -61,9 +61,10 @@
         </div>
       </div>
       <div class="shop-store-row">
-        <div class="shop-store-copy"><span class="shop-store-icon" aria-hidden="true">⌖</span><span><strong>Địa điểm nhận hàng</strong><small>Chọn cửa hàng để xem sản phẩm còn bán</small></span></div>
-        <div class="dash-field"><label for="store-select">Cửa hàng nhận hàng</label><select id="store-select"></select></div>
+        <div class="shop-store-copy"><span class="shop-store-icon" aria-hidden="true">⌖</span><span><strong>Cửa hàng và địa điểm nhận hàng</strong><small id="shop-store-description">Hàng được nhận trực tiếp tại cửa hàng.</small></span></div>
+        <div id="shop-store-selector" class="dash-field"><label for="store-select">Cửa hàng nhận hàng</label><select id="store-select"></select></div>
         <button id="find-nearby-stores" class="dash-button secondary shop-nearby-button" type="button">Tìm cửa hàng gần tôi</button>
+        <button id="shop-chat-button" class="dash-button shop-nearby-button" type="button" data-chat-store="selected">Chat với cửa hàng</button>
       </div>
       <div id="nearby-store-status" class="dash-status" role="status" aria-live="polite"></div>
       <ul id="nearby-store-list" class="shop-nearby-list" aria-label="Cửa hàng gần bạn" hidden></ul>
@@ -88,6 +89,7 @@
     </section>
   </main>
   <script src="../../assets/js/core/routes.js"></script>
+  <script src="../../assets/js/features/customer-chat.js"></script>
   <script src="../../assets/js/features/customer-home.js"></script>
 </body>
 </html>

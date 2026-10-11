@@ -3,6 +3,7 @@
   const API = (window.API_BASE || "").replace(/\/$/, "");
   const status = document.querySelector("#store-status");
   const storeSelect = document.querySelector("#store-select");
+  const storeSelector = document.querySelector("#shop-store-selector");
   const list = document.querySelector("#product-list");
   const search = document.querySelector("#product-search");
   const categorySelect = document.querySelector("#category-filter");
@@ -174,6 +175,16 @@
     });
     if (selectedId && stores.some(store => String(store.id) === String(selectedId))) {
       storeSelect.value = String(selectedId);
+    }
+    if (storeSelector) storeSelector.hidden = stores.length === 1;
+    if (nearbyButton) nearbyButton.hidden = stores.length < 2;
+    if (stores.length === 1) {
+      const description = document.querySelector("#shop-store-description");
+      if (description) {
+        const store = stores[0];
+        description.textContent = `${store.name} · ${[store.addressDetail, store.ward, store.district, store.province]
+          .filter(Boolean).join(", ")}`;
+      }
     }
   }
 
@@ -452,7 +463,9 @@
         setStoreHotline(selected);
         await loadCategories();
         await loadProducts(storeSelect.value);
-        status.textContent = `${stores.length} cửa hàng đang hoạt động.`;
+        status.textContent = stores.length === 1
+          ? `Đang xem hàng hóa tại ${selected.name}.`
+          : `${stores.length} cửa hàng đang hoạt động.`;
       } else {
         setStoreHotline(null);
         status.textContent = "Hiện chưa có cửa hàng nào được kích hoạt.";

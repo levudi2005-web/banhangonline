@@ -67,6 +67,15 @@
     storeLine.textContent = [store.name, store.addressDetail, store.ward, store.district]
       .filter(Boolean).join(" · ");
     cartLink.href = AppRoutes.getRoute("customer.cart", { store: storeId });
+    if (!document.querySelector("#product-chat-button")) {
+      const chatButton = document.createElement("button");
+      chatButton.id = "product-chat-button";
+      chatButton.type = "button";
+      chatButton.className = "dash-button secondary";
+      chatButton.textContent = "Chat với cửa hàng";
+      chatButton.dataset.chatStore = storeId;
+      document.querySelector("#product-cart-form").append(chatButton);
+    }
 
     const media = document.querySelector("#product-media");
     const thumbnails = document.querySelector("#product-thumbnails");

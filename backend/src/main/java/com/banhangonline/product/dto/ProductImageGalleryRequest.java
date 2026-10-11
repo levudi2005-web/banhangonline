@@ -10,5 +10,5 @@ import java.util.List;
 public record ProductImageGalleryRequest(
         @NotNull @Size(max = 8)
         List<@NotBlank @Size(max = 500)
-                @Pattern(regexp = "^(https?://.{1,492}|/uploads/stores/[0-9]+/products/[0-9a-fA-F-]{36}\\.(png|jpg|webp))$")
+                @Pattern(regexp = "^(https?://.{1,492}|/uploads/stores/[0-9]+/products/[0-9a-fA-F-]{36}\\.(png|jpe?g|webp))$")
                 String> imageUrls) {}

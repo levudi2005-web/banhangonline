@@ -21,7 +21,7 @@ body.dashboard {
     radial-gradient(ellipse at 100% 18%, rgba(31, 35, 40, .035), transparent 30rem),
     var(--dash-bg);
   color: var(--dash-ink);
-  font: 15px/1.55 "Be Vietnam Pro", system-ui, sans-serif;
+  font: 16px/1.6 "Pixelify Sans", "Be Vietnam Pro", "Courier New", monospace;
 }
 
 .dash-shell { width: min(1760px, calc(100% - clamp(32px, 4vw, 80px))); margin: 0 auto; padding: 22px 0 64px; }
@@ -131,6 +131,53 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--ui-focus); outl
 .notification-item > p { line-height: 1.6; }
 .dash-grid > .dash-card.half { min-width: 0; }
 .dash-list li, .dash-card, .shop-product-card { overflow-wrap: anywhere; }
+
+.chat-launcher { position: fixed; z-index: 30; right: 22px; bottom: 22px; min-height: 50px; padding: 12px 18px; border: 0; border-radius: 999px; background: var(--ui-accent); color: #fff; font: inherit; font-weight: 750; box-shadow: 0 8px 24px rgba(24, 28, 34, .22); cursor: pointer; }
+.chat-panel { position: fixed; z-index: 31; right: 22px; bottom: 84px; display: grid; width: min(390px, calc(100vw - 28px)); height: min(560px, calc(100dvh - 120px)); grid-template-rows: auto auto minmax(0, 1fr) auto; overflow: hidden; border: 1px solid var(--dash-line); border-radius: 18px; background: var(--ui-surface); box-shadow: 0 16px 48px rgba(24, 28, 34, .22); }
+.chat-panel[hidden] { display: none; }
+.chat-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 17px; background: var(--ui-accent); color: #fff; }
+.chat-close { padding: 7px 10px; border: 1px solid rgba(255,255,255,.42); border-radius: 8px; background: transparent; color: #fff; font: inherit; cursor: pointer; }
+.chat-status { min-height: 20px; margin: 0; padding: 7px 14px; color: var(--dash-muted); font-size: 13px; }
+.chat-status.error { color: var(--dash-danger); }
+.chat-messages { display: flex; flex-direction: column; gap: 9px; overflow-y: auto; padding: 14px; margin: 0; list-style: none; background: var(--ui-surface-soft); }
+.chat-message { max-width: 86%; align-self: flex-start; padding: 9px 12px; border: 1px solid var(--dash-line); border-radius: 13px 13px 13px 4px; background: #fff; }
+.chat-message.mine { align-self: flex-end; border-color: var(--ui-accent-soft); border-radius: 13px 13px 4px 13px; background: var(--ui-accent-soft); }
+.chat-message p { margin: 0; color: var(--dash-ink); overflow-wrap: anywhere; white-space: pre-wrap; }
+.chat-message time { display: block; margin-top: 4px; color: var(--dash-muted); font-size: 11px; }
+.chat-compose { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 9px; padding: 11px; border-top: 1px solid var(--dash-line); background: var(--ui-surface); }
+.chat-compose textarea { box-sizing: border-box; width: 100%; min-height: 44px; max-height: 110px; padding: 9px 11px; border: 1px solid var(--ui-border-strong); border-radius: 10px; font: inherit; resize: vertical; }
+.chat-inbox-layout { display: grid; grid-template-columns: minmax(240px, .75fr) minmax(0, 1.6fr); gap: 16px; min-height: 520px; }
+.chat-inbox-list-card, .chat-inbox-thread-card { min-width: 0; min-height: 0; padding: 18px; }
+.chat-inbox-list-card h2, .chat-inbox-thread-card h2 { margin: 0 0 12px; font-size: 20px; }
+.chat-inbox-list { display: grid; align-content: start; gap: 8px; max-height: 68vh; overflow: auto; padding: 0; margin: 0; list-style: none; }
+.chat-inbox-list > li { padding: 0; overflow: hidden; }
+.chat-inbox-list > li.active { border-color: var(--ui-accent); background: var(--ui-accent-soft); }
+.chat-inbox-select { position: relative; display: grid; width: 100%; gap: 5px; padding: 12px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.chat-inbox-select strong { padding-right: 34px; }
+.chat-inbox-select span { color: var(--dash-muted); font-size: 13px; }
+.chat-inbox-select time { color: var(--dash-muted); font-size: 11px; }
+.chat-inbox-select .chat-unread-count { position: absolute; top: 12px; right: 12px; display: grid; min-width: 22px; height: 22px; place-items: center; border-radius: 99px; background: var(--ui-accent); color: #fff; font-size: 11px; font-weight: 750; }
+.management-chat-messages { height: min(56vh, 480px); min-height: 280px; border: 1px solid var(--dash-line); border-radius: 13px; }
+.chat-inbox-thread-card .chat-compose { padding-inline: 0; border-top: 0; }
+.chat-unread-preview { color: var(--dash-ink) !important; font-weight: 750; }
+body.dashboard .chat-launcher { border: 0; border-radius: 0; background: var(--coral); color: #fff; font: 700 17px/1.35 "Pixelify Sans", "VT323", "Be Vietnam Pro", "Courier New", monospace; box-shadow: inset 4px 4px 0 rgba(255,255,255,.45), inset -4px -4px 0 var(--coral-d), var(--r4), 6px 6px 0 var(--ink); }
+body.dashboard .chat-panel { border: 0; border-radius: 0; box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r4), 8px 8px 0 var(--ink); }
+body.dashboard .chat-panel-header { background: var(--coral); font-family: "Pixelify Sans", "VT323", "Be Vietnam Pro", "Courier New", monospace; }
+body.dashboard .chat-messages { background: #e8f6ff; }
+body.dashboard .chat-message,
+body.dashboard .chat-message.mine { border-radius: 0; box-shadow: var(--r3); }
+body.dashboard .chat-message.mine { background: var(--mint-l); }
+body.dashboard .chat-compose textarea { border: 0; border-radius: 0; box-shadow: var(--r3g); font: inherit; }
+body.dashboard .chat-inbox-list-card,
+body.dashboard .chat-inbox-thread-card { border-radius: 0; box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r3), 5px 5px 0 var(--ink); }
+body.dashboard .chat-inbox-list > li.active { border-radius: 0; background: var(--yellow-l); }
+
+@media (max-width: 720px) {
+  .chat-inbox-layout { grid-template-columns: 1fr; }
+  .chat-inbox-list { max-height: 30vh; }
+  .chat-launcher { right: 14px; bottom: 14px; }
+  .chat-panel { right: 10px; bottom: 74px; }
+}
 
 .product-breadcrumb { display: flex; align-items: center; gap: 9px; margin: 0 0 16px; color: var(--dash-muted); font-size: 13px; }
 .product-breadcrumb a, .product-back-link a { color: var(--dash-accent-dark); font-weight: 650; text-decoration: none; }

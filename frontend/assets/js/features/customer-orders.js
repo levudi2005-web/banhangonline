@@ -58,7 +58,13 @@
       rows.textContent = order.items.map(line => `${line.productName} × ${line.quantity}`).join(" · ");
       const total = document.createElement("p");
       total.textContent = `Tổng: ${Number(order.totalAmount).toLocaleString("vi-VN")} ${order.currency}`;
-      item.append(title, state, date, rows, total);
+      const chat = document.createElement("button");
+      chat.type = "button";
+      chat.className = "dash-button secondary";
+      chat.textContent = "Chat với cửa hàng";
+      chat.dataset.chatStore = String(order.storeId);
+      chat.dataset.chatOrder = String(order.id);
+      item.append(title, state, date, rows, total, chat);
       const activeStep = orderSteps.findIndex(([key]) => key === order.status);
       if (activeStep >= 0) {
         const progress = document.createElement("ol");

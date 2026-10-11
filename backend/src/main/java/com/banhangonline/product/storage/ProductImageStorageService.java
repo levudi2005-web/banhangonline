@@ -116,7 +116,7 @@ public class ProductImageStorageService {
                 return false;
             }
             String fileName = imageUrl.substring(prefix.length());
-            if (!fileName.matches("[0-9a-fA-F-]{36}\\.(png|jpg|webp)")) {
+            if (!fileName.matches("(?i)[0-9a-fA-F-]{36}\\.(png|jpe?g|webp)")) {
                 return false;
             }
             Path root = localRoot();
@@ -161,7 +161,7 @@ public class ProductImageStorageService {
             return false;
         }
         String fileName = imageUrl.substring(prefix.length());
-        if (!fileName.matches("[0-9a-fA-F-]{36}\\.(png|jpg|webp)")) {
+        if (!fileName.matches("(?i)[0-9a-fA-F-]{36}\\.(png|jpe?g|webp)")) {
             return false;
         }
         Path root = localRoot();
@@ -194,7 +194,7 @@ public class ProductImageStorageService {
             return null;
         }
         String fileName = imageUrl.substring(storePrefix.length());
-        if (!fileName.matches("[0-9a-fA-F-]{36}\\.(png|jpg|webp)")) {
+        if (!fileName.matches("(?i)[0-9a-fA-F-]{36}\\.(png|jpe?g|webp)")) {
             return null;
         }
         return "stores/" + storeId + "/products/" + fileName.toLowerCase(Locale.ROOT);

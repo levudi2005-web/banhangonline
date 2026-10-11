@@ -8,7 +8,7 @@ public class CleanUrlController {
 
     @GetMapping("/")
     public String landing() {
-        return "forward:/pages/auth/index.html";
+        return "forward:/pages/customer/index.html";
     }
 
     @GetMapping("/dang-nhap")
@@ -139,6 +139,11 @@ public class CleanUrlController {
     @GetMapping("/quan-ly/owner/don-hang")
     public String ownerOrders() {
         return "forward:/pages/owner/orders.html";
+    }
+
+    @GetMapping("/quan-ly/owner/tin-nhan")
+    public String ownerMessages() {
+        return "forward:/pages/owner/messages.html";
     }
 
     @GetMapping("/quan-ly/owner/thong-bao")

@@ -56,6 +56,18 @@ class ProductImageStorageServiceTest {
     }
 
     @Test
+    void uploadsValidatedJpegImage() {
+        var file = new MockMultipartFile("file", "PHOTO.JPG", "image/jpeg",
+                new byte[]{(byte) 0xff, (byte) 0xd8, (byte) 0xff, 1});
+
+        String imageUrl = service.upload(12L, file);
+
+        assertThat(imageUrl).startsWith("https://images.example.test/stores/12/products/")
+                .endsWith(".jpg");
+        verify(client).putObject(any(PutObjectRequest.class), any(RequestBody.class));
+    }
+
+    @Test
     void rejectsUnsupportedImageContentBeforeCallingStorage() {
         var file = new MockMultipartFile("file", "photo.png", "image/png", "not an image".getBytes());
 

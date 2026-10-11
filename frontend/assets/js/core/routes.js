@@ -49,6 +49,7 @@
       products: "/quan-ly/owner/san-pham",
       inventory: "/quan-ly/owner/ton-kho",
       orders: "/quan-ly/owner/don-hang",
+      messages: "/quan-ly/owner/tin-nhan",
       notifications: "/quan-ly/owner/thong-bao"
     }
   });
@@ -93,6 +94,7 @@
     "owner.products": ROUTES.owner.products,
     "owner.inventory": ROUTES.owner.inventory,
     "owner.orders": ROUTES.owner.orders,
+    "owner.messages": ROUTES.owner.messages,
     "owner.notifications": ROUTES.owner.notifications
   };
 

@@ -19,6 +19,7 @@
     products: "Sản phẩm",
     inventory: "Tồn kho",
     orders: "Đơn hàng",
+    messages: "Tin nhắn khách hàng",
     notifications: "Thông báo"
   };
   const permissionLabels = {
@@ -72,7 +73,8 @@
       products: "m7 4 5-2 5 2 4 2-2 5v10H5V11L3 6zM3 6l9 4 9-4M12 10v11",
       inventory: "M4 5h16M4 12h16M4 19h16M7 3v4M17 10v4M9 17v4",
       orders: "M6 3h12v18H6zM9 7h6M9 11h6M9 15h4",
-      notifications: "M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"
+      notifications: "M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4",
+      messages: "M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"
     };
     const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     icon.setAttribute("viewBox", "0 0 24 24");
@@ -185,6 +187,7 @@
     const items = [{ page: "dashboard", icon: "dashboard" }];
     if (role === "OWNER") {
       items.push({ page: "store", icon: "store" });
+      items.push({ page: "messages", icon: "messages" });
       if (context.stores.some(store => store.status === "ACTIVE")) {
         items.push({ page: "staff", icon: "staff" }, { page: "permissions", icon: "permissions" });
       }
@@ -373,7 +376,7 @@
   }
 
   function configureAccess() {
-    const ownerOnly = ["store", "staff", "permissions", "categories"].includes(page);
+    const ownerOnly = ["store", "staff", "permissions", "categories", "messages"].includes(page);
     const permissionByPage = {
       products: ["VIEW_PRODUCTS", "MANAGE_PRODUCTS"],
       inventory: ["VIEW_INVENTORY", "MANAGE_INVENTORY"],
@@ -561,6 +564,7 @@
   async function renderStore() {
     document.querySelector(".management-page-description").textContent =
       "Quản lý bản nháp cửa hàng và gửi thông tin để được xét duyệt.";
+    const pending = context.stores.find(store => store.status === "DRAFT");
     const listCard = addCard("Cửa hàng của bạn");
     if (!context.stores.length) {
       listCard.append(element("div", "Chưa có cửa hàng. Hãy tạo bản nháp bằng biểu mẫu bên cạnh.", "dash-empty"));
@@ -592,6 +596,11 @@
       });
       listCard.append(list);
     }
+    if (context.stores.length && !pending) {
+      addCard("Cửa hàng đã được khai báo",
+        "Hệ thống chỉ hỗ trợ một cửa hàng; hiện không thể tạo thêm cửa hàng.");
+      return;
+    }
     const formCard = addCard("Thiết lập bản nháp", "Cửa hàng chỉ hiển thị cho khách sau khi được quản trị viên kích hoạt.");
     const form = element("form", undefined, "dash-form management-form");
     form.id = "store-editor";
@@ -600,12 +609,22 @@
       if (name === "description") wrapper.classList.add("full");
       form.append(wrapper);
     });
+    if (pending) {
+      form.dataset.storeId = String(pending.id);
+      storeFormFields.forEach(([name]) => {
+        if (form.elements[name]) form.elements[name].value = pending[name] || "";
+      });
+    }
     const latitude = document.createElement("input");
     latitude.type = "hidden";
     latitude.name = "latitude";
     const longitude = document.createElement("input");
     longitude.type = "hidden";
     longitude.name = "longitude";
+    if (pending) {
+      latitude.value = pending.latitude ?? "";
+      longitude.value = pending.longitude ?? "";
+    }
     form.append(latitude, longitude);
     const locationSection = element("div", undefined, "location-picker-section full");
     locationSection.append(element("h3", "Vị trí cửa hàng"),
@@ -624,6 +643,7 @@
         addressLine: form.elements.addressDetail
       }
     });
+    if (pending) locationPicker.setPosition(pending.latitude, pending.longitude);
     const save = element("button", "Lưu bản nháp", "dash-button");
     save.type = "submit";
     save.id = "store-submit";
@@ -650,7 +670,6 @@
       }
     });
     formCard.append(form);
-    const pending = context.stores.find(store => store.status === "DRAFT");
     if (pending) {
       const submit = button("Gửi quản trị viên kiểm duyệt", "secondary", async () => {
         submit.disabled = true;
@@ -1675,7 +1694,145 @@
     }
   }
 
+  let chatPollTimer = null;
+
+  async function renderMessages() {
+    contentNode.replaceChildren();
+    document.querySelector(".management-page-description").textContent =
+      "Trò chuyện trực tiếp với khách hàng; tin nhắn được lưu trên hệ thống và tự cập nhật.";
+    if (role !== "OWNER") {
+      setStatus("Chỉ chủ cửa hàng mới có thể xem tin nhắn khách hàng.", "error");
+      return;
+    }
+    if (!context.selectedStoreId) return noStoreNotice();
+
+    const layout = element("div", undefined, "chat-inbox-layout");
+    const inboxCard = element("section", undefined, "dash-card chat-inbox-list-card");
+    const threadCard = element("section", undefined, "dash-card chat-inbox-thread-card");
+    const conversationList = element("ul", undefined, "chat-inbox-list");
+    const threadTitle = element("h2", "Chọn một cuộc trò chuyện");
+    const messageList = element("ol", undefined, "chat-messages management-chat-messages");
+    const compose = element("form", undefined, "chat-compose");
+    const messageInput = element("textarea");
+    messageInput.rows = 2;
+    messageInput.maxLength = 4000;
+    messageInput.placeholder = "Nhập tin nhắn phản hồi…";
+    messageInput.setAttribute("aria-label", "Nội dung phản hồi");
+    messageInput.required = true;
+    const sendButton = button("Gửi", "", null);
+    sendButton.type = "submit";
+    compose.append(messageInput, sendButton);
+    inboxCard.append(element("h2", "Khách hàng"), conversationList);
+    threadCard.append(threadTitle, messageList, compose);
+    layout.append(inboxCard, threadCard);
+    contentNode.append(layout);
+
+    let conversations = [];
+    let selectedConversationId = null;
+
+    function renderConversationList() {
+      conversationList.replaceChildren();
+      if (!conversations.length) {
+        conversationList.append(element("li", "Chưa có khách hàng nhắn tin.", "dash-empty"));
+        return;
+      }
+      conversations.forEach(conversation => {
+        const item = element("li", undefined,
+          Number(conversation.id) === Number(selectedConversationId) ? "active" : "");
+        const select = element("button", undefined, "chat-inbox-select");
+        select.type = "button";
+        select.append(element("strong", conversation.customerName || "Khách hàng"),
+          element("span", conversation.lastMessage || "Chưa có tin nhắn",
+            conversation.unreadCount ? "chat-unread-preview" : ""),
+          element("time", conversation.lastMessageAt
+            ? new Date(conversation.lastMessageAt).toLocaleString("vi-VN") : ""));
+        if (conversation.unreadCount) {
+          select.append(element("span", String(conversation.unreadCount), "chat-unread-count"));
+        }
+        select.addEventListener("click", () => {
+          selectedConversationId = conversation.id;
+          renderConversationList();
+          loadSelectedConversation();
+        });
+        item.append(select);
+        conversationList.append(item);
+      });
+    }
+
+    async function loadSelectedConversation() {
+      const current = conversations.find(item => Number(item.id) === Number(selectedConversationId));
+      if (!current) {
+        threadTitle.textContent = "Chọn một cuộc trò chuyện";
+        messageList.replaceChildren();
+        return;
+      }
+      threadTitle.textContent = `Chat với ${current.customerName || "khách hàng"}`;
+      const items = await request(`/api/chat/conversations/${current.id}/messages`);
+      messageList.replaceChildren();
+      items.forEach(message => {
+        const item = element("li", undefined,
+          Number(message.senderUserId) === Number(context.user.id) ? "chat-message mine" : "chat-message");
+        const text = element("p", message.messageText);
+        const time = element("time", new Date(message.createdAt).toLocaleString("vi-VN"));
+        item.append(text, time);
+        messageList.append(item);
+      });
+      messageList.scrollTop = messageList.scrollHeight;
+      await request(`/api/chat/conversations/${current.id}/read`, { method: "PATCH" });
+      const marked = conversations.find(item => Number(item.id) === Number(selectedConversationId));
+      if (marked) marked.unreadCount = 0;
+      renderConversationList();
+    }
+
+    async function refreshInbox() {
+      conversations = await request(`/api/owner/chat/conversations?storeId=${context.selectedStoreId}`);
+      if (!conversations.some(item => Number(item.id) === Number(selectedConversationId))) {
+        selectedConversationId = conversations.length ? conversations[0].id : null;
+      }
+      renderConversationList();
+      if (selectedConversationId) await loadSelectedConversation();
+    }
+
+    compose.addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!selectedConversationId || !messageInput.value.trim()) return;
+      sendButton.disabled = true;
+      try {
+        await request(`/api/chat/conversations/${selectedConversationId}/messages`, {
+          method: "POST",
+          body: JSON.stringify({ messageText: messageInput.value })
+        });
+        messageInput.value = "";
+        await refreshInbox();
+        setStatus("Đã gửi phản hồi.", "success");
+      } catch (error) {
+        setStatus(error.message, "error");
+      } finally {
+        sendButton.disabled = false;
+      }
+    });
+
+    try {
+      await refreshInbox();
+      setStatus("");
+      const poll = async () => {
+        try {
+          await refreshInbox();
+        } catch (error) {
+          setStatus(error.message, "error");
+        } finally {
+          chatPollTimer = setTimeout(poll, 4000);
+        }
+      };
+      chatPollTimer = setTimeout(poll, 4000);
+    } catch (error) {
+      conversationList.replaceChildren(element("li", error.message, "dash-empty"));
+      setStatus(error.message, "error");
+    }
+  }
+
   async function renderPage() {
+    clearTimeout(chatPollTimer);
     contentNode.replaceChildren();
     const renderers = {
       dashboard: renderDashboard,
@@ -1686,6 +1843,7 @@
       products: renderProducts,
       inventory: renderInventory,
       orders: renderOrders,
+      messages: renderMessages,
       notifications: renderNotifications
     };
     if (renderers[page]) await renderers[page]();

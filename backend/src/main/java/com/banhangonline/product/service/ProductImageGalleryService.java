@@ -110,8 +110,8 @@ public class ProductImageGalleryService {
             if (imageUrl == null || imageUrl.isBlank() || imageUrl.length() > 500 || !unique.add(imageUrl)) {
                 throw ApiException.validation("Danh sách ảnh không hợp lệ hoặc có ảnh bị trùng.");
             }
-            if (imageUrl.matches("^/uploads/stores/" + storeId
-                    + "/products/[0-9a-fA-F-]{36}\\.(png|jpg|webp)$")) {
+            if (imageUrl.matches("(?i)^/uploads/stores/" + storeId
+                    + "/products/[0-9a-fA-F-]{36}\\.(png|jpe?g|webp)$")) {
                 continue;
             }
             if (!imageUrl.startsWith("/") && !imageUrl.matches("^https?://[^/].*$")) {

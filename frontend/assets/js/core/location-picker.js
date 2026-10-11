@@ -35,21 +35,35 @@
     return request;
   }
 
-  function fillAddress(fields, address) {
-    if (!fields || !address) return;
+  function fillAddress(fields, address, fallbackAddressLine) {
+    if (!fields) return false;
+    address = address || {};
+
     const first = (...values) => values.find(value => typeof value === "string" && value.trim()) || "";
-    if (fields.province) fields.province.value = first(address.state, address.region);
-    if (fields.district) {
-      fields.district.value = first(address.city_district, address.district, address.county, address.city);
-    }
-    if (fields.ward) {
-      fields.ward.value = first(address.suburb, address.quarter, address.neighbourhood,
-        address.ward, address.village, address.town);
-    }
-    if (fields.addressLine) {
-      const street = [address.house_number, address.road].filter(Boolean).join(" ");
-      if (street) fields.addressLine.value = street;
-    }
+    const province = first(address.state, address.province, address.region, address.city);
+    const district = first(address.city_district, address.district, address.county, address.municipality,
+      address.city !== province ? address.city : "");
+    const values = {
+      province,
+      district,
+      ward: first(address.ward, address.suburb, address.quarter, address.neighbourhood,
+        address.village, address.town),
+      addressLine: [address.house_number, first(address.road, address.pedestrian,
+        address.residential, address.footway)].filter(Boolean).join(" ")
+        || first(address.building, address.amenity, fallbackAddressLine)
+    };
+
+    let applied = false;
+    Object.entries(fields).forEach(([key, field]) => {
+      if (!field) return;
+      const value = values[key] || "";
+      if (value) {
+        field.value = value;
+        applied = true;
+      }
+    });
+
+    return applied;
   }
 
   function mount(container, options) {
@@ -96,6 +110,7 @@
       attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener noreferrer\">OpenStreetMap contributors</a>"
     }).addTo(map);
     let marker = null;
+    let lookupSequence = 0;
 
     function setBusy(value) {
       searchButton.disabled = value;
@@ -127,6 +142,7 @@
     }
 
     async function selectPosition(lat, lon, reverseLookup) {
+      const sequence = ++lookupSequence;
       if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
         throw new Error("Tọa độ vị trí không hợp lệ.");
       }
@@ -140,12 +156,21 @@
         const url = new URL(`${NOMINATIM}/reverse`);
         url.search = new URLSearchParams({ lat: String(lat), lon: String(lon), format: "jsonv2" });
         const result = await geocode(url);
-        fillAddress(options.addressFields, result.address);
-        if (result.display_name) status.textContent = `Đã chọn: ${result.display_name}`;
+        if (sequence !== lookupSequence) return;
+        const fallbackAddressLine = typeof result.name === "string" && result.name.trim()
+          ? result.name : typeof result.display_name === "string" ? result.display_name.split(",")[0] : "";
+        const hasAddress = fillAddress(options.addressFields, result.address, fallbackAddressLine);
+        if (hasAddress) {
+          status.textContent = `Đã tự điền địa chỉ${result.display_name ? `: ${result.display_name}` : "."}`;
+        } else {
+          status.textContent = "Không nhận được địa chỉ hợp lệ; tọa độ đã lưu và các trường địa chỉ được giữ nguyên.";
+        }
       } catch (error) {
-        status.textContent = `${error.message} Tọa độ đã được lưu; bạn có thể nhập địa chỉ thủ công.`;
+        if (sequence === lookupSequence) {
+          status.textContent = `${error.message} Tọa độ đã được lưu; bạn có thể nhập địa chỉ thủ công.`;
+        }
       } finally {
-        setBusy(false);
+        if (sequence === lookupSequence) setBusy(false);
       }
     }
 
@@ -162,21 +187,23 @@
         search.focus();
         return;
       }
+      const sequence = ++lookupSequence;
       setBusy(true);
       status.textContent = "Đang tìm vị trí…";
       try {
         const url = new URL(`${NOMINATIM}/search`);
         url.search = new URLSearchParams({ q: query, format: "jsonv2", limit: "1", countrycodes: "vn" });
         const result = await geocode(url);
+        if (sequence !== lookupSequence) return;
         if (!Array.isArray(result) || !result.length) {
           status.textContent = "Không tìm thấy địa chỉ. Thử thêm phường, quận hoặc thành phố.";
           return;
         }
         await selectPosition(Number(result[0].lat), Number(result[0].lon), true);
       } catch (error) {
-        status.textContent = error.message;
+        if (sequence === lookupSequence) status.textContent = error.message;
       } finally {
-        setBusy(false);
+        if (sequence === lookupSequence) setBusy(false);
       }
     }
 
@@ -192,15 +219,18 @@
         status.textContent = "Trình duyệt này không hỗ trợ xác định vị trí.";
         return;
       }
+      const sequence = ++lookupSequence;
       currentButton.disabled = true;
       status.textContent = "Đang xác định vị trí hiện tại…";
       navigator.geolocation.getCurrentPosition(
         position => {
+          if (sequence !== lookupSequence) return;
           selectPosition(position.coords.latitude, position.coords.longitude, true)
             .catch(error => { status.textContent = error.message; })
             .finally(() => { currentButton.disabled = false; });
         },
         error => {
+          if (sequence !== lookupSequence) return;
           status.textContent = error.code === error.PERMISSION_DENIED
             ? "Bạn chưa cho phép truy cập vị trí. Bạn vẫn có thể tìm địa chỉ hoặc chọn trực tiếp trên bản đồ."
             : "Không xác định được vị trí hiện tại. Vui lòng thử lại hoặc chọn trên bản đồ.";
@@ -216,9 +246,11 @@
 
     Object.values(options.addressFields || {}).forEach(field => {
       field.addEventListener("input", () => {
+        lookupSequence++;
         if (latitude.value || longitude.value) {
           clearCoordinates("Địa chỉ đã thay đổi. Hãy chọn lại vị trí để tránh sai lệch.");
         }
+        setBusy(false);
       });
     });
 

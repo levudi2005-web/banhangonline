@@ -41,8 +41,8 @@ public class StoreManagementService {
         if (!owner.hasRole("OWNER")) {
             throw new ApiException(HttpStatus.FORBIDDEN, "OWNER_REQUIRED", "Chỉ chủ cửa hàng mới được tạo cửa hàng");
         }
-        if (stores.existsByOwnerId(ownerId)) {
-            throw ApiException.conflict("STORE_ALREADY_EXISTS", "Cửa hàng đã được khai báo cho tài khoản này");
+        if (stores.count() > 0) {
+            throw ApiException.conflict("STORE_ALREADY_EXISTS", "Hệ thống chỉ hỗ trợ một cửa hàng.");
         }
         Store store = new Store();
         store.setOwner(owner);
