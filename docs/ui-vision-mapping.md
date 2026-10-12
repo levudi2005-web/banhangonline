@@ -169,8 +169,14 @@ the existing order list.
   that pass.
 - UI-035 supports up to eight images, main-image selection by order, local
   previews, HTTPS image URLs, uploads, replacement, removal, and persistent
-  gallery ordering through the product image API. Storage-dependent uploads
-  still require configured S3-compatible storage.
+  gallery ordering through the product image API. Uploads accept PNG, JPG,
+  GIF, WebP, BMP, TIFF, AVIF, HEIC, and ICO files up to 5 MB each; SVG is
+  rejected until it can be sanitized safely. Local storage is enabled by
+  default, while S3-compatible storage is used when configured. Failed uploads
+  show the specific file and server-side reason.
+- The pixel theme now keeps the area chooser three-up on wide screens, two-up
+  on tablets, and stacked on phones; shared dashboard/catalog layouts use
+  wider cards, larger type, and responsive product grids.
 - The latest shared UI changes refine the storefront hero and hotline,
   management inventory availability/status labels, store-order status badges,
   product image gallery upload progress, auth gateway/cards, and narrow-screen

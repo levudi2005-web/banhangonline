@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -60,6 +61,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
             HttpStatusCode status, WebRequest request) {
+        if (ex instanceof MaxUploadSizeExceededException) {
+            return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).headers(headers)
+                    .body(ApiResponse.error("IMAGE_TOO_LARGE",
+                            "Tệp tải lên vượt giới hạn máy chủ. Mỗi ảnh sản phẩm được phép tối đa 5 MB."));
+        }
         return ResponseEntity.status(status).headers(headers)
                 .body(ApiResponse.error("HTTP_" + status.value(), "Yêu cầu không hợp lệ"));
     }

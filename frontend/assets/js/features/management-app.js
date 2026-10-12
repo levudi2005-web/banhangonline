@@ -1015,16 +1015,77 @@
     return wrapper;
   }
 
+  async function compressProductImage(file) {
+    const maxUploadSize = 4.5 * 1024 * 1024;
+    const maxDimension = 2560;
+    let bitmap;
+    try {
+      bitmap = await createImageBitmap(file);
+    } catch (error) {
+      if (file.size <= maxUploadSize) return file;
+      throw new Error("Trình duyệt không giải mã được ảnh này để nén tự động. "
+        + "Hãy chuyển sang JPG/PNG/WebP hoặc nén ảnh trước khi tải lên.");
+    }
+
+    try {
+      const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+      if (file.size <= maxUploadSize && scale === 1) return file;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Trình duyệt không thể xử lý ảnh để nén.");
+      context.fillStyle = "#fff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+      const qualityLevels = [0.86, 0.78, 0.7, 0.62];
+      for (let attempt = 0; attempt < 12; attempt++) {
+        const quality = qualityLevels[attempt % qualityLevels.length];
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", quality));
+        if (!blob) throw new Error("Trình duyệt không thể tạo ảnh đã nén.");
+        if (blob.size <= maxUploadSize) {
+          const baseName = file.name.replace(/\.[^.]+$/, "") || "product-image";
+          return new File([blob], `${baseName}.jpg`, {
+            type: "image/jpeg",
+            lastModified: Date.now()
+          });
+        }
+
+        if (attempt % qualityLevels.length === qualityLevels.length - 1) {
+          const resized = document.createElement("canvas");
+          resized.width = Math.max(1, Math.floor(canvas.width * 0.8));
+          resized.height = Math.max(1, Math.floor(canvas.height * 0.8));
+          const resizedContext = resized.getContext("2d");
+          if (!resizedContext) throw new Error("Trình duyệt không thể thay đổi kích thước ảnh.");
+          resizedContext.fillStyle = "#fff";
+          resizedContext.fillRect(0, 0, resized.width, resized.height);
+          resizedContext.drawImage(canvas, 0, 0, resized.width, resized.height);
+          canvas.width = resized.width;
+          canvas.height = resized.height;
+          context.drawImage(resized, 0, 0);
+        }
+      }
+      throw new Error("Không thể nén ảnh xuống dưới 4,5 MB mà vẫn giữ chất lượng phù hợp.");
+    } finally {
+      bitmap.close();
+    }
+  }
+
   function uploadProductImage(storeId, file, onProgress) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open("POST", `${API}/api/owner/stores/${encodeURIComponent(storeId)}/products/images`);
       xhr.withCredentials = true;
+      xhr.timeout = 120000;
       xhr.setRequestHeader("X-Requested-With", "fetch");
       xhr.upload.addEventListener("progress", event => {
         if (event.lengthComputable) onProgress(Math.round(event.loaded / event.total * 100));
       });
-      xhr.addEventListener("error", () => reject(new TypeError("Không thể kết nối máy chủ.")));
+      xhr.addEventListener("error", () => reject(new TypeError("Mất kết nối khi tải ảnh lên.")));
+      xhr.addEventListener("timeout", () => reject(new Error("Tải ảnh quá lâu và đã hết thời gian chờ.")));
+      xhr.addEventListener("abort", () => reject(new Error("Đã hủy tải ảnh lên.")));
       xhr.addEventListener("load", () => {
         let result;
         try {
@@ -1038,7 +1099,10 @@
           return;
         }
         if (xhr.status < 200 || xhr.status >= 300 || !result || !result.success) {
-          const error = new Error(result && result.message || "Không thể tải ảnh lên kho lưu trữ.");
+          const error = new Error(result && result.message
+            || (xhr.status === 413
+              ? "Tệp vượt giới hạn tải lên. Mỗi ảnh được phép tối đa 5 MB."
+              : `Máy chủ từ chối tải ảnh (HTTP ${xhr.status || "không rõ"}).`));
           error.code = result && result.code;
           error.status = xhr.status;
           reject(error);
@@ -1061,13 +1125,13 @@
     preview.hidden = true;
     const placeholder = element("div", undefined, "management-image-placeholder");
     placeholder.append(element("strong", "Thư viện ảnh sản phẩm"),
-      element("span", "Tối đa 8 ảnh · PNG hoặc JPG · tối đa 5 MB mỗi ảnh"));
+      element("span", "Tối đa 8 ảnh · PNG, JPG, GIF, WebP, BMP, TIFF, AVIF, HEIC, ICO · 5 MB/ảnh. Một số định dạng có thể không xem trước được trên trình duyệt."));
     dropzone.append(preview, placeholder);
 
     const controls = element("div", undefined, "management-image-controls");
     const fileInput = document.createElement("input");
     fileInput.type = "file";
-    fileInput.accept = ".png,.jpg,.jpeg,image/png,image/jpeg";
+    fileInput.accept = "image/*";
     fileInput.multiple = true;
     fileInput.className = "management-file-input";
     fileInput.tabIndex = -1;
@@ -1193,9 +1257,13 @@
 
     function validateFile(file) {
       const extension = file.name.split(".").pop().toLowerCase();
-      if (!["png", "jpg", "jpeg"].includes(extension)
-          || (file.type && !["image/png", "image/jpeg"].includes(file.type))) {
-        return "Chỉ hỗ trợ ảnh PNG hoặc JPG.";
+      if (extension === "svg" || file.type === "image/svg+xml") {
+        return "Chưa hỗ trợ SVG vì cần làm sạch nội dung vector trước khi lưu an toàn.";
+      }
+      if (!file.type.startsWith("image/")
+          && !["png", "jpg", "jpeg", "gif", "webp", "bmp", "tif", "tiff",
+            "avif", "heic", "heif", "ico"].includes(extension)) {
+        return "Tệp này không được nhận diện là ảnh. Hãy chọn một tệp hình ảnh hợp lệ.";
       }
       if (file.size > 5 * 1024 * 1024) {
         return "Mỗi ảnh sản phẩm không được vượt quá 5 MB.";
@@ -1370,11 +1438,20 @@
       try {
         const files = imageEditor.pendingFiles();
         imageEditor.setBusy(true, files.length
-          ? `Đang tải ${files.length} ảnh lên kho lưu trữ…`
+          ? `Đang tối ưu ${files.length} ảnh trước khi tải lên…`
           : "Đang lưu sản phẩm…");
         for (const { index, file } of files) {
-          const uploaded = await uploadProductImage(context.selectedStoreId, file,
-            percent => imageEditor.setUploadProgress(index, percent));
+          let uploaded;
+          try {
+            const uploadFile = await compressProductImage(file);
+            imageEditor.setBusy(true,
+              `${file.name}: ${Math.ceil(file.size / 1024)} KB → ${Math.ceil(uploadFile.size / 1024)} KB`);
+            uploaded = await uploadProductImage(context.selectedStoreId, uploadFile,
+              percent => imageEditor.setUploadProgress(index, percent));
+          } catch (error) {
+            error.fileName = file.name;
+            throw error;
+          }
           pendingUploadedImageUrls.push(uploaded.imageUrl);
           imageEditor.setUploadedUrl(index, uploaded.imageUrl);
         }
@@ -1426,11 +1503,14 @@
         setStatus(message, kind);
         await renderProducts();
       } catch (error) {
-        const message = error.code === "IMAGE_STORAGE_UNAVAILABLE"
+        const reason = error.code === "IMAGE_STORAGE_UNAVAILABLE"
           ? "Kho lưu trữ ảnh chưa được cấu hình. Ảnh chưa được tải lên; hãy cấu hình storage trước khi thử lại."
           : productPersisted
             ? `Sản phẩm đã lưu, nhưng thư viện ảnh chưa được cập nhật: ${error.message}`
             : error.message;
+        const message = error.fileName && error.code === "IMAGE_STORAGE_UNAVAILABLE"
+          ? `${error.fileName}: ${reason}`
+          : reason;
         imageEditor.setError(message);
         setStatus(message, "error");
         save.disabled = false;

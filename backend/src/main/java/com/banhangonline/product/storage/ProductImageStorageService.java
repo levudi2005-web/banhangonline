@@ -23,6 +23,7 @@ import java.util.UUID;
 public class ProductImageStorageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductImageStorageService.class);
     private static final long MAX_IMAGE_SIZE = 5L * 1024 * 1024;
+    private static final String IMAGE_FILE_PATTERN = "(?i)[0-9a-f-]{36}\\.(png|jpe?g|gif|webp|bmp|tiff?|avif|heic|heif|ico)";
     private final S3StorageProperties properties;
     private final LocalImageStorageProperties localProperties;
     private final S3Client client;
@@ -58,7 +59,8 @@ public class ProductImageStorageService {
         }
         ImageFormat format = ImageFormat.from(bytes);
         if (format == null) {
-            throw ApiException.validation("Chỉ hỗ trợ ảnh PNG hoặc JPG hợp lệ.");
+            throw ApiException.validation("Định dạng ảnh không được hỗ trợ hoặc tệp không phải ảnh hợp lệ. "
+                    + "Hỗ trợ PNG, JPG, GIF, WebP, BMP, TIFF, AVIF, HEIC và ICO; SVG chưa được hỗ trợ.");
         }
         if (localProperties.isEnabled() && !properties.isEnabled()) {
             return uploadLocal(storeId, bytes, format);
@@ -116,7 +118,7 @@ public class ProductImageStorageService {
                 return false;
             }
             String fileName = imageUrl.substring(prefix.length());
-            if (!fileName.matches("(?i)[0-9a-fA-F-]{36}\\.(png|jpe?g|webp)")) {
+            if (!fileName.matches(IMAGE_FILE_PATTERN)) {
                 return false;
             }
             Path root = localRoot();
@@ -161,7 +163,7 @@ public class ProductImageStorageService {
             return false;
         }
         String fileName = imageUrl.substring(prefix.length());
-        if (!fileName.matches("(?i)[0-9a-fA-F-]{36}\\.(png|jpe?g|webp)")) {
+        if (!fileName.matches(IMAGE_FILE_PATTERN)) {
             return false;
         }
         Path root = localRoot();
@@ -202,7 +204,15 @@ public class ProductImageStorageService {
 
     private enum ImageFormat {
         PNG("png", "image/png"),
-        JPG("jpg", "image/jpeg");
+        JPG("jpg", "image/jpeg"),
+        GIF("gif", "image/gif"),
+        WEBP("webp", "image/webp"),
+        BMP("bmp", "image/bmp"),
+        TIFF("tiff", "image/tiff"),
+        AVIF("avif", "image/avif"),
+        HEIC("heic", "image/heic"),
+        HEIF("heif", "image/heif"),
+        ICO("ico", "image/x-icon");
 
         private final String extension;
         private final String contentType;
@@ -222,7 +232,55 @@ public class ProductImageStorageService {
                     && (bytes[1] & 0xff) == 0xd8 && (bytes[2] & 0xff) == 0xff) {
                 return JPG;
             }
+            if (startsWith(bytes, "GIF87a") || startsWith(bytes, "GIF89a")) {
+                return GIF;
+            }
+            if (startsWith(bytes, "RIFF") && bytes.length >= 12 && matchesAscii(bytes, 8, "WEBP")) {
+                return WEBP;
+            }
+            if (startsWith(bytes, "BM")) {
+                return BMP;
+            }
+            if (bytes.length >= 4 && ((bytes[0] == 'I' && bytes[1] == 'I'
+                    && bytes[2] == 42 && bytes[3] == 0)
+                    || (bytes[0] == 'M' && bytes[1] == 'M' && bytes[2] == 0 && bytes[3] == 42)
+                    || (bytes[0] == 'I' && bytes[1] == 'I' && bytes[2] == 43 && bytes[3] == 0)
+                    || (bytes[0] == 'M' && bytes[1] == 'M' && bytes[2] == 0 && bytes[3] == 43))) {
+                return TIFF;
+            }
+            if (bytes.length >= 12 && matchesAscii(bytes, 4, "ftyp")) {
+                if (matchesAscii(bytes, 8, "avif") || matchesAscii(bytes, 8, "avis")) {
+                    return AVIF;
+                }
+                if (matchesAscii(bytes, 8, "heic") || matchesAscii(bytes, 8, "heix")
+                        || matchesAscii(bytes, 8, "hevc") || matchesAscii(bytes, 8, "hevx")) {
+                    return HEIC;
+                }
+                if (matchesAscii(bytes, 8, "mif1") || matchesAscii(bytes, 8, "msf1")) {
+                    return HEIF;
+                }
+            }
+            if (bytes.length >= 4 && bytes[0] == 0 && bytes[1] == 0
+                    && bytes[2] == 1 && bytes[3] == 0) {
+                return ICO;
+            }
             return null;
+        }
+
+        private static boolean startsWith(byte[] bytes, String signature) {
+            return matchesAscii(bytes, 0, signature);
+        }
+
+        private static boolean matchesAscii(byte[] bytes, int offset, String signature) {
+            if (offset < 0 || bytes.length < offset + signature.length()) {
+                return false;
+            }
+            for (int i = 0; i < signature.length(); i++) {
+                if (bytes[offset + i] != (byte) signature.charAt(i)) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

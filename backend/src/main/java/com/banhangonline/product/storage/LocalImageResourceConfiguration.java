@@ -24,7 +24,6 @@ public class LocalImageResourceConfiguration implements WebMvcConfigurer {
         if (!location.endsWith("/")) {
             location += "/";
         }
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations(location);
+        registry.addResourceHandler("/uploads/**").addResourceLocations(location);
     }
 }

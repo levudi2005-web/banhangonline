@@ -1,0 +1,364 @@
+@font-face {
+  font-family: "Pixelify Sans";
+  src: url("../fonts/PixelifySans-variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+:root {
+  --ui-font-body: "Pixelify Sans", "Courier New", monospace;
+  --pixel-ink: #1c1b3a;
+  --pixel-border: 3px solid var(--pixel-ink);
+  --pixel-shadow: 6px 6px 0 var(--pixel-ink);
+  --pixel-shadow-raised: 0 7px 0 var(--pixel-ink);
+  --motion-quick: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 300ms;
+  --motion-ease: steps(4, end);
+  --motion-bounce: steps(5, end);
+  --ui-card-radius: 0;
+  --ui-control-radius: 0;
+  --ui-shadow-soft: var(--pixel-shadow);
+  --ui-shadow-card: inset 4px 4px 0 #fff, inset -4px -4px 0 #d6d4ec, var(--r4), 8px 8px 0 var(--pixel-ink);
+  --ui-shadow-dialog: inset 4px 4px 0 #fff, inset -4px -4px 0 #d6d4ec, var(--r4), 8px 8px 0 var(--pixel-ink);
+}
+
+html,
+body,
+body * {
+  font-family: var(--ui-font-body) !important;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+body {
+  font-size: clamp(16px, .3vw + 15px, 18px);
+  line-height: 1.6;
+}
+
+body :where(*) {
+  border-radius: 0 !important;
+  transition-timing-function: steps(4, end) !important;
+  animation-timing-function: steps(6, end) !important;
+}
+
+.auth.auth-landing {
+  min-height: 100svh;
+  padding: clamp(28px, 4vw, 64px) clamp(20px, 5vw, 72px);
+}
+
+.auth.auth-landing .panel.panel-landing {
+  width: min(1320px, 100%);
+  max-width: none;
+}
+
+.auth.auth-landing .launcher-card {
+  width: 100%;
+  max-width: none;
+  padding: clamp(34px, 4vw, 58px);
+}
+
+.auth.auth-landing .launcher-header {
+  margin-bottom: clamp(32px, 4vw, 56px);
+}
+
+.auth.auth-landing .launcher-intro {
+  max-width: 900px;
+  margin-bottom: clamp(32px, 4vw, 52px);
+}
+
+.auth.auth-landing .launcher-intro h1 {
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1.12;
+}
+
+.auth.auth-landing .launcher-intro .sub {
+  max-width: 760px;
+  font-size: clamp(17px, 1.4vw, 20px);
+  line-height: 1.6;
+}
+
+.auth.auth-landing .role-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: clamp(18px, 2vw, 28px);
+}
+
+.auth.auth-landing .role-card {
+  min-width: 0;
+  min-height: 320px;
+  padding: clamp(22px, 2.5vw, 34px);
+}
+
+.auth.auth-landing .role-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 24px;
+}
+
+.auth.auth-landing .role-meta strong {
+  font-size: clamp(21px, 2vw, 25px);
+}
+
+.auth.auth-landing .role-meta small {
+  max-width: none;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.auth.auth-landing .role-actions {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.auth.auth-landing .role-action {
+  min-width: 0;
+  min-height: 54px;
+  flex: 1 1 0;
+  padding-inline: 14px;
+  font-size: 16px;
+}
+
+body.dashboard {
+  font-size: clamp(16px, .3vw + 15px, 18px);
+  line-height: 1.65;
+}
+
+.dash-muted,
+.dash-status,
+.management-image-status {
+  font-size: 15px;
+}
+
+.dash-shell {
+  width: min(1800px, calc(100% - clamp(36px, 7vw, 128px)));
+}
+
+.dash-grid {
+  gap: clamp(18px, 2vw, 28px);
+}
+
+.dash-card,
+.management-page-content {
+  padding: clamp(24px, 2.5vw, 36px);
+}
+
+.dash-field label,
+.management-field label {
+  font-size: 15px;
+}
+
+.shop-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
+  gap: clamp(18px, 2vw, 28px);
+}
+
+.shop-product-art,
+.shop-product-art img {
+  min-height: 220px;
+  height: 220px;
+}
+
+.management-product-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: clamp(18px, 2vw, 28px);
+}
+
+.management-image-editor {
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+  gap: clamp(18px, 2vw, 28px);
+}
+
+@media (max-width: 920px) {
+  .auth.auth-landing .role-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .auth.auth-landing .role-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    width: min(100%, calc(50% - 12px));
+    justify-self: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .auth.auth-landing {
+    padding: 16px 12px 28px;
+  }
+
+  .auth.auth-landing .launcher-card {
+    padding: 28px 18px;
+  }
+
+  .auth.auth-landing .role-actions {
+    flex-direction: column;
+  }
+
+  .auth.auth-landing .role-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .auth.auth-landing .role-card:last-child:nth-child(odd) {
+    grid-column: auto;
+    width: 100%;
+  }
+
+  .dash-shell {
+    width: calc(100% - 24px);
+  }
+
+  .dash-card,
+  .management-page-content {
+    padding: 20px 16px;
+  }
+
+  .management-image-editor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+dialog.management-dialog.product-image-dialog {
+  width: min(1040px, calc(100% - 40px));
+}
+
+.management-image-dropzone {
+  border: 2px dashed var(--pixel-ink) !important;
+  box-shadow: inset 4px 4px 0 #fff, 5px 5px 0 var(--pixel-ink) !important;
+}
+
+.management-image-card {
+  border: 2px solid var(--pixel-ink) !important;
+  box-shadow: 4px 4px 0 var(--pixel-ink) !important;
+}
+
+.management-image-card > img {
+  border: 2px solid var(--pixel-ink) !important;
+}
+
+body.customer,
+body.dashboard {
+  background-color: #b9e8ff !important;
+  background-image:
+    linear-gradient(rgba(28, 27, 58, .055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(28, 27, 58, .055) 1px, transparent 1px),
+    linear-gradient(180deg, #b9e8ff 0 35%, #ddf4de 35% 65%, #fff0ad 65% 100%) !important;
+  background-size: 4px 4px, 4px 4px, 100% 100% !important;
+  background-attachment: scroll, scroll, fixed !important;
+}
+
+body.staff {
+  background-color: #b9caff !important;
+  background-image:
+    linear-gradient(rgba(28, 27, 58, .055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(28, 27, 58, .055) 1px, transparent 1px),
+    linear-gradient(180deg, #b9caff 0 35%, #e2d5ff 35% 65%, #ffe0c4 65% 100%) !important;
+  background-size: 4px 4px, 4px 4px, 100% 100% !important;
+  background-attachment: scroll, scroll, fixed !important;
+}
+
+:is(.card, .panel, .auth-card, .launcher-card, .role-card, .dash-card, .shop-product-card,
+  .management-page-content, .management-dialog, .management-card,
+  .cart-card, .order-card, .product-detail-card, .error-card,
+  .modal, .toast, .notification-item, .dash-empty, .dash-alert,
+  .dash-list li, dialog, fieldset, .chat-panel, .chat-panel-header) {
+  border: var(--pixel-border) !important;
+  box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 #d6d4ec, var(--pixel-shadow) !important;
+  backdrop-filter: none !important;
+}
+
+:is(.card, .panel, .auth-card, .launcher-card, .role-card, .dash-card,
+  .shop-product-card, .management-page-content, .management-dialog,
+  .management-card, .cart-card, .order-card, .product-detail-card,
+  .error-card, .modal, .toast, .notification-item, .dash-empty,
+  .dash-alert, .dash-list li, dialog, fieldset) {
+  background-color: #fffdf7 !important;
+}
+
+:is(.dash-top, .dash-header, .management-topbar, .management-header,
+  .shop-header, .shop-topbar, .chat-panel-header) {
+  border: var(--pixel-border) !important;
+  box-shadow: var(--pixel-shadow) !important;
+  backdrop-filter: none !important;
+}
+
+:is(button, input[type="button"], input[type="submit"], input[type="reset"],
+  .btn, .dash-button, .management-button, .role-action, .shop-search button,
+  .shop-quick-links a, .management-role-switch a, .management-user-profile) {
+  border: 2px solid var(--pixel-ink) !important;
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .55),
+    inset -3px -3px 0 rgba(28, 27, 58, .18), 0 5px 0 var(--pixel-ink) !important;
+  text-shadow: 1px 1px 0 rgba(28, 27, 58, .35);
+}
+
+:is(button, .btn, .dash-button, .management-button, .role-action,
+  .shop-search button, .management-user-profile):hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .6),
+    inset -3px -3px 0 rgba(28, 27, 58, .18), 0 7px 0 var(--pixel-ink) !important;
+}
+
+:is(button, .btn, .dash-button, .management-button, .role-action,
+  .shop-search button):active:not(:disabled) {
+  transform: translate(2px, 3px);
+  box-shadow: inset 3px 3px 0 rgba(28, 27, 58, .18),
+    0 1px 0 var(--pixel-ink) !important;
+}
+
+:is(input:not([type="checkbox"]):not([type="radio"]), select, textarea,
+  .dash-field input, .dash-field select, .dash-field textarea,
+  .management-field input, .management-field select, .management-field textarea) {
+  border: 2px solid var(--pixel-ink) !important;
+  box-shadow: inset 3px 3px 0 #ecebf7 !important;
+}
+
+:is(input, select, textarea):focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 3px dashed #c23a1a !important;
+  outline-offset: 3px !important;
+}
+
+:is(.badge, .dash-badge, .status-badge, .management-badge, .chip,
+  .secure-chip, .tag, .pill) {
+  border: 2px solid var(--pixel-ink);
+  box-shadow: 3px 3px 0 var(--pixel-ink);
+}
+
+table {
+  border: 3px solid var(--pixel-ink);
+  border-collapse: collapse;
+  box-shadow: var(--pixel-shadow);
+}
+
+:is(th, td) {
+  border: 2px solid var(--pixel-ink);
+}
+
+th {
+  background: #ffe27a;
+  color: var(--pixel-ink);
+}
+
+tr:nth-child(even) td {
+  background: #f6f5fd;
+}
+
+img,
+svg,
+video,
+canvas {
+  image-rendering: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

@@ -73,19 +73,24 @@ class ProductImageStorageServiceTest {
 
         assertThatThrownBy(() -> service.upload(12L, file))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("PNG hoặc JPG");
+                .hasMessageContaining("không được hỗ trợ");
         verifyNoInteractions(client);
     }
 
     @Test
-    void rejectsWebpImageContentBeforeCallingStorage() {
-        var file = new MockMultipartFile("file", "photo.webp", "image/webp",
-                new byte[]{'R', 'I', 'F', 'F', 0, 0, 0, 0, 'W', 'E', 'B', 'P'});
-
-        assertThatThrownBy(() -> service.upload(12L, file))
-                .isInstanceOf(ApiException.class)
-                .hasMessageContaining("PNG hoặc JPG");
-        verifyNoInteractions(client);
+    void uploadsCommonWebAndDeviceImageFormats() {
+        assertThat(uploadImage("photo.gif", "GIF89a".getBytes())).endsWith(".gif");
+        assertThat(uploadImage("photo.webp",
+                new byte[]{'R', 'I', 'F', 'F', 0, 0, 0, 0, 'W', 'E', 'B', 'P'})).endsWith(".webp");
+        assertThat(uploadImage("photo.bmp", new byte[]{'B', 'M', 1, 2})).endsWith(".bmp");
+        assertThat(uploadImage("photo.tiff", new byte[]{'I', 'I', 42, 0})).endsWith(".tiff");
+        assertThat(uploadImage("photo.avif",
+                new byte[]{0, 0, 0, 0, 'f', 't', 'y', 'p', 'a', 'v', 'i', 'f'})).endsWith(".avif");
+        assertThat(uploadImage("photo.heic",
+                new byte[]{0, 0, 0, 0, 'f', 't', 'y', 'p', 'h', 'e', 'i', 'c'})).endsWith(".heic");
+        assertThat(uploadImage("photo.ico", new byte[]{0, 0, 1, 0})).endsWith(".ico");
+        verify(client, org.mockito.Mockito.times(7))
+                .putObject(any(PutObjectRequest.class), any(RequestBody.class));
     }
 
     @Test
@@ -152,5 +157,10 @@ class ProductImageStorageServiceTest {
         assertThat(service.deleteIfManaged(13L, imageUrl)).isFalse();
         assertThat(service.deleteIfManaged(12L, imageUrl)).isTrue();
         assertThat(Files.exists(stored)).isFalse();
+    }
+
+    private String uploadImage(String fileName, byte[] bytes) {
+        return service.upload(12L,
+                new MockMultipartFile("file", fileName, "image/*", bytes));
     }
 }
