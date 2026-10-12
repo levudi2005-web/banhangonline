@@ -172,20 +172,15 @@
   async function load() {
     try {
       const stores = await getJson("/api/stores");
-      let store = stores.find(item => String(item.id) === storeId);
+      let store = stores[0];
+      storeId = store ? String(store.id) : "";
       let item;
       if (productSlug) {
-        const candidates = store ? [store] : stores;
-        for (const candidate of candidates) {
+        if (store) {
           const catalog = await getJson(
-            `/api/catalog/stores/${encodeURIComponent(candidate.id)}/products`
+            `/api/catalog/stores/${encodeURIComponent(store.id)}/products`
           );
           item = catalog.find(product => product.slug === productSlug);
-          if (item) {
-            store = candidate;
-            storeId = String(candidate.id);
-            break;
-          }
         }
       } else if (/^\d+$/.test(storeId || "") && /^\d+$/.test(productId || "")) {
         item = await getJson(

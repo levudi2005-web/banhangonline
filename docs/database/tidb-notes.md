@@ -1,4 +1,9 @@
-# TiDB Cloud implementation notes
+# Historical TiDB Cloud implementation notes
+
+> Historical reference only. The current database target is MariaDB 10.11.x;
+> use `database/sql/mariadb_full_schema.sql` and the MariaDB JDBC configuration.
+> The TiDB connection details below are no longer the application's active
+> datasource configuration.
 
 ## Connection and runtime
 

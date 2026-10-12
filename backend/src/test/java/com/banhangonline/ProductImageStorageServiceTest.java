@@ -73,7 +73,18 @@ class ProductImageStorageServiceTest {
 
         assertThatThrownBy(() -> service.upload(12L, file))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("PNG, JPG hoặc WEBP");
+                .hasMessageContaining("PNG hoặc JPG");
+        verifyNoInteractions(client);
+    }
+
+    @Test
+    void rejectsWebpImageContentBeforeCallingStorage() {
+        var file = new MockMultipartFile("file", "photo.webp", "image/webp",
+                new byte[]{'R', 'I', 'F', 'F', 0, 0, 0, 0, 'W', 'E', 'B', 'P'});
+
+        assertThatThrownBy(() -> service.upload(12L, file))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("PNG hoặc JPG");
         verifyNoInteractions(client);
     }
 

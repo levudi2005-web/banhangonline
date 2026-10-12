@@ -80,4 +80,21 @@ class AuthControllerTest {
         verify(auth).authenticateStaff(request.account(), request.password());
         verify(cookies).start(owner, true, "Đăng nhập quản trị thành công", servletRequest);
     }
+
+    @Test
+    void customerLoginUsesCustomerOnlyAuthenticationPath() {
+        LoginRequest request = new LoginRequest("buyer1", "Test-password-25", false);
+        HttpServletRequest servletRequest = mock(HttpServletRequest.class);
+        User customer = new User();
+        customer.setId(9L);
+        Role role = new Role();
+        role.setName("CUSTOMER");
+        customer.getRoles().add(role);
+        when(auth.authenticateCustomer(request.account(), request.password())).thenReturn(customer);
+
+        controller.login(request, servletRequest);
+
+        verify(auth).authenticateCustomer(request.account(), request.password());
+        verify(cookies).start(customer, false, "Đăng nhập thành công", servletRequest);
+    }
 }

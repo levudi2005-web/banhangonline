@@ -1,9 +1,8 @@
 # Local development with XAMPP
 
-The `local` Spring profile is for the XAMPP MariaDB instance on this machine. It
-binds the application to `127.0.0.1` and defaults the datasource to
-`banhangonline_local` on port `3306`, using XAMPP's `root` account with an empty
-password. Override those defaults with `LOCAL_DB_HOST`, `LOCAL_DB_PORT`,
+The `local` Spring profile is for a MariaDB instance. It binds the application
+to `127.0.0.1` and defaults the datasource to `usadshop` on port `3306`, using
+the local `root` account with an empty password. Override those defaults with `LOCAL_DB_HOST`, `LOCAL_DB_PORT`,
 `LOCAL_DB_NAME`, `LOCAL_DB_USERNAME`, and `LOCAL_DB_PASSWORD` when needed.
 
 From the repository root, start the backend with:

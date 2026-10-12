@@ -315,8 +315,9 @@
     const profile = document.createElement("a");
     profile.href = `${AppRoutes.getRoute("customer.account")}?area=${area}`;
     profile.className = "management-user-profile";
-    profile.setAttribute("aria-label", "Thông tin tài khoản");
-    profile.textContent = "›";
+    profile.setAttribute("aria-label", "Xem thông tin tài khoản");
+    profile.title = "Xem thông tin tài khoản";
+    profile.textContent = "Hồ sơ";
     userMenu.append(identity, profile);
     topbar.append(menuButton, topTitle, storefrontLink, storeGroup, userMenu);
 
@@ -1060,13 +1061,13 @@
     preview.hidden = true;
     const placeholder = element("div", undefined, "management-image-placeholder");
     placeholder.append(element("strong", "Thư viện ảnh sản phẩm"),
-      element("span", "Tối đa 8 ảnh · PNG, JPG hoặc WEBP · tối đa 5 MB mỗi ảnh"));
+      element("span", "Tối đa 8 ảnh · PNG hoặc JPG · tối đa 5 MB mỗi ảnh"));
     dropzone.append(preview, placeholder);
 
     const controls = element("div", undefined, "management-image-controls");
     const fileInput = document.createElement("input");
     fileInput.type = "file";
-    fileInput.accept = "image/png,image/jpeg,image/webp";
+    fileInput.accept = ".png,.jpg,.jpeg,image/png,image/jpeg";
     fileInput.multiple = true;
     fileInput.className = "management-file-input";
     fileInput.tabIndex = -1;
@@ -1192,9 +1193,9 @@
 
     function validateFile(file) {
       const extension = file.name.split(".").pop().toLowerCase();
-      if (!["png", "jpg", "jpeg", "webp"].includes(extension)
-          || (file.type && !["image/png", "image/jpeg", "image/webp"].includes(file.type))) {
-        return "Chỉ hỗ trợ ảnh PNG, JPG hoặc WEBP.";
+      if (!["png", "jpg", "jpeg"].includes(extension)
+          || (file.type && !["image/png", "image/jpeg"].includes(file.type))) {
+        return "Chỉ hỗ trợ ảnh PNG hoặc JPG.";
       }
       if (file.size > 5 * 1024 * 1024) {
         return "Mỗi ảnh sản phẩm không được vượt quá 5 MB.";

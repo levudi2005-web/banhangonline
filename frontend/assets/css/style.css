@@ -1,4 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=VT323&display=swap');
+@font-face {
+  font-family: "Pixelify Sans";
+  src: url("../fonts/PixelifySans-variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
 
 /* =====================================================
    BANHANGONLINE — PIXEL SHOP (tươi sáng, nhiều màu)
@@ -104,7 +110,7 @@ body {
 
   margin: 0;
   min-height: 100vh;
-  font-family: "Pixelify Sans", "VT323", "Be Vietnam Pro", "Segoe UI", Arial, sans-serif;
+  font-family: var(--ui-font-body);
   font-size: 17px;
   font-weight: 500;
   line-height: 1.5;
@@ -1420,11 +1426,16 @@ hr {
   --ui-success-surface: var(--mint-l);
   --ui-warning-surface: var(--yellow-l);
   --ui-focus: var(--yellow);
-  --ui-font-body: "Pixelify Sans", "VT323", "Be Vietnam Pro", "Segoe UI", Arial, sans-serif;
+  --ui-font-body: "Pixelify Sans", "Courier New", monospace;
   --ui-card-radius: 0;
   --ui-control-radius: 0;
   --ui-transition: .1s steps(2, end);
   --ui-shadow-soft: 6px 6px 0 var(--ink);
   --ui-shadow-card: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r4), 12px 12px 0 rgba(28, 27, 58, .35);
   --ui-shadow-dialog: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r4), 10px 10px 0 rgba(28, 27, 58, .35);
+}
+
+body,
+body :where(button, input, select, textarea) {
+  font-family: var(--ui-font-body);
 }

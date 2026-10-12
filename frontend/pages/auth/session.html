@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../../assets/css/style.css">
   <link rel="stylesheet" href="../../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../../assets/css/auth.css">
   <title>Tài khoản — BanHangOnline</title>
 </head>
-<body class="customer" data-auth-mode="session">
+<body class="customer account-page" data-auth-mode="session">
   <main class="auth">
     <section class="panel">
       <div class="card auth-card">
@@ -18,51 +19,58 @@
         <p class="sub">Thông tin được xác thực từ phiên hiện tại trên máy chủ.</p>
         <p id="session-state" class="form-msg show" role="status">Đang tải thông tin tài khoản…</p>
         <div id="account-info" hidden>
-          <p><b id="account-name"></b></p>
-          <p>Vai trò: <span id="account-roles"></span></p>
-          <p>Số điện thoại: <span id="account-phone"></span></p>
-          <p id="customer-links" class="dash-inline" hidden>
+          <section class="account-summary" aria-labelledby="account-summary-title">
+            <h2 id="account-summary-title">Thông tin hiện tại</h2>
+            <dl class="account-facts">
+              <div><dt>Họ và tên</dt><dd id="account-name"></dd></div>
+              <div><dt>Vai trò</dt><dd id="account-roles"></dd></div>
+              <div><dt>Số điện thoại</dt><dd id="account-phone"></dd></div>
+            </dl>
+          </section>
+          <p id="customer-links" class="dash-inline account-customer-links" hidden>
             <a class="dash-link" href="/pages/customer/index.html">Cửa hàng</a>
             <a class="dash-link" href="/pages/customer/cart.html">Giỏ hàng</a>
             <a class="dash-link" href="/pages/customer/orders.html">Đơn hàng</a>
             <a class="dash-link" href="/pages/customer/addresses.html">Địa chỉ</a>
             <a class="dash-link" href="/pages/customer/notifications.html">Thông báo</a>
           </p>
-          <form id="profile-form" data-endpoint="/api/users/profile" novalidate>
-            <h2>Thông tin tài khoản</h2>
-            <div class="row">
+          <div class="account-actions">
+            <form id="profile-form" data-endpoint="/api/users/profile" novalidate>
+              <h2>Cập nhật thông tin</h2>
+              <div class="row">
+                <div class="field">
+                  <label for="profileFullName">Họ và tên</label>
+                  <input id="profileFullName" name="fullName" autocomplete="name" data-v="required" data-required-message="Vui lòng nhập họ và tên.">
+                  <small class="required-hint">Thông tin bắt buộc</small><p class="err"></p>
+                </div>
+                <div class="field">
+                  <label for="profileUsername">Tên đăng nhập</label>
+                  <input id="profileUsername" name="username" autocomplete="username" data-v="required username" data-required-message="Vui lòng nhập tên đăng nhập.">
+                  <small class="required-hint">Thông tin bắt buộc</small><p class="err"></p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="profileEmail">Email</label>
+                  <input id="profileEmail" name="email" type="email" autocomplete="email" data-v="required email" data-required-message="Vui lòng nhập email.">
+                  <small class="required-hint">Thông tin bắt buộc</small><p class="err"></p>
+                </div>
+                <div class="field">
+                  <label for="profilePhone">Số điện thoại mới (để trống nếu không đổi)</label>
+                  <input id="profilePhone" name="phone" type="tel" autocomplete="tel" data-v="phone" placeholder="Nhập số mới nếu cần đổi">
+                  <p class="err"></p>
+                </div>
+              </div>
               <div class="field">
-                <label for="profileFullName">Họ và tên</label>
-                <input id="profileFullName" name="fullName" autocomplete="name" data-v="required" data-required-message="Vui lòng nhập họ và tên.">
+                <label for="profilePhoneLastFour">Bốn số cuối của số điện thoại hiện tại</label>
+                <input id="profilePhoneLastFour" name="phoneLastFour" inputmode="numeric" autocomplete="off" maxlength="4" data-v="required phoneLastFour" data-required-message="Thông tin bắt buộc">
                 <small class="required-hint">Thông tin bắt buộc</small><p class="err"></p>
               </div>
-              <div class="field">
-                <label for="profileUsername">Tên đăng nhập</label>
-                <input id="profileUsername" name="username" autocomplete="username" data-v="required username" data-required-message="Vui lòng nhập tên đăng nhập.">
-                <small class="required-hint">Thông tin bắt buộc</small><p class="err"></p>
-              </div>
-            </div>
-            <div class="row">
-              <div class="field">
-                <label for="profileEmail">Email</label>
-                <input id="profileEmail" name="email" type="email" autocomplete="email" data-v="required email" data-required-message="Vui lòng nhập email.">
-                <small class="required-hint">Thông tin bắt buộc</small><p class="err"></p>
-              </div>
-              <div class="field">
-                <label for="profilePhone">Số điện thoại mới (để trống nếu không đổi)</label>
-                <input id="profilePhone" name="phone" type="tel" autocomplete="tel" data-v="phone" placeholder="Nhập số mới nếu cần đổi">
-                <p class="err"></p>
-              </div>
-            </div>
-            <div class="field">
-              <label for="profilePhoneLastFour">Bốn số cuối của số điện thoại hiện tại</label>
-              <input id="profilePhoneLastFour" name="phoneLastFour" inputmode="numeric" autocomplete="off" maxlength="4" data-v="required phoneLastFour" data-required-message="Thông tin bắt buộc">
-              <small class="required-hint">Thông tin bắt buộc</small><p class="err"></p>
-            </div>
-            <p class="form-msg" role="alert" aria-live="polite"></p>
-            <button class="btn" type="submit">Xác minh và cập nhật</button>
-          </form>
-          <a id="logout-link" class="btn" href="/pages/customer/auth/logout.html">Đăng xuất</a>
+              <p class="form-msg" role="alert" aria-live="polite"></p>
+              <button class="btn" type="submit">Xác minh và cập nhật</button>
+            </form>
+            <a id="logout-link" class="btn ghost" href="/pages/customer/auth/logout.html">Đăng xuất</a>
+          </div>
         </div>
         <p id="session-error" class="form-msg" role="alert" hidden></p>
         <button id="session-retry" class="btn ghost" type="button" hidden>Thử tải lại</button>

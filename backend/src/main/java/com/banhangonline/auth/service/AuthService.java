@@ -79,6 +79,15 @@ public class AuthService {
         return u;
     }
 
+    public User authenticateCustomer(String account, String password) {
+        User u = authenticate(account, password);
+        if (!u.hasRole("CUSTOMER")) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "CUSTOMER_ACCESS_DENIED",
+                    "Tài khoản này không có quyền truy cập khu vực khách hàng");
+        }
+        return u;
+    }
+
     @Transactional
     public User registerCustomer(RegisterRequest r) {
         Rules.password(r.password(), r.confirmPassword());

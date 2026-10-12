@@ -103,6 +103,22 @@ class AuthServiceTest {
         assertThat(auth.authenticate("buyer@example.com", PASSWORD)).isSameAs(user);
     }
 
+    @Test
+    void customerLoginRejectsOwnerOnlyAccounts() {
+        User owner = new User();
+        owner.setUsername("owner1");
+        owner.setPasswordHash(encoder.encode(PASSWORD));
+        owner.setStatus(UserStatus.ACTIVE);
+        Role ownerRole = new Role();
+        ownerRole.setName("OWNER");
+        owner.getRoles().add(ownerRole);
+        when(users.findByUsername("owner1")).thenReturn(Optional.of(owner));
+
+        assertThatThrownBy(() -> auth.authenticateCustomer("owner1", PASSWORD))
+                .isInstanceOf(ApiException.class)
+                .extracting("code").isEqualTo("CUSTOMER_ACCESS_DENIED");
+    }
+
     private RegisterRequest registration(String email, String username, String phone) {
         return new RegisterRequest(
                 "Buyer Name", username, email, phone, PASSWORD, PASSWORD,

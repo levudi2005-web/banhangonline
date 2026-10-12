@@ -40,7 +40,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<UserResponse>> login(@Valid @RequestBody LoginRequest r, HttpServletRequest req) {
-        User u = auth.authenticate(r.account(), r.password());
+        User u = auth.authenticateCustomer(r.account(), r.password());
         return cookies.start(u, r.remember(), "Đăng nhập thành công", req);
     }
 

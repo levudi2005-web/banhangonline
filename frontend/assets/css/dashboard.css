@@ -21,7 +21,7 @@ body.dashboard {
     radial-gradient(ellipse at 100% 18%, rgba(31, 35, 40, .035), transparent 30rem),
     var(--dash-bg);
   color: var(--dash-ink);
-  font: 16px/1.6 "Pixelify Sans", "Be Vietnam Pro", "Courier New", monospace;
+  font: 16px/1.6 var(--ui-font-body);
 }
 
 .dash-shell { width: min(1760px, calc(100% - clamp(32px, 4vw, 80px))); margin: 0 auto; padding: 22px 0 64px; }
@@ -160,9 +160,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--ui-focus); outl
 .management-chat-messages { height: min(56vh, 480px); min-height: 280px; border: 1px solid var(--dash-line); border-radius: 13px; }
 .chat-inbox-thread-card .chat-compose { padding-inline: 0; border-top: 0; }
 .chat-unread-preview { color: var(--dash-ink) !important; font-weight: 750; }
-body.dashboard .chat-launcher { border: 0; border-radius: 0; background: var(--coral); color: #fff; font: 700 17px/1.35 "Pixelify Sans", "VT323", "Be Vietnam Pro", "Courier New", monospace; box-shadow: inset 4px 4px 0 rgba(255,255,255,.45), inset -4px -4px 0 var(--coral-d), var(--r4), 6px 6px 0 var(--ink); }
+body.dashboard .chat-launcher { border: 0; border-radius: 0; background: var(--coral); color: #fff; font: 700 17px/1.35 var(--ui-font-body); box-shadow: inset 4px 4px 0 rgba(255,255,255,.45), inset -4px -4px 0 var(--coral-d), var(--r4), 6px 6px 0 var(--ink); }
 body.dashboard .chat-panel { border: 0; border-radius: 0; box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r4), 8px 8px 0 var(--ink); }
-body.dashboard .chat-panel-header { background: var(--coral); font-family: "Pixelify Sans", "VT323", "Be Vietnam Pro", "Courier New", monospace; }
+body.dashboard .chat-panel-header { background: var(--coral); font-family: var(--ui-font-body); }
 body.dashboard .chat-messages { background: #e8f6ff; }
 body.dashboard .chat-message,
 body.dashboard .chat-message.mine { border-radius: 0; box-shadow: var(--r3); }
@@ -1700,7 +1700,7 @@ body.dashboard {
   min-height: 100vh;
   margin: 0;
   color: var(--ink);
-  font: 17px/1.5 "Pixelify Sans", "VT323", "Be Vietnam Pro", "Segoe UI", Arial, sans-serif;
+  font: 17px/1.5 var(--ui-font-body);
   background-color: var(--b1);
   background-image:
     conic-gradient(var(--b6) 25%, transparent 0 50%, var(--b6) 0 75%, transparent 0),
@@ -2021,7 +2021,7 @@ body.dashboard .shop-search button {
   background: var(--coral);
   color: #fff;
   box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .5), inset -4px -4px 0 var(--coral-d), var(--r4), 0 6px 0 var(--ink);
-  font: 700 17px/1.3 "Pixelify Sans", "VT323", "Be Vietnam Pro", "Segoe UI", Arial, sans-serif;
+  font: 700 17px/1.3 var(--ui-font-body);
   text-shadow: 2px 2px 0 var(--coral-d);
   transition: transform .1s steps(2, end), box-shadow .1s steps(2, end), background .1s steps(2, end);
 }
@@ -2234,6 +2234,63 @@ body.dashboard .management-dialog {
   border: 0;
   border-radius: 0;
   box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r4), 10px 10px 0 rgba(28, 27, 58, .35);
+}
+
+body.dashboard .management-user-profile {
+  display: inline-flex;
+  min-width: 76px;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  background: var(--yellow);
+  box-shadow: var(--r3), 4px 4px 0 var(--ink);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+body.dashboard .management-user-profile:hover {
+  transform: translate(-1px, -1px);
+  background: var(--mint-l);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+@media (max-width: 760px) {
+  body.dashboard .management-topbar {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-block: 10px;
+  }
+
+  body.dashboard .management-top-title {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  body.dashboard .management-topbar {
+    row-gap: 8px;
+  }
+
+  body.dashboard .management-store-picker {
+    flex: 1;
+    margin-left: 0;
+  }
+
+  body.dashboard .management-user {
+    margin-left: auto;
+  }
+
+  body.dashboard .management-user-profile {
+    min-width: 68px;
+    padding-inline: 8px;
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 600px) {

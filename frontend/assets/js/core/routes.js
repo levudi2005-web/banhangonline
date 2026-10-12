@@ -36,6 +36,9 @@
       orders: "/quan-ly/staff/don-hang",
       notifications: "/quan-ly/staff/thong-bao"
     },
+    management: {
+      login: "/quan-ly/dang-nhap?area=management"
+    },
     owner: {
       login: "/quan-ly/dang-nhap?area=owner",
       forgot: "/quan-ly/quen-mat-khau?area=owner",
@@ -74,6 +77,7 @@
     "customer.notifications": ROUTES.customer.notifications,
     "customer.addresses": ROUTES.customer.addresses,
     "staff.login": ROUTES.staff.login,
+    "management.login": ROUTES.management.login,
     "staff.forgot": ROUTES.staff.forgot,
     "staff.reset": ROUTES.staff.reset,
     "staff.logout": ROUTES.staff.logout,

@@ -5,6 +5,7 @@
   const status = document.querySelector("#cart-status");
   const totals = document.querySelector("#cart-total");
   const storeSelect = document.querySelector("#cart-store");
+  const storeName = document.querySelector("#cart-store-name");
   const confirmation = document.querySelector("#checkout-result");
   const clearButton = document.querySelector("#cart-clear");
 
@@ -42,7 +43,7 @@
     totals.textContent = "0 VND";
     status.className = "dash-status";
     if (!storeId) {
-      status.textContent = "Chọn cửa hàng để xem giỏ hàng.";
+      status.textContent = "Hiện chưa có cửa hàng hoạt động.";
       return;
     }
     try {
@@ -162,17 +163,14 @@
     const response = await fetch(`${API}/api/stores`);
     const result = await response.json().catch(() => null);
     if (!response.ok || !result || !result.success) throw new Error("Không thể tải cửa hàng.");
-    storeSelect.replaceChildren();
-    result.data.forEach(store => {
-      const option = document.createElement("option");
-      option.value = store.id;
-      option.textContent = store.name;
-      storeSelect.append(option);
-    });
-    const preferred = new URLSearchParams(location.search).get("store")
-      || localStorage.getItem("selectedStoreId");
-    if (preferred && result.data.some(store => String(store.id) === preferred)) storeSelect.value = preferred;
-    if (storeSelect.value) localStorage.setItem("selectedStoreId", storeSelect.value);
+    const store = result.data[0];
+    storeSelect.value = store ? String(store.id) : "";
+    if (storeName) {
+      storeName.textContent = store
+        ? `Nhận hàng tại ${store.name}. Thanh toán tiền mặt khi nhận.`
+        : "Hiện chưa có cửa hàng hoạt động.";
+    }
+    if (store) localStorage.setItem("selectedStoreId", String(store.id));
     await loadCart();
   }
 
@@ -180,7 +178,7 @@
     event.preventDefault();
     const button = event.currentTarget.querySelector("button[type=submit]");
     if (!storeSelect.value) {
-      status.textContent = "Chọn cửa hàng trước khi đặt.";
+      status.textContent = "Hiện chưa có cửa hàng hoạt động.";
       status.className = "dash-status error";
       return;
     }

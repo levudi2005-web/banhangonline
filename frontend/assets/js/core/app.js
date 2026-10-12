@@ -88,7 +88,7 @@ document.addEventListener("submit",async e=>{const f=e.target;if(!f.dataset.endp
    if(!d.success||!d.data||!Array.isArray(d.data.roles))throw new Error("Máy chủ không trả về thông tin vai trò hợp lệ.");
    const roles=d.data&&Array.isArray(d.data.roles)?d.data.roles:[];
    const requestedArea=new URLSearchParams(location.search).get("area");
-   const requiredRole=requestedArea==="owner"?"OWNER":requestedArea==="staff"?"STAFF":f.dataset.loginRole;
+   const requiredRole=requestedArea==="owner"?"OWNER":requestedArea==="staff"?"STAFF":requestedArea==="management"?"MANAGEMENT":f.dataset.loginRole;
    const allowed=requiredRole==="MANAGEMENT"?["OWNER","STAFF"]:[requiredRole];
    const role=allowed.find(candidate=>roles.includes(candidate));
    if(!role){

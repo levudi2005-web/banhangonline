@@ -58,7 +58,7 @@ public class ProductImageStorageService {
         }
         ImageFormat format = ImageFormat.from(bytes);
         if (format == null) {
-            throw ApiException.validation("Chỉ hỗ trợ ảnh PNG, JPG hoặc WEBP hợp lệ.");
+            throw ApiException.validation("Chỉ hỗ trợ ảnh PNG hoặc JPG hợp lệ.");
         }
         if (localProperties.isEnabled() && !properties.isEnabled()) {
             return uploadLocal(storeId, bytes, format);
@@ -202,8 +202,7 @@ public class ProductImageStorageService {
 
     private enum ImageFormat {
         PNG("png", "image/png"),
-        JPG("jpg", "image/jpeg"),
-        WEBP("webp", "image/webp");
+        JPG("jpg", "image/jpeg");
 
         private final String extension;
         private final String contentType;
@@ -222,11 +221,6 @@ public class ProductImageStorageService {
             if (bytes.length >= 3 && (bytes[0] & 0xff) == 0xff
                     && (bytes[1] & 0xff) == 0xd8 && (bytes[2] & 0xff) == 0xff) {
                 return JPG;
-            }
-            if (bytes.length >= 12 && bytes[0] == 'R' && bytes[1] == 'I'
-                    && bytes[2] == 'F' && bytes[3] == 'F'
-                    && bytes[8] == 'W' && bytes[9] == 'E' && bytes[10] == 'B' && bytes[11] == 'P') {
-                return WEBP;
             }
             return null;
         }
