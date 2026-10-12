@@ -17,6 +17,7 @@ class CleanUrlControllerTest {
     void forwardsCustomerCleanUrlsToTheirExistingPages() throws Exception {
         Map<String, String> routes = Map.ofEntries(
                 Map.entry("/", "/pages/customer/index.html"),
+                Map.entry("/chon-khu-vuc", "/pages/auth/index.html"),
                 Map.entry("/dang-nhap", "/pages/customer/auth/login.html"),
                 Map.entry("/dang-ky", "/pages/customer/auth/register.html"),
                 Map.entry("/quen-mat-khau", "/pages/customer/auth/forgot-password.html"),

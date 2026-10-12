@@ -11,6 +11,11 @@ public class CleanUrlController {
         return "forward:/pages/customer/index.html";
     }
 
+    @GetMapping("/chon-khu-vuc")
+    public String gateway() {
+        return "forward:/pages/auth/index.html";
+    }
+
     @GetMapping("/dang-nhap")
     public String customerLogin() {
         return "forward:/pages/customer/auth/login.html";

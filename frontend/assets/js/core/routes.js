@@ -4,7 +4,7 @@
   const API = (window.API_BASE || "").replace(/\/$/, "");
   const ROUTES = Object.freeze({
     public: {
-      gateway: "/",
+      gateway: "/chon-khu-vuc",
       forbidden: "/403",
       notFound: "/404"
     },
