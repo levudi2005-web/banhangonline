@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="stylesheet" href="../../assets/css/style.css">
 
   <title>BanHangOnline — Chọn khu vực</title>
@@ -85,7 +85,7 @@
           #f3f4f6 48%,
           #eef0f3 100%
         );
-      font-family: "Pixelify Sans", "Be Vietnam Pro", "Courier New", monospace;
+      font-family: var(--ui-font-body);
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
@@ -317,9 +317,9 @@
       box-shadow: var(--shadow-sm);
 
       transition:
-        transform .28s var(--ease),
-        box-shadow .28s var(--ease),
-        border-color .28s var(--ease);
+        transform var(--motion-base) var(--motion-bounce),
+        box-shadow var(--motion-base) var(--motion-ease),
+        border-color var(--motion-base) var(--motion-ease);
     }
 
     .role-card:hover {
@@ -735,25 +735,38 @@
             <span class="role-meta">
 
               <strong>
-                Chủ cửa hàng / Nhân viên
+                Chủ cửa hàng
               </strong>
 
               <small>
-                Đăng nhập khu vực quản lý cửa hàng bằng tài khoản chủ
-                hoặc nhân viên đã được cấp.
+                Đăng nhập khu vực quản lý bằng tài khoản chủ cửa hàng đã được duyệt.
               </small>
 
             </span>
 
-            <a
-              class="role-action"
-              data-route="management.login"
-              href="/quan-ly/dang-nhap?area=management"
-            >
-              <span>Đăng nhập quản lý</span>
-              <i data-i="right"></i>
-            </a>
+            <div class="role-actions">
+              <a class="role-action" data-route="owner.login" href="/quan-ly/dang-nhap?area=owner">
+                <span>Đăng nhập chủ cửa hàng</span>
+                <i data-i="right"></i>
+              </a>
+            </div>
 
+          </section>
+
+          <section class="role-card">
+            <span class="role-icon staff">
+              <i data-i="store"></i>
+            </span>
+            <span class="role-meta">
+              <strong>Nhân viên cửa hàng</strong>
+              <small>Đăng nhập bằng tài khoản nhân viên được chủ cửa hàng cấp.</small>
+            </span>
+            <div class="role-actions">
+              <a class="role-action" data-route="staff.login" href="/quan-ly/dang-nhap?area=staff">
+                <span>Đăng nhập nhân viên</span>
+                <i data-i="right"></i>
+              </a>
+            </div>
           </section>
 
         </div>
@@ -761,7 +774,7 @@
 
         <!-- Footer -->
         <p class="gateway-note">
-          Đăng nhập khách hàng và đăng nhập quản lý cửa hàng là hai khu vực riêng.
+          Đăng nhập mua hàng, chủ cửa hàng và nhân viên là các khu vực riêng.
         </p>
 
       </div>

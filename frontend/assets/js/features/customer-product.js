@@ -45,7 +45,7 @@
 
   function render(productData, store, images, galleryError) {
     product = productData;
-    const categoryName = product.categoryName || "Sản phẩm";
+    const categoryName = AppRoutes.getCategoryDisplayName(product.categoryName);
     document.title = `${product.name} — BanHangOnline`;
     document.querySelector("#product-category-crumb").textContent = categoryName;
     document.querySelector("#product-category").textContent = categoryName;

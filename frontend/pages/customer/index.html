@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="vi">
 <head>
+  <link rel="icon" type="image/png" href="/favicon.png">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../../assets/css/dashboard.css">
@@ -29,10 +30,10 @@
         <input id="product-search" name="q" type="search" placeholder="Bạn cần tìm sản phẩm gì?" autocomplete="off">
         <button type="submit" aria-label="Tìm kiếm">Tìm kiếm</button>
       </form>
-      <nav class="shop-quick-links" aria-label="Tài khoản và giỏ hàng">
-        <div id="public-admin-quick-actions" class="shop-admin-quick-actions" hidden></div>
-        <a href="/pages/auth/session.html?area=customer"><span aria-hidden="true">♙</span><span>Tài khoản</span></a>
-        <a href="/pages/customer/cart.html"><span aria-hidden="true">▣</span><span>Giỏ hàng</span></a>
+      <nav class="shop-quick-links" aria-label="Tài khoản, quản trị cửa hàng và giỏ hàng">
+        <a id="shop-account-link" href="/dang-nhap"><span aria-hidden="true">♙</span><span data-link-label>Đăng nhập người dùng</span></a>
+        <a id="shop-cart-link" href="/gio-hang" hidden><span aria-hidden="true">▣</span><span data-link-label>Giỏ hàng</span></a>
+        <a id="shop-management-link" href="/"><span aria-hidden="true">⌂</span><span data-link-label>Đăng nhập quản lý</span></a>
       </nav>
     </header>
     <nav id="shop-category-nav" class="shop-category-nav" aria-label="Danh mục sản phẩm">

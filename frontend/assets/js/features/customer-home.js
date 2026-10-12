@@ -14,53 +14,56 @@
   let categories = [];
   let stores = [];
 
-  function renderPublicAdminActions(user) {
-    const adminContainer = document.querySelector("#public-admin-quick-actions");
-    if (!adminContainer) return;
-    adminContainer.replaceChildren();
-    if (!user || !user.roles || !Array.isArray(user.roles)) {
-      adminContainer.hidden = true;
+  function renderShopHeaderForUser(user) {
+    const accountLink = document.querySelector("#shop-account-link");
+    const cartLink = document.querySelector("#shop-cart-link");
+    const managementLink = document.querySelector("#shop-management-link");
+    if (!accountLink || !cartLink || !managementLink) return;
+
+    const roles = new Set(user && Array.isArray(user.roles) ? user.roles : []);
+    const managementRole = roles.has("OWNER") ? "OWNER" : roles.has("STAFF") ? "STAFF" : null;
+    const accountLabel = accountLink.querySelector("[data-link-label]");
+
+    if (managementRole) {
+      const area = AppRoutes.areaForRole(managementRole);
+      accountLink.href = `${AppRoutes.getRoute("customer.account")}?area=${area}`;
+      if (accountLabel) accountLabel.textContent = "Tài khoản";
+      cartLink.href = AppRoutes.getRoute(`${area}.home`);
+      cartLink.hidden = false;
+      const managementLabel = cartLink.querySelector("[data-link-label]");
+      if (managementLabel) managementLabel.textContent = "Quản trị cửa hàng";
+      managementLink.hidden = true;
       return;
     }
-    const roles = new Set(user.roles);
-    const canManageStore = roles.has("OWNER") || roles.has("STAFF");
-    if (!canManageStore) {
-      adminContainer.hidden = true;
-      return;
-    }
 
-    const dashboardLink = document.createElement("a");
-    const dashboardRoute = roles.has("OWNER") ? AppRoutes.getRoute("owner.home") : AppRoutes.getRoute("staff.home");
-    dashboardLink.href = dashboardRoute || AppRoutes.getRoute("customer.home");
-    dashboardLink.className = "shop-admin-link";
-    dashboardLink.innerHTML = '<span aria-hidden="true">⌂</span><span>Quản trị cửa hàng</span>';
-
-    const storefrontLink = document.createElement("a");
-    storefrontLink.href = AppRoutes.getRoute("customer.home");
-    storefrontLink.className = "shop-admin-link";
-    storefrontLink.innerHTML = '<span aria-hidden="true">◫</span><span>Xem cửa hàng</span>';
-
-    adminContainer.append(dashboardLink, storefrontLink);
-    adminContainer.hidden = false;
+    const isCustomer = roles.has("CUSTOMER");
+    accountLink.href = isCustomer
+      ? `${AppRoutes.getRoute("customer.account")}?area=customer`
+      : AppRoutes.getRoute("customer.login");
+    if (accountLabel) accountLabel.textContent = isCustomer ? "Tài khoản" : "Đăng nhập người dùng";
+    cartLink.href = AppRoutes.getRoute("customer.cart");
+    cartLink.hidden = !isCustomer;
+    const cartLabel = cartLink.querySelector("[data-link-label]");
+    if (cartLabel) cartLabel.textContent = "Giỏ hàng";
+    managementLink.href = AppRoutes.getRoute("gateway");
+    managementLink.hidden = isCustomer;
   }
 
   async function syncPublicAdminActions() {
-    const adminContainer = document.querySelector("#public-admin-quick-actions");
-    if (!adminContainer) return;
     try {
       const response = await fetch(`${API}/api/auth/me`, { credentials: "include" });
       if (response.status === 401) {
-        renderPublicAdminActions(null);
+        renderShopHeaderForUser(null);
         return;
       }
       const result = await response.json().catch(() => null);
       if (!response.ok || !result || !result.success || !result.data) {
-        renderPublicAdminActions(null);
+        renderShopHeaderForUser(null);
         return;
       }
-      renderPublicAdminActions(result.data);
+      renderShopHeaderForUser(result.data);
     } catch {
-      renderPublicAdminActions(null);
+      renderShopHeaderForUser(null);
     }
   }
 
@@ -132,6 +135,8 @@
         store: storeSelect.value,
         slug: product.slug
       });
+      const categoryData = categories.find(item => String(item.id) === String(product.categoryId));
+      const categoryName = AppRoutes.getCategoryDisplayName(categoryData || product.categoryName);
       const art = document.createElement("a");
       art.className = "shop-product-art";
       art.href = productUrl;
@@ -145,17 +150,16 @@
         image.addEventListener("error", () => {
           image.remove();
           art.classList.add("shop-product-art-fallback");
-          art.textContent = product.categoryName || "Sản phẩm";
+          art.textContent = categoryName;
         }, { once: true });
         art.append(image);
       } else {
         art.classList.add("shop-product-art-fallback");
-        art.textContent = product.categoryName || "Sản phẩm";
+        art.textContent = categoryName;
       }
 
       const content = document.createElement("div");
       content.className = "shop-product-content";
-      const categoryData = categories.find(item => String(item.id) === String(product.categoryId));
       const category = document.createElement(categoryData ? "a" : "span");
       category.className = "dash-badge";
       if (categoryData) {
@@ -164,7 +168,7 @@
           store: storeSelect.value
         });
       }
-      category.textContent = product.categoryName || "Sản phẩm";
+      category.textContent = categoryName;
       const name = document.createElement("h3");
       const nameLink = document.createElement("a");
       nameLink.href = productUrl;
@@ -284,7 +288,7 @@
     categories.forEach(category => {
       const option = document.createElement("option");
       option.value = category.id;
-      option.textContent = category.name;
+      option.textContent = AppRoutes.getCategoryDisplayName(category);
       option.dataset.slug = category.slug;
       categorySelect.append(option);
     });
@@ -309,7 +313,7 @@
           slug: category.slug,
           store: storeSelect.value
         });
-        link.textContent = category.name;
+        link.textContent = AppRoutes.getCategoryDisplayName(category);
         link.dataset.categoryId = String(category.id);
         categoryNav.append(link);
       });

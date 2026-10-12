@@ -36,7 +36,7 @@
         <targetPath>static</targetPath>
         <includes>
           <include>index.html</include>
-          <include>favicon.svg</include>
+          <include>favicon.png</include>
           <include>error/**</include>
           <include>pages/**</include>
           <include>assets/**</include>

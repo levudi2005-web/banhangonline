@@ -57,6 +57,40 @@
     }
   });
 
+  const CATEGORY_DISPLAY_NAMES = Object.freeze({
+    "dien-thoai": "Điện thoại",
+    laptop: "Laptop",
+    "may-tinh-bang": "Máy tính bảng",
+    "tai-nghe-am-thanh": "Tai nghe & âm thanh",
+    "phu-kien-dien-thoai": "Phụ kiện điện thoại",
+    "phu-kien-may-tinh": "Phụ kiện máy tính",
+    "man-hinh": "Màn hình",
+    "ban-phim": "Bàn phím",
+    "chuot-may-tinh": "Chuột máy tính",
+    "thiet-bi-mang": "Thiết bị mạng",
+    "sac-cap": "Sạc & cáp",
+    "thiet-bi-luu-tru": "Thiết bị lưu trữ"
+  });
+
+  function categorySlug(value) {
+    const name = value && typeof value === "object"
+      ? value.slug || value.name
+      : value;
+    return String(name || "")
+      .trim()
+      .toLocaleLowerCase("vi")
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .replace(/đ/g, "d")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  function getCategoryDisplayName(category) {
+    const name = category && typeof category === "object" ? category.name : category;
+    return CATEGORY_DISPLAY_NAMES[categorySlug(category)] || String(name || "Sản phẩm");
+  }
+
   const routeKeys = {
     gateway: ROUTES.public.gateway,
     forbidden: ROUTES.public.forbidden,
@@ -331,6 +365,7 @@
   window.AppRoutes = Object.freeze({
     ROUTES,
     getRoute,
+    getCategoryDisplayName,
     getHomeRoute,
     goToLogin,
     handleSessionExpired,

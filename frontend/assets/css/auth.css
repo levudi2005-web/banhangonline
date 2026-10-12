@@ -87,7 +87,7 @@
   color: var(--ui-muted);
   font-size: 13px;
   font-weight: 650;
-  transition: color .2s ease, background .2s ease, transform .2s ease;
+  transition: color var(--motion-base) var(--motion-ease), background var(--motion-base) var(--motion-ease), transform var(--motion-base) var(--motion-ease);
 }
 
 .auth:not(.auth-landing) .auth-header .back:hover {
@@ -165,7 +165,7 @@
   font: inherit;
   font-size: 13px;
   box-shadow: 2px 2px 0 rgba(38, 53, 42, .08);
-  transition: border-color .16s ease, box-shadow .16s ease;
+  transition: border-color var(--motion-base) var(--motion-ease), box-shadow var(--motion-base) var(--motion-ease);
 }
 
 .auth:not(.auth-landing) .auth-card .field select {
@@ -227,7 +227,7 @@
   height: 43px;
   transform: translateY(-50%);
   border-radius: var(--ui-control-radius);
-  transition: color .18s ease, background .18s ease, transform .18s ease;
+  transition: color var(--motion-base) var(--motion-ease), background var(--motion-base) var(--motion-ease), transform var(--motion-base) var(--motion-bounce);
 }
 
 .auth:not(.auth-landing) .auth-card .eye:hover {
@@ -305,7 +305,7 @@
   font-size: 13px;
   font-weight: 700;
   box-shadow: 3px 3px 0 rgba(38, 53, 42, .2);
-  transition: background .16s ease;
+  transition: background var(--motion-base) var(--motion-ease);
 }
 
 .auth:not(.auth-landing) .auth-card .btn:hover {
@@ -339,7 +339,7 @@
   border: 1px solid #e1e3e6;
   border-radius: var(--ui-control-radius);
   background: #f8f8f9;
-  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+  transition: border-color var(--motion-base) var(--motion-ease), background var(--motion-base) var(--motion-ease), transform var(--motion-base) var(--motion-bounce);
 }
 
 .auth:not(.auth-landing) .auth-card .switch:hover {
@@ -649,7 +649,7 @@ body.customer * {
   font-size: 18px;
   letter-spacing: .5px;
   text-shadow: 2px 2px 0 var(--coral-d);
-  transition: transform .1s steps(2, end), box-shadow .1s steps(2, end), background .1s steps(2, end);
+  transition: transform var(--motion-base) var(--motion-bounce), box-shadow var(--motion-base) var(--motion-ease), background var(--motion-base) var(--motion-ease);
 }
 
 .auth:not(.auth-landing) .auth-card .btn:hover:not(:disabled) {
@@ -747,8 +747,12 @@ body.customer .auth.auth-landing {
   background: var(--cream);
   color: var(--ink);
   box-shadow: inset 4px 4px 0 #fff, inset -4px -4px 0 var(--g3), var(--r3), 6px 6px 0 var(--ink);
-  transition: transform .12s steps(2, end), box-shadow .12s steps(2, end), background .12s steps(2, end);
+  transition: transform var(--motion-base) var(--motion-bounce), box-shadow var(--motion-base) var(--motion-ease), background var(--motion-base) var(--motion-ease);
+  animation: pixel-enter var(--motion-slow) var(--motion-bounce) both;
 }
+
+.auth.auth-landing .role-card:nth-child(2) { animation-delay: 60ms; }
+.auth.auth-landing .role-card:nth-child(3) { animation-delay: 120ms; }
 
 .auth.auth-landing .role-card:hover {
   transform: translate(-3px, -3px);
@@ -793,7 +797,7 @@ body.customer .auth.auth-landing {
   box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .5), inset -4px -4px 0 var(--coral-d), var(--r3), 0 6px 0 var(--ink);
   font-family: inherit;
   text-shadow: 2px 2px 0 var(--coral-d);
-  transition: transform .1s steps(2, end), box-shadow .1s steps(2, end), background .1s steps(2, end);
+  transition: transform var(--motion-base) var(--motion-bounce), box-shadow var(--motion-base) var(--motion-ease), background var(--motion-base) var(--motion-ease);
 }
 
 .auth.auth-landing .role-action:hover {
