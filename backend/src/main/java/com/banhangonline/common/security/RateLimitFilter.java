@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 /** Giới hạn số lần gọi các endpoint nhạy cảm theo IP (bộ nhớ của một instance). */
 public class RateLimitFilter extends OncePerRequestFilter {
     private static final Set<String> LIMITED = Set.of(
-            "/api/auth/login", "/api/auth/staff/login", "/api/auth/register",
+            "/api/auth/login", "/api/auth/staff/login", "/api/auth/owner/login", "/api/auth/register",
             "/api/auth/forgot-password", "/api/auth/reset-password",
             "/api/users/profile",
             "/api/auth/otp/send", "/api/auth/otp/resend", "/api/auth/otp/verify");

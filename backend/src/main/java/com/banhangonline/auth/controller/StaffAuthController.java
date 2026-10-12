@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/auth/staff")
+@RequestMapping("/api/auth")
 public class StaffAuthController {
     private final AuthService auth;
     private final SessionCookies cookies;
@@ -22,10 +22,17 @@ public class StaffAuthController {
         this.cookies = cookies;
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<ApiResponse<UserResponse>> login(@Valid @RequestBody LoginRequest r, HttpServletRequest req) {
+    @PostMapping("/staff/login")
+    public ResponseEntity<ApiResponse<UserResponse>> staffLogin(
+            @Valid @RequestBody LoginRequest r, HttpServletRequest req) {
         User u = auth.authenticateStaff(r.account(), r.password());
-        return cookies.start(u, r.remember(), "Đăng nhập quản trị thành công", req);
+        return cookies.start(u, r.remember(), "Đăng nhập nhân viên thành công", req);
     }
 
+    @PostMapping("/owner/login")
+    public ResponseEntity<ApiResponse<UserResponse>> ownerLogin(
+            @Valid @RequestBody LoginRequest r, HttpServletRequest req) {
+        User u = auth.authenticateOwner(r.account(), r.password());
+        return cookies.start(u, r.remember(), "Đăng nhập chủ cửa hàng thành công", req);
+    }
 }

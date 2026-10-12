@@ -119,6 +119,34 @@ class AuthServiceTest {
                 .extracting("code").isEqualTo("CUSTOMER_ACCESS_DENIED");
     }
 
+    @Test
+    void ownerAndStaffLoginRequireTheSelectedRole() {
+        User owner = managementUser("owner1", "OWNER");
+        User staff = managementUser("staff1", "STAFF");
+        when(users.findByUsername("owner1")).thenReturn(Optional.of(owner));
+        when(users.findByUsername("staff1")).thenReturn(Optional.of(staff));
+
+        assertThat(auth.authenticateOwner("owner1", PASSWORD)).isSameAs(owner);
+        assertThat(auth.authenticateStaff("staff1", PASSWORD)).isSameAs(staff);
+        assertThatThrownBy(() -> auth.authenticateStaff("owner1", PASSWORD))
+                .isInstanceOf(ApiException.class)
+                .extracting("code").isEqualTo("STAFF_ACCESS_DENIED");
+        assertThatThrownBy(() -> auth.authenticateOwner("staff1", PASSWORD))
+                .isInstanceOf(ApiException.class)
+                .extracting("code").isEqualTo("OWNER_ACCESS_DENIED");
+    }
+
+    private User managementUser(String username, String roleName) {
+        User user = new User();
+        user.setUsername(username);
+        user.setPasswordHash(encoder.encode(PASSWORD));
+        user.setStatus(UserStatus.ACTIVE);
+        Role role = new Role();
+        role.setName(roleName);
+        user.getRoles().add(role);
+        return user;
+    }
+
     private RegisterRequest registration(String email, String username, String phone) {
         return new RegisterRequest(
                 "Buyer Name", username, email, phone, PASSWORD, PASSWORD,

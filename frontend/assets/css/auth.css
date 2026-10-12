@@ -78,6 +78,33 @@
   margin-bottom: 16px;
 }
 
+.management-role-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 5px;
+  border: 1px solid var(--ui-border, #e4e6e9);
+  border-radius: 14px;
+  background: #f5f6f7;
+}
+
+.management-role-switch a {
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--ui-muted, #68707d);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.management-role-switch a[aria-current="page"] {
+  color: var(--ui-ink, #16181d);
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(17, 24, 39, .08);
+}
+
 .auth:not(.auth-landing) .auth-header .back {
   display: inline-flex;
   align-items: center;

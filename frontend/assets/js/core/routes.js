@@ -37,7 +37,7 @@
       notifications: "/quan-ly/staff/thong-bao"
     },
     management: {
-      login: "/quan-ly/dang-nhap?area=management"
+      login: "/quan-ly/dang-nhap?area=staff"
     },
     owner: {
       login: "/quan-ly/dang-nhap?area=owner",
@@ -349,16 +349,43 @@
   });
   canonicalizeLegacyLinks();
 
+  const serverRequiredWarning = document.querySelector("#server-required-warning");
+  if (location.protocol === "file:" && serverRequiredWarning) {
+    serverRequiredWarning.hidden = false;
+  }
+
   const loginArea = new URLSearchParams(location.search).get("area");
-  if (location.pathname === "/quan-ly/dang-nhap" || location.pathname === "/pages/staff/auth/login.html") {
+  if (location.pathname === "/quan-ly/dang-nhap" || location.pathname.endsWith("/pages/staff/auth/login.html")) {
     const title = document.querySelector("#management-login-title");
     const description = document.querySelector("#management-login-description");
-    if (loginArea === "owner" && title && description) {
+    const ownerLogin = loginArea === "owner";
+    const selectedRole = ownerLogin ? "OWNER" : "STAFF";
+    const form = document.querySelector("form[data-login-role]");
+    const ownerChoice = document.querySelector("#owner-login-choice");
+    const staffChoice = document.querySelector("#staff-login-choice");
+    if (form) {
+      form.dataset.endpoint = ownerLogin ? "/api/auth/owner/login" : "/api/auth/staff/login";
+      form.dataset.loginRole = selectedRole;
+    }
+    if (ownerChoice) {
+      if (ownerLogin) ownerChoice.setAttribute("aria-current", "page");
+      else ownerChoice.removeAttribute("aria-current");
+    }
+    if (staffChoice) {
+      if (ownerLogin) staffChoice.removeAttribute("aria-current");
+      else staffChoice.setAttribute("aria-current", "page");
+    }
+    if (ownerLogin && title && description) {
       title.textContent = "Đăng nhập chủ cửa hàng";
       description.textContent = "Dành cho tài khoản chủ cửa hàng đã được quản trị viên duyệt.";
-    } else if (loginArea === "staff" && title && description) {
+    } else if (title && description) {
       title.textContent = "Đăng nhập nhân viên";
       description.textContent = "Dành cho nhân viên đã được cấp tài khoản.";
+    }
+    const forgotLink = document.querySelector('a[data-route="staff.forgot"]');
+    if (forgotLink && ownerLogin) {
+      forgotLink.href = getRoute("owner.forgot");
+      forgotLink.dataset.route = "owner.forgot";
     }
   }
 

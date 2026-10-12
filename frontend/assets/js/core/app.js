@@ -75,7 +75,8 @@ document.addEventListener("submit",async e=>{const f=e.target;if(!f.dataset.endp
  btn.disabled=true;
  btn.textContent=f.dataset.resetRequest?"Đang xác minh…":"Đang xử lý…";
  if(f.dataset.endpoint==="/api/auth/reset-password"&&!$("[name=token]",f).value){msg.textContent="Thông tin xác minh bị thiếu hoặc không hợp lệ. Vui lòng xác minh lại tài khoản.";msg.classList.add("show");btn.removeAttribute("aria-busy");btn.disabled=false;btn.textContent=originalText;return}
- try{const r=await fetch(API+f.dataset.endpoint,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json","X-Requested-With":"fetch"},body:JSON.stringify(collect(f))});
+ try{if(location.protocol==="file:")throw new Error("Không thể đăng nhập khi mở tệp HTML trực tiếp. Hãy khởi động ứng dụng và truy cập bằng địa chỉ website của máy chủ.");
+  const r=await fetch(API+f.dataset.endpoint,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json","X-Requested-With":"fetch"},body:JSON.stringify(collect(f))});
   const d=await r.json().catch(()=>({}));
   if(!r.ok){
    if(r.status===401&&f.dataset.endpoint==="/api/users/profile"&&window.AppRoutes){
@@ -87,10 +88,8 @@ document.addEventListener("submit",async e=>{const f=e.target;if(!f.dataset.endp
   if(f.dataset.loginRole){
    if(!d.success||!d.data||!Array.isArray(d.data.roles))throw new Error("Máy chủ không trả về thông tin vai trò hợp lệ.");
    const roles=d.data&&Array.isArray(d.data.roles)?d.data.roles:[];
-   const requestedArea=new URLSearchParams(location.search).get("area");
-   const requiredRole=requestedArea==="owner"?"OWNER":requestedArea==="staff"?"STAFF":requestedArea==="management"?"MANAGEMENT":f.dataset.loginRole;
-   const allowed=requiredRole==="MANAGEMENT"?["OWNER","STAFF"]:[requiredRole];
-   const role=allowed.find(candidate=>roles.includes(candidate));
+   const requiredRole=f.dataset.loginRole;
+   const role=roles.includes(requiredRole)?requiredRole:null;
    if(!role){
     const revoked=await fetch(API+"/api/auth/logout",{method:"POST",credentials:"include",headers:{"X-Requested-With":"fetch"}});
     if(!revoked.ok)throw new Error("Tài khoản không thuộc khu vực này và máy chủ chưa thể thu hồi phiên đăng nhập. Vui lòng đăng xuất rồi thử lại.");

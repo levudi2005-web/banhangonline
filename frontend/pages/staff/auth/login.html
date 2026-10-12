@@ -75,13 +75,22 @@
 
         </div>
 
+        <p id="server-required-warning" class="server-required-warning" role="alert" hidden>
+          Bạn đang mở tệp HTML trực tiếp. Đăng nhập cần ứng dụng và cơ sở dữ liệu đang chạy; hãy truy cập website qua địa chỉ máy chủ.
+        </p>
+
+        <nav class="management-role-switch" aria-label="Chọn vai trò đăng nhập">
+          <a id="owner-login-choice" href="/quan-ly/dang-nhap?area=owner">Chủ cửa hàng</a>
+          <a id="staff-login-choice" href="/quan-ly/dang-nhap?area=staff">Nhân viên</a>
+        </nav>
+
         <!-- =================================================
              LOGIN FORM
         ================================================== -->
 
         <form
           data-endpoint="/api/auth/staff/login"
-          data-login-role="MANAGEMENT"
+          data-login-role="STAFF"
           novalidate
         >
 
@@ -204,7 +213,7 @@
           class="center"
           style="margin-top:18px"
         >
-          Chủ cửa hàng và nhân viên sử dụng cùng khu vực đăng nhập quản lý.
+          Đăng nhập bằng tài khoản đã được cấp đúng vai trò.
         </p>
 
         <p class="lockline">

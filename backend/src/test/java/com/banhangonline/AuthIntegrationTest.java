@@ -149,7 +149,7 @@ class AuthIntegrationTest {
         assertThat(status(send("GET", "/api/auth/me", null, sid, true))).isEqualTo(401);
     }
 
-    @Test void staffLogin_allowsStaff_rejectsCustomer() throws Exception {
+    @Test void staffAndOwnerLogin_onlyAllowTheSelectedRole() throws Exception {
         int n = SEQ.incrementAndGet();
         User s = new User();
         s.setFullName("Nhan Vien"); s.setUsername("staff" + n); s.setEmail("s" + n + "@example.com");
@@ -160,6 +160,22 @@ class AuthIntegrationTest {
         MvcResult ok = login("/api/auth/staff/login", "staff" + n, PW);
         assertThat(status(ok)).isEqualTo(200);
         assertThat(json(ok).path("data").path("permissions").toString()).contains("CONFIRM_PICKUP");
+
+        User o = new User();
+        o.setFullName("Chu Cua Hang"); o.setUsername("owner" + n); o.setEmail("o" + n + "@example.com");
+        o.setPhone(phone()); o.setPasswordHash(encoder.encode(PW)); o.setStatus(UserStatus.ACTIVE);
+        o.getRoles().add(roles.findByName("OWNER").orElseThrow());
+        users.save(o);
+
+        MvcResult ownerOk = login("/api/auth/owner/login", "owner" + n, PW);
+        assertThat(status(ownerOk)).isEqualTo(200);
+        assertThat(json(ownerOk).path("data").path("roles").toString()).contains("OWNER");
+        MvcResult ownerOnStaffLogin = login("/api/auth/staff/login", "owner" + n, PW);
+        assertThat(status(ownerOnStaffLogin)).isEqualTo(403);
+        assertThat(code(ownerOnStaffLogin)).isEqualTo("STAFF_ACCESS_DENIED");
+        MvcResult staffOnOwnerLogin = login("/api/auth/owner/login", "staff" + n, PW);
+        assertThat(status(staffOnOwnerLogin)).isEqualTo(403);
+        assertThat(code(staffOnOwnerLogin)).isEqualTo("OWNER_ACCESS_DENIED");
 
         Map<String, Object> c = registered();
         MvcResult denied = login("/api/auth/staff/login", (String) c.get("email"), PW);
@@ -201,6 +217,10 @@ class AuthIntegrationTest {
                 .contains("/api/auth/login", "../../../assets/css/style.css");
 
         assertThat(status(send("GET", "/pages/staff/auth/register.html", null, null, true))).isEqualTo(404);
+        MvcResult staffLoginPage = send("GET", "/pages/staff/auth/login.html", null, null, true);
+        assertThat(status(staffLoginPage)).isEqualTo(200);
+        assertThat(staffLoginPage.getResponse().getContentAsString(StandardCharsets.UTF_8))
+                .contains("area=owner", "area=staff", "/api/auth/staff/login");
 
         assertThat(status(send("GET", "/assets/css/style.css", null, null, true))).isEqualTo(200);
         MvcResult appScript = send("GET", "/assets/js/core/app.js", null, null, true);

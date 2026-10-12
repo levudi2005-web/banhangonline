@@ -74,8 +74,19 @@ public class AuthService {
 
     public User authenticateStaff(String account, String password) {
         User u = authenticate(account, password);
-        if (!u.hasRole("STAFF") && !u.hasRole("OWNER"))
-            throw new ApiException(HttpStatus.FORBIDDEN, "STAFF_ACCESS_DENIED", "Tài khoản này không có quyền truy cập khu vực quản trị");
+        if (!u.hasRole("STAFF")) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "STAFF_ACCESS_DENIED",
+                    "Tài khoản này không có quyền truy cập khu vực nhân viên");
+        }
+        return u;
+    }
+
+    public User authenticateOwner(String account, String password) {
+        User u = authenticate(account, password);
+        if (!u.hasRole("OWNER")) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "OWNER_ACCESS_DENIED",
+                    "Tài khoản này không có quyền truy cập khu vực chủ cửa hàng");
+        }
         return u;
     }
 

@@ -68,3 +68,24 @@ The gated fixture test verifies the datasource identity before clearing and seed
 - Resolve or investigate the Hibernate metadata warning.
 - Add retained, repeatable Playwright specs and run concurrent/delayed duplicate-checkout scenarios.
 - No commit, push, or Render deployment was made.
+
+## Validation Attempt — Role-Specific Login (2026-10-12)
+
+| Step | Status | Exit Code | Details |
+|---|---|---:|---|
+| Authentication unit tests | PASS | 0 | Full Maven suite: 104 tests, 0 failures, 0 errors, 11 skipped |
+| E2E Spring startup | FAIL | 1 | Connection to `127.0.0.1:3307` refused |
+| Role-specific login integration test | UNVERIFIED | 1 | Spring context failed before the test method ran |
+| Browser role-selection check | PASS | 0 | `area=owner` selects `OWNER` and `/api/auth/owner/login`; `area=staff` selects `STAFF` and `/api/auth/staff/login` |
+| Browser login against backend | UNVERIFIED | n/a | No backend/E2E DB was running; page was opened using a `file:` URL |
+
+**Attempt result**: NEEDS_SIGNOFF — role-selection and unit behavior pass, but database-backed authentication with persisted test users was not exercised.
+
+Environment at the time of this attempt:
+
+- Docker CLI was unavailable; Node.js v24.21.0 and Playwright 1.64.0 were available.
+- No listener was available on E2E port 3307. `E2E_DB_USERNAME` and `E2E_DB_PASSWORD` were unset.
+- MySQL 8.4 was installed but its service was stopped; it was not used because the E2E profile requires MariaDB.
+- The attempted command was `mvn -f backend/pom.xml -DrunLiveDbTests=true -Dtest=AuthIntegrationTest#staffAndOwnerLogin_onlyAllowTheSelectedRole test`; it exited 1 because the socket connection to `127.0.0.1:3307` was refused while loading the Spring context.
+- `E2eFixtureSeederTest` was not run. No E2E database rows were deleted or seeded during this attempt.
+- The user authorized resetting/seeding the dedicated E2E database, but MariaDB 10.11 at `127.0.0.1:3307`, schema `banhangonline_e2e`, and the E2E credentials are not currently available. Backend login success, session-cookie issuance, and persisted-role authorization remain unverified until those prerequisites are available.

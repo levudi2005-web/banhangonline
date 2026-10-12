@@ -65,20 +65,37 @@ class AuthControllerTest {
     }
 
     @Test
-    void managementLoginAcceptsOnlyStaffOrOwnerAuthenticationPath() {
+    void staffLoginUsesStaffAuthenticationPath() {
+        LoginRequest request = new LoginRequest("staff1", "Test-password-25", true);
+        HttpServletRequest servletRequest = mock(HttpServletRequest.class);
+        User staff = new User();
+        staff.setId(7L);
+        Role role = new Role();
+        role.setName("STAFF");
+        staff.getRoles().add(role);
+        when(auth.authenticateStaff(request.account(), request.password())).thenReturn(staff);
+
+        staffController.staffLogin(request, servletRequest);
+
+        verify(auth).authenticateStaff(request.account(), request.password());
+        verify(cookies).start(staff, true, "Đăng nhập nhân viên thành công", servletRequest);
+    }
+
+    @Test
+    void ownerLoginUsesOwnerAuthenticationPath() {
         LoginRequest request = new LoginRequest("owner1", "Test-password-25", true);
         HttpServletRequest servletRequest = mock(HttpServletRequest.class);
         User owner = new User();
-        owner.setId(7L);
+        owner.setId(8L);
         Role role = new Role();
         role.setName("OWNER");
         owner.getRoles().add(role);
-        when(auth.authenticateStaff(request.account(), request.password())).thenReturn(owner);
+        when(auth.authenticateOwner(request.account(), request.password())).thenReturn(owner);
 
-        staffController.login(request, servletRequest);
+        staffController.ownerLogin(request, servletRequest);
 
-        verify(auth).authenticateStaff(request.account(), request.password());
-        verify(cookies).start(owner, true, "Đăng nhập quản trị thành công", servletRequest);
+        verify(auth).authenticateOwner(request.account(), request.password());
+        verify(cookies).start(owner, true, "Đăng nhập chủ cửa hàng thành công", servletRequest);
     }
 
     @Test
